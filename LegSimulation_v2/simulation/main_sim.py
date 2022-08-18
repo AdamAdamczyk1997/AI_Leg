@@ -22,6 +22,25 @@ from LegSimulation_v2.simulation import LegPartJoint
 from LegSimulation_v2.simulation.Location import Location
 
 
+def ball_controller(space, balls: [], ticks_to_next_ball):
+    ticks_to_next_ball -= 1
+    if ticks_to_next_ball <= 0:
+        ticks_to_next_ball = 1000
+        ball_shape = Model.add_ball(space)
+        balls.append(ball_shape)
+
+    balls_to_remove = []
+    for ball in balls:
+        if ball.body.position.y == constants.MIN_Y:
+            balls_to_remove.append(ball)
+
+    for ball in balls_to_remove:
+        space.remove(ball, ball.body)
+        balls.remove(ball)
+
+    return ticks_to_next_ball
+
+
 def main() -> None:
     global SCREEN, CLOCK
     pygame.init()
@@ -33,7 +52,7 @@ def main() -> None:
     space = pymunk.Space()
     space.gravity = Vec2d(0, constants.GRAVITY)
 
-    Model.Model(space)
+    model_entity = Model.Model(space)
 
     balls = []
     draw_options = pymunk.pygame_util.DrawOptions(SCREEN)
@@ -49,7 +68,7 @@ def main() -> None:
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
                 sys.exit(0)
             # elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
-            #     if Model.body.velocity = (-600, 0)
+            #     if Model.Model.corps.body.velocity = (-600, 0)
             # elif event.type == pygame.KEYUP and event.key == pygame.K_LEFT:
             #     player_body.velocity = 0, 0
             #
@@ -85,30 +104,20 @@ def main() -> None:
                     mouse_joint = None
 
         pygame.display.update()
-        ticks_to_next_ball -= 1
-        if ticks_to_next_ball <= 0:
-            ticks_to_next_ball = 1000
-            ball_shape = Model.add_ball(space)
-            balls.append(ball_shape)
 
         SCREEN.fill(pygame.Color("white"))
 
-        balls_to_remove = []
-        for ball in balls:
-            if ball.body.position.y == constants.MIN_Y:
-                balls_to_remove.append(ball)
-
-        for ball in balls_to_remove:
-            space.remove(ball, ball.body)
-            balls.remove(ball)
-
+        ticks_to_next_ball = ball_controller(space, balls, ticks_to_next_ball)
         space.debug_draw(draw_options)
 
         space.step(1 / 60.0)
 
         pygame.display.flip()
         CLOCK.tick(50)
+        Model.time = CLOCK.get_time()
         pygame.display.set_caption(f"fps: {CLOCK.get_fps()}")
+        #model_entity.corps.Location.change_location()
+        model_entity.corps.get_current_location()
 
 
 if __name__ == "__main__":

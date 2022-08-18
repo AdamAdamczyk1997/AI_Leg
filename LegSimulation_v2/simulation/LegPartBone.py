@@ -5,7 +5,7 @@ from random import random
 import pymunk
 from pymunk import Poly, Vec2d, Body
 
-import Location
+from LegSimulation_v2.simulation.Location import Location
 
 
 class LegPartBone:
@@ -19,17 +19,19 @@ class LegPartBone:
     shape: Poly
     shape_friction: shape.friction = 1
     shape_color: shape.color = "black"
+    position: Location
 
-    def __init__(self, space: pymunk.Space(), name, mass, size, body_position):
+    def __init__(self, space: pymunk.Space(), name, mass, size, vector: Vec2d):
         self.name = name
         self.mass = mass
         self.size = size
         self.moment = pymunk.moment_for_box(mass, size)
         self.body = pymunk.Body(mass, self.moment)
-        self.body.position = Vec2d(*body_position)
+        self.body.position = vector
         self.shape = pymunk.Poly.create_box(self.body, size)
         self.body_rotation_limit = None
         self.body_rotation_center = None
+        self.position = Location(vector)
 
         space.add(self.body, self.shape)
 
@@ -68,4 +70,9 @@ class LegPartBone:
         pivot_joint_body = pymunk.Body(body_type=pymunk.Body.STATIC)
         pivot_joint_body.position = Vec2d(*position_arg)
         return pivot_joint_body
+
+    def get_current_location(self):
+        self.position.change_location(self.body.position)
+        print(self.position.get_current_location())
+        pass
 

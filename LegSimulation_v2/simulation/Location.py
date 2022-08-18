@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List
+from typing import List, Tuple
 import random
 import pymunk
 import pymunk.pygame_util
@@ -17,21 +17,25 @@ class Location:
     """A model of a 2-d cartesian coordinate Point."""
     x: int
     y: int
-    location_history: List[int, int, int]
+    body_position: Vec2d
+    location_history: List[Vec2d]
     records_amount: int = 0
+    tick: List[int]
 
-    def __init__(self, first_x: int, first_y: int, tick: int):
+    def __init__(self, first_vec: pymunk.Vec2d):
         """Construct a point with x, y coordinates."""
-        self.x = first_x
-        self.y = first_y
-        self.location_history = [first_x, first_y, tick]
+        self.body_position = Vec2d(*first_vec)
+        self.x = first_vec[0]
+        self.y = first_vec[1]
+        self.location_history = [self.body_position]
         self.records_amount = 1
 
-    def change_location(self, next_x: int, next_y: int, tick: int) -> Location:
+    def change_location(self, body_location) -> Location:
+        self.location_history.append(Vec2d(*body_location))
+        self.x = body_location[0]
+        self.y = body_location[1]
         self.records_amount += 1
-        self.location_history.append(next_x, next_y, tick)
-        self.x = next_x
-        self.y = next_y
         return self
 
-
+    def get_current_location(self) -> tuple[int, int]:
+        return self.x, self.y

@@ -15,26 +15,25 @@ import self as self
 from LegSimulation_v2.simulation import constants
 from math import sin, cos, pi
 
-from LegSimulation_v2.simulation import LegPartJoint, LegPartBone
+from LegSimulation_v2.simulation.LegPartBone import LegPartBone
+from LegSimulation_v2.simulation.LegPartJoint import LegPartJoint
 from LegSimulation_v2.simulation.constants import JOINT_RADIUS, BONE_WIDTH, BONE_HEIGHT
 
 random.seed(1)  # make the simulation the same each time, easier to debug
 global_corps: LegPartBone
 
 
-def add_leg_parts(space):
-    corps = LegPartBone.LegPartBone(space, "korpus", 100, (200, 100), (1000, 700))
-    hip = LegPartJoint.LegPartJoint(space, "hip", 10, JOINT_RADIUS, (corps.body.position - (0, 70)))
-    thigh = LegPartBone.LegPartBone(space, "thigh", 50, (BONE_WIDTH, BONE_HEIGHT),
-                                    (hip.body.position - (0, 120)))
-    knee = LegPartJoint.LegPartJoint(space, "knee", 10, JOINT_RADIUS, (thigh.body.position - (0, 120)))
+def add_floor(space):
+    floor = pymunk.Segment(space.static_body, (-100, 0), (2000, 0), 5)
+    floor.friction = 1.0
+    space.add(floor)
+
+    return space
+
+
+def add_leg_parts(space, corps, hip, thigh, knee, cale, ankle, foot):
     patella = knee.add_patella()
     space.add(patella)
-
-    cale = LegPartBone.LegPartBone(space, "cale", 50, (BONE_WIDTH, BONE_HEIGHT),
-                                   (knee.body.position - (0, 120)))
-    ankle = LegPartJoint.LegPartJoint(space, "ankle", 10, JOINT_RADIUS, (cale.body.position - (0, 120)))
-    foot = LegPartBone.LegPartBone(space, "foot", 30, (100, 10), (ankle.body.position + (40, -25)))
 
     hip_pivot_body = corps.add_body_pivot_joint(space, corps.body, thigh.body, hip.body.position)
     knee_pivot_body = thigh.add_body_pivot_joint(space, thigh.body, cale.body, knee.body.position)
@@ -49,10 +48,10 @@ def add_leg_parts(space):
     cale_ankle_pin_joint = cale.add_body_pin_joint(space, cale.body, ankle.body, (0, -120), (0, 0))
     ankle_foot_pin_joint = ankle.add_body_pin_joint(space, ankle.body, foot.body, (0, 0), (-35, 25))
 
-    thigh_muscle_front_joint = corps.add_body_limit_slide_joint(space, corps.body, cale.body, (100, -50), (5, 50), 330,
-                                                                410)
-    thigh_muscle_back_joint = corps.add_body_limit_slide_joint(space, corps.body, cale.body, (-100, -50), (-5, 50), 330,
-                                                               410)
+    thigh_muscle_front_joint = corps.add_body_limit_slide_joint(space, corps.body, cale.body, (100, -50), (5, 50),
+                                                                330, 410)
+    thigh_muscle_back_joint = corps.add_body_limit_slide_joint(space, corps.body, cale.body, (-100, -50), (-5, 50),
+                                                               330, 410)
     cale_muscle_front_joint = cale.add_body_limit_slide_joint(space, cale.body, foot.body, (5, 100), (-20, 5), 230,
                                                               240)
     cale_muscle_back_joint = cale.add_body_limit_slide_joint(space, cale.body, foot.body, (-5, 100), (-50, 5), 230,
@@ -61,20 +60,27 @@ def add_leg_parts(space):
     return space
 
 
-def add_floor(space):
-    floor = pymunk.Segment(space.static_body, (-100, 0), (2000, 0), 5)
-    floor.friction = 1.0
-    space.add(floor)
-
-    return space
-
-
 class Model:
-    population: List[LegPartBone]
+    corps: LegPartBone
+    hip: LegPartJoint
+    thigh: LegPartBone
+    knee: LegPartJoint
+    cale: LegPartBone
+    ankle: LegPartJoint
+    foot: LegPartBone
     time: int = 0
 
     def __init__(self, space):
-        add_leg_parts(space)
+        self.corps = LegPartBone(space, "korpus", 100, (200, 100), Vec2d(1000, 700))
+        self.hip = LegPartJoint(space, "hip", 10, JOINT_RADIUS, (self.corps.body.position - (0, 70)))
+        self.thigh = LegPartBone(space, "thigh", 50, (BONE_WIDTH, BONE_HEIGHT),
+                                 (self.hip.body.position - (0, 120)))
+        self.knee = LegPartJoint(space, "knee", 10, JOINT_RADIUS, (self.thigh.body.position - (0, 120)))
+        self.cale = LegPartBone(space, "cale", 50, (BONE_WIDTH, BONE_HEIGHT),
+                                (self.knee.body.position - (0, 120)))
+        self.ankle = LegPartJoint(space, "ankle", 10, JOINT_RADIUS, (self.cale.body.position - (0, 120)))
+        self.foot = LegPartBone(space, "foot", 30, (100, 10), (self.ankle.body.position + (40, -25)))
+        add_leg_parts(space, self.corps, self.hip, self.thigh, self.knee, self.cale, self.ankle, self.foot)
         add_floor(space)
 
 
