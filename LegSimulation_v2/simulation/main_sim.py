@@ -2,6 +2,7 @@ import sys
 
 import pygame
 import pymunk
+from numpy import equal
 
 import constants
 import LegPartBone
@@ -41,7 +42,7 @@ def ball_controller(space, balls: [], ticks_to_next_ball):
     return ticks_to_next_ball
 
 
-def main() -> None:
+def main(model_object, space_object) -> None:
     global SCREEN, CLOCK
     pygame.init()
     SCREEN = pygame.display.set_mode((constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT))
@@ -49,10 +50,7 @@ def main() -> None:
     CLOCK = pygame.time.Clock()
     pymunk.pygame_util.positive_y_is_up = True
 
-    space = pymunk.Space()
-    space.gravity = Vec2d(0, constants.GRAVITY)
-
-    model_entity = Model.Model(space)
+    space_object.gravity = Vec2d(0, constants.GRAVITY)
 
     balls = []
     draw_options = pymunk.pygame_util.DrawOptions(SCREEN)
@@ -78,11 +76,11 @@ def main() -> None:
             #     player_body.velocity = 0, 0
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if mouse_joint is not None:
-                    space.remove(mouse_joint)
+                    space_object.remove(mouse_joint)
                     mouse_joint = None
 
                 p = Vec2d(*event.pos)
-                hit = space.point_query_nearest(p, 5, pymunk.ShapeFilter())
+                hit = space_object.point_query_nearest(p, 5, pymunk.ShapeFilter())
                 if hit is not None and hit.shape.body.body_type == pymunk.Body.DYNAMIC:
                     shape = hit.shape
                     # Use the closest point on the surface if the click is outside
@@ -96,29 +94,33 @@ def main() -> None:
                     )
                     mouse_joint.max_force = 50000
                     mouse_joint.error_bias = (1 - 0.15) ** 60
-                    space.add(mouse_joint)
+                    space_object.add(mouse_joint)
 
             elif event.type == pygame.MOUSEBUTTONUP:
                 if mouse_joint is not None:
-                    space.remove(mouse_joint)
+                    space_object.remove(mouse_joint)
                     mouse_joint = None
+
+        model_object.thigh_muscle_front_joint.shorten(space_object, Vec2d(0, -20))
 
         pygame.display.update()
 
         SCREEN.fill(pygame.Color("white"))
 
-        ticks_to_next_ball = ball_controller(space, balls, ticks_to_next_ball)
-        space.debug_draw(draw_options)
+        ticks_to_next_ball = ball_controller(space_object, balls, ticks_to_next_ball)
+        space_object.debug_draw(draw_options)
 
-        space.step(1 / 60.0)
+        space_object.step(1 / 60.0)
 
         pygame.display.flip()
         CLOCK.tick(50)
-        Model.time = CLOCK.get_time()
+        model_object.time = CLOCK.get_time()
         pygame.display.set_caption(f"fps: {CLOCK.get_fps()}")
-        #model_entity.corps.Location.change_location()
-        model_entity.corps.get_current_location()
+        # model_entity.corps.Location.change_location()
+        model_object.foot.position.get_current_location()
 
 
 if __name__ == "__main__":
-    main()
+    world = pymunk.Space()
+    model_entity = Model.Model(world)
+    main(model_entity, world)

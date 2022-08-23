@@ -44,7 +44,7 @@ class LegPartBone:
         body_limit_slide_joint = pymunk.SlideJoint(body1, body2, how_far_from_body1, how_far_from_body2, min_distance,
                                                    max_distance)
         space.add(body_limit_slide_joint)
-        pass
+        return body_limit_slide_joint
 
     def add_body_pin_joint(self, space, body1: Body, body2: Body, how_far_from_body1: tuple[float, float],
                            how_far_from_body2: tuple[float, float]):
@@ -73,6 +73,6 @@ class LegPartBone:
 
     def get_current_location(self):
         self.position.change_location(self.body.position)
-        print(self.position.get_current_location())
+        self.position.get_current_location()
         pass
 

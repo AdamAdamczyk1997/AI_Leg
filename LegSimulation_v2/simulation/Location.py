@@ -37,5 +37,6 @@ class Location:
         self.records_amount += 1
         return self
 
-    def get_current_location(self) -> tuple[int, int]:
-        return self.x, self.y
+    def get_current_location(self) -> Vec2d:
+        print(self.x, self.y)
+        return self.body_position

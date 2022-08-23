@@ -57,7 +57,7 @@ class LegPartJoint:
         return self.body_rotation_center, self.body_rotation_limit
 
     def add_patella(self: LegPartJoint):
-        static = pymunk.Segment(self.body, (10, 30), (10, -30), 5)
+        static = pymunk.Segment(self.body, (10, 40), (10, -40), 5)
         static.collision_type = 1
 
         return static
