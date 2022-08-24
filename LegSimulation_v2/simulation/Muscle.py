@@ -44,25 +44,28 @@ class Muscle:
         space.add(self.body, self.shape)
 
     @staticmethod
-    def add_muscle_pin_joint(space, self_body: Body, other_body: Body, how_far_from_muscle_position: tuple[float, float],
+    def add_muscle_pin_joint(space, self_body: Body, other_body: Body,
+                             how_far_from_muscle_position: tuple[float, float],
                              how_far_from_body: tuple[float, float]):
         muscle_pin_joint = pymunk.PinJoint(self_body, other_body, how_far_from_muscle_position, how_far_from_body)
         space.add(muscle_pin_joint)
 
-    def shorten(self, space, new_size: Vec2d):
+    def add_muscle_limit_slide_joint(self, space: pymunk.Space(), body1: Body, body2: Body,
+                                     how_far_from_body1: tuple[float, float], how_far_from_body2: tuple[float, float],
+                                     min_distance: float, max_distance: float):
+        body_limit_slide_joint = pymunk.SlideJoint(body1, body2, how_far_from_body1, how_far_from_body2, min_distance,
+                                                   max_distance)
+        space.add(body_limit_slide_joint)
+        return body_limit_slide_joint
+
+    def shorten(self, new_size: Vec2d):
         size = self.size.__sub__(new_size)
         x = size.x
         y = size.y
         self.convert_size = (x, y)
-        self.moment = pymunk.moment_for_box(self.mass, self.convert_size)
-        self.body = pymunk.Body(self.mass, self.moment)
         self.shape = pymunk.Poly.create_box(self.body, self.convert_size)
 
-        space.add(self.body, self.shape)
-
-        return space
+        return self.body, self.shape
 
     def update(self, space: pymunk.Space()):
         pass
-
-

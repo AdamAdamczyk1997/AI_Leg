@@ -37,25 +37,6 @@ class LegPartJoint:
 
         space.add(self.body, self.shape)
 
-    def add_body_limit_slide_joint(self, space: pymunk.Space(), body, body_rotation_limit):
-        body_limit_slide_joint = pymunk.SlideJoint(body, body_rotation_limit, (0, 0), (0, 0), 0, 10)
-        space.add(body_limit_slide_joint)
-        pass
-
-    def add_body_pin_joint(self, space: pymunk.Space(), body1: Body, body2: Body,
-                           how_far_from_body1: tuple[float, float],
-                           how_far_from_body2: tuple[float, float]):
-        body_pin_joint = pymunk.PinJoint(body1, body2, how_far_from_body1, how_far_from_body2)
-        space.add(body_pin_joint)
-        pass
-
-    def add_body_rotation_center_and_limit(self, body_rotation_center_position, body_rotation_limit_position):
-        self.body_rotation_center = pymunk.Body(body_type=pymunk.Body.STATIC)
-        self.body_rotation_center.position = body_rotation_center_position
-        self.body_rotation_limit = pymunk.Body(body_type=pymunk.Body.STATIC)
-        self.body_rotation_limit.position = body_rotation_limit_position
-        return self.body_rotation_center, self.body_rotation_limit
-
     def add_patella(self: LegPartJoint):
         static = pymunk.Segment(self.body, (10, 40), (10, -40), 5)
         static.collision_type = 1

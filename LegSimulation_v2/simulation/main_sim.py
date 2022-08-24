@@ -101,8 +101,6 @@ def main(model_object, space_object) -> None:
                     space_object.remove(mouse_joint)
                     mouse_joint = None
 
-        model_object.thigh_muscle_front_joint.shorten(space_object, Vec2d(0, -20))
-
         pygame.display.update()
 
         SCREEN.fill(pygame.Color("white"))
