@@ -34,14 +34,14 @@ class LegPartBone:
         self.body_rotation_limit = None
         self.body_rotation_center = None
         self.position = Location(vector)
-        # self.helper = LegPartsHelper
+        self.shape.collision_type = 0
 
         space.add(self.body, self.shape)
 
     # def tick(self, space) -> None:
     #     """Update the state of the simulation by one time step."""
 
-    def get_current_location(self):
+    def get_location(self):
         self.position.change_location(self.body.position)
         self.position.get_current_location()
         pass

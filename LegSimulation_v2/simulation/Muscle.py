@@ -63,6 +63,7 @@ class Muscle:
         x = size.x
         y = size.y
         self.convert_size = (x, y)
+        self.body = pymunk.Body(self.mass, self.moment)
         self.shape = pymunk.Poly.create_box(self.body, self.convert_size)
 
         return self.body, self.shape

@@ -34,11 +34,12 @@ class LegPartJoint:
         self.body.position = Vec2d(*body_position)
         self.shape = pymunk.Circle(self.body, radius)
         self.position = Location(body_position)
+        self.shape.collision_type = 0
 
         space.add(self.body, self.shape)
 
-    def add_patella(self: LegPartJoint):
-        static = pymunk.Segment(self.body, (10, 40), (10, -40), 5)
+    def add_patella(self: LegPartJoint, place, height, width):
+        static = pymunk.Segment(self.body, (place, height), (place, -height), width)
         static.collision_type = 1
 
         return static
