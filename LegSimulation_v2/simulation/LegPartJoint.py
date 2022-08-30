@@ -15,11 +15,11 @@ class LegPartJoint:
     mass: float
     inner_radius: float = 20
     outer_radius: int
-    offset: tuple[float, float] = (0, 360)
+    offset: tuple[float, float] = (0, 0)
     body: pymunk.Body
     moment: float
     shape: Circle
-    shape_friction: shape.friction = 1
+    shape_friction: shape.friction = 0
     shape_color: shape.color = "black"
     position: Location
 

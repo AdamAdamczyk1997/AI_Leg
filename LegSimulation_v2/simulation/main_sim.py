@@ -25,8 +25,10 @@ from LegSimulation_v2.simulation.Location import Location
 pygame.init()
 SCREEN = pygame.display.set_mode((constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT))
 CLOCK = pygame.time.Clock()
+
 space = pymunk.Space()
 model_entity = Model.Model(space)
+
 pymunk.pygame_util.positive_y_is_up = True
 space.gravity = Vec2d(0, constants.GRAVITY)
 
@@ -72,11 +74,16 @@ def main() -> None:
                     mouse_joint.error_bias = (1 - 0.15) ** 60
                     space.add(mouse_joint)
 
-            elif event.type == pygame.MOUSEBUTTONUP:
-                if mouse_joint is not None:
-                    space.remove(mouse_joint)
-                    mouse_joint = None
-            # elif event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_3:
+                model_entity.move_muscles(0)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_2:
+                model_entity.move_muscles(1)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_4:
+                model_entity.move_muscles(2)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
+                model_entity.move_muscles(3)
+            #
+            # and event.key == pygame.K_LEFT:
             #     if Model.Model.corps.body.velocity = (-600, 0)
             # elif event.type == pygame.KEYUP and event.key == pygame.K_LEFT:
             #     player_body.velocity = 0, 0
@@ -86,6 +93,7 @@ def main() -> None:
             # elif event.type == pygame.KEYUP and event.key == pygame.K_RIGHT:
             #     player_body.velocity = 0, 0
 
+        #model_entity.tick()
         ticks_to_next_ball = Model.ball_controller(space, balls, ticks_to_next_ball)
 
         space.step(1.0 / 60)
@@ -94,7 +102,7 @@ def main() -> None:
         CLOCK.tick(60)
         model_entity.time = CLOCK.get_time()
 
-        pygame.display.set_caption(f"fps: {CLOCK.get_fps()}")
+        pygame.display.set_caption("fps: {CLOCK.get_fps()}")
         SCREEN.fill(pygame.Color("white"))
 
         # model_object.thigh_muscle_front_joint.shorten(Vec2d(0, 10))
