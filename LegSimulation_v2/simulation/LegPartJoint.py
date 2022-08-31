@@ -40,6 +40,6 @@ class LegPartJoint:
 
     def add_patella(self: LegPartJoint, place, height, width):
         static = pymunk.Segment(self.body, (place, height), (place, -height), width)
-        static.collision_type = 1
+        static.collision_type = 0
 
         return static

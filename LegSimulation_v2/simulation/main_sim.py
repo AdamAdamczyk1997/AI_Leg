@@ -82,7 +82,14 @@ def main() -> None:
                 model_entity.move_muscles(2)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
                 model_entity.move_muscles(3)
-            #
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
+                model_entity.move_muscles(4)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+                model_entity.move_muscles(5)
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                model_entity.release()
+
             # and event.key == pygame.K_LEFT:
             #     if Model.Model.corps.body.velocity = (-600, 0)
             # elif event.type == pygame.KEYUP and event.key == pygame.K_LEFT:

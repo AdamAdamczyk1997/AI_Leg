@@ -27,10 +27,12 @@ FOOT_WIDTH: float = 200*CONVERTER
 
 JOINT_RADIUS: float = 50*CONVERTER
 
-MIN_TMFJ: float = sqrt(pow(((1/2)*CORPS_WIDTH-((1/2)*CALE_WIDTH)), 2) + pow(JOINT_RADIUS*4 + THIGH_HEIGHT + ((1/3)*CALE_HEIGHT), 2))
-MIN_TMBJ: float = sqrt(pow(((1/2)*CORPS_WIDTH-((1/2)*CALE_WIDTH)), 2) + pow(JOINT_RADIUS*4 + THIGH_HEIGHT + ((1/3)*CALE_HEIGHT), 2))
+MIN_CORPS_THIGH: float = sqrt(pow(((1 / 2) * CORPS_WIDTH - (2 * JOINT_RADIUS)), 2) + pow((2 * JOINT_RADIUS), 2))
+MIN_CTBJ: float = sqrt(pow(((1/2)*CORPS_WIDTH- (2*JOINT_RADIUS)), 2) + pow((2 * JOINT_RADIUS), 2))
+
 MIN_CMFJ: float = sqrt(pow(((1/2)*CORPS_WIDTH-((1/2)*CALE_WIDTH)), 2) + pow(JOINT_RADIUS*4 + THIGH_HEIGHT + ((1/3)*CALE_HEIGHT), 2))
 MIN_CMBJ: float = sqrt(pow(((1/2)*CORPS_WIDTH-((1/2)*CALE_WIDTH)), 2) + pow(JOINT_RADIUS*4 + THIGH_HEIGHT + ((1/3)*CALE_HEIGHT), 2))
+
 
 
 CELL_RADIUS: float = 15

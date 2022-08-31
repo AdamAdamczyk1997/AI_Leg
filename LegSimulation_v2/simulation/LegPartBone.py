@@ -49,3 +49,8 @@ class LegPartBone:
     def update(self, position):
         self.position = position
 
+    def add_bone_part(self: LegPartBone, place, height, width):
+        static = pymunk.Segment(self.body, (width, place), (-width, place), height)
+        static.collision_type = 0
+
+        return static
