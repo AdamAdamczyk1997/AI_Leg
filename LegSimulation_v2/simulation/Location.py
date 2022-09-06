@@ -38,5 +38,7 @@ class Location:
         return self
 
     def get_current_location(self) -> Vec2d:
-        print(self.x, self.y)
         return self.body_position
+
+    def show_location(self) -> None:
+        print(self.x, self.y)

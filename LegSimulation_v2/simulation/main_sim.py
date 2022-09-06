@@ -21,19 +21,34 @@ import matplotlib.pyplot as plt
 
 from LegSimulation_v2.simulation import LegPartJoint
 from LegSimulation_v2.simulation.Location import Location
+from tabulate import tabulate
 
-pygame.init()
-SCREEN = pygame.display.set_mode((constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT))
-CLOCK = pygame.time.Clock()
 
-space = pymunk.Space()
-model_entity = Model.Model(space)
+def table(model_object: Model.Model) -> None:
+    table_content = [['Parts Name',  'Moment', 'Position_x', 'Position_y', 'Velocity_x', 'Velocity_y', ''],
+                     [model_object.corps.name, model_object.corps.moment, model_object.corps.body.position.x, model_object.corps.body.position.y,
+                      model_object.corps.body.velocity.x, model_object.corps.body.velocity.y],
+                     [model_object.thigh.name, model_object.thigh.moment, model_object.thigh.body.position.x, model_object.thigh.body.position.y,
+                      model_object.thigh.body.velocity.x, model_object.thigh.body.velocity.y],
+                     [model_object.cale.name, model_object.cale.moment, model_object.cale.body.position.x, model_object.cale.body.position.y,
+                      model_object.cale.body.velocity.x, model_object.cale.body.velocity.y],
+                     [model_object.foot.name, model_object.foot.moment, model_object.foot.body.position.x, model_object.foot.body.position.y,
+                      model_object.foot.body.velocity.x, model_object.foot.body.velocity.y]]
 
-pymunk.pygame_util.positive_y_is_up = True
-space.gravity = Vec2d(0, constants.GRAVITY)
+    print(tabulate(table_content, headers='firstrow', tablefmt='fancy_grid'))
 
 
 def main() -> None:
+    pygame.init()
+    SCREEN = pygame.display.set_mode((constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT))
+    CLOCK = pygame.time.Clock()
+
+    space = pymunk.Space()
+    model_entity = Model.Model(space)
+
+    pymunk.pygame_util.positive_y_is_up = True
+    space.gravity = Vec2d(0, constants.GRAVITY)
+
     pygame.display.set_caption("Pysics simulation of leg model")
 
     bodies = space.bodies
@@ -87,8 +102,13 @@ def main() -> None:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
                 model_entity.move_muscles(5)
 
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+                main()
+
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 model_entity.release()
+
+            table(model_entity)
 
             # and event.key == pygame.K_LEFT:
             #     if Model.Model.corps.body.velocity = (-600, 0)
@@ -100,16 +120,23 @@ def main() -> None:
             # elif event.type == pygame.KEYUP and event.key == pygame.K_RIGHT:
             #     player_body.velocity = 0, 0
 
-        #model_entity.tick()
+        # model_entity.tick()
         ticks_to_next_ball = Model.ball_controller(space, balls, ticks_to_next_ball)
 
-        space.step(1.0 / 60)
+        #space.step(1.0 / 60)
         space.debug_draw(draw_options)
+        ### Update physics
+        fps = 50
+        iterations = 10
+        dt = 1.0 / float(fps) / float(iterations)
+        for x in range(iterations):  # 10 iterations to get a more stable simulation
+            space.step(dt)
+
         pygame.display.flip()
         CLOCK.tick(60)
         model_entity.time = CLOCK.get_time()
 
-        pygame.display.set_caption("fps: {CLOCK.get_fps()}")
+        pygame.display.set_caption(f"fps: {CLOCK.get_fps()}")
         SCREEN.fill(pygame.Color("white"))
 
         # model_object.thigh_muscle_front_joint.shorten(Vec2d(0, 10))
