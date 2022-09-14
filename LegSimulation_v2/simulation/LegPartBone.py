@@ -29,12 +29,14 @@ class LegPartBone:
         self.size = size
         self.moment = pymunk.moment_for_box(mass, size)
         self.body = pymunk.Body(mass, self.moment)
+        self.body.body_type = pymunk.Body.DYNAMIC
         self.body.position = vector
         self.shape = pymunk.Poly.create_box(self.body, size)
         self.body_rotation_limit = None
         self.body_rotation_center = None
         self.position = Location(vector)
         self.shape.collision_type = 0
+        self.shape.friction = 0.61
 
         space.add(self.body, self.shape)
 
@@ -43,7 +45,8 @@ class LegPartBone:
 
     def get_location(self):
         self.position.change_location(self.body.position)
-        self.position.get_current_location()
+        self.position.body_position = self.body._get_position()
+
         pass
 
     def update(self, position):

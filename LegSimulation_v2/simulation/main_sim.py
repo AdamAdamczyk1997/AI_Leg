@@ -25,14 +25,18 @@ from tabulate import tabulate
 
 
 def table(model_object: Model.Model) -> None:
-    table_content = [['Parts Name',  'Moment', 'Position_x', 'Position_y', 'Velocity_x', 'Velocity_y', ''],
-                     [model_object.corps.name, model_object.corps.moment, model_object.corps.body.position.x, model_object.corps.body.position.y,
+    table_content = [['Parts Name', 'Moment', 'Position_x', 'Position_y', 'Velocity_x', 'Velocity_y', ''],
+                     [model_object.corps.name, model_object.corps.moment, model_object.corps.body.position.x,
+                      model_object.corps.body.position.y,
                       model_object.corps.body.velocity.x, model_object.corps.body.velocity.y],
-                     [model_object.thigh.name, model_object.thigh.moment, model_object.thigh.body.position.x, model_object.thigh.body.position.y,
+                     [model_object.thigh.name, model_object.thigh.moment, model_object.thigh.body.position.x,
+                      model_object.thigh.body.position.y,
                       model_object.thigh.body.velocity.x, model_object.thigh.body.velocity.y],
-                     [model_object.cale.name, model_object.cale.moment, model_object.cale.body.position.x, model_object.cale.body.position.y,
+                     [model_object.cale.name, model_object.cale.moment, model_object.cale.body.position.x,
+                      model_object.cale.body.position.y,
                       model_object.cale.body.velocity.x, model_object.cale.body.velocity.y],
-                     [model_object.foot.name, model_object.foot.moment, model_object.foot.body.position.x, model_object.foot.body.position.y,
+                     [model_object.foot.name, model_object.foot.moment, model_object.foot.body.position.x,
+                      model_object.foot.body.position.y,
                       model_object.foot.body.velocity.x, model_object.foot.body.velocity.y]]
 
     print(tabulate(table_content, headers='firstrow', tablefmt='fancy_grid'))
@@ -47,7 +51,7 @@ def main() -> None:
     model_entity = Model.Model(space)
 
     pymunk.pygame_util.positive_y_is_up = True
-    space.gravity = Vec2d(0, constants.GRAVITY)
+    space.gravity = (0, constants.GRAVITY)
 
     pygame.display.set_caption("Pysics simulation of leg model")
 
@@ -89,17 +93,17 @@ def main() -> None:
                     mouse_joint.error_bias = (1 - 0.15) ** 60
                     space.add(mouse_joint)
 
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_3:
-                model_entity.move_muscles(0)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_2:
-                model_entity.move_muscles(1)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_4:
-                model_entity.move_muscles(2)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
-                model_entity.move_muscles(3)
+                model_entity.move_muscles(0)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_3:
+                model_entity.move_muscles(1)
             if event.type == pygame.KEYDOWN and event.key == pygame.K_5:
+                model_entity.move_muscles(2)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_2:
+                model_entity.move_muscles(3)
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_6:
                 model_entity.move_muscles(4)
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_1:
                 model_entity.move_muscles(5)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_n:
@@ -120,10 +124,10 @@ def main() -> None:
             # elif event.type == pygame.KEYUP and event.key == pygame.K_RIGHT:
             #     player_body.velocity = 0, 0
 
-        # model_entity.tick()
+        model_entity.tick()
         ticks_to_next_ball = Model.ball_controller(space, balls, ticks_to_next_ball)
 
-        #space.step(1.0 / 60)
+        # space.step(1.0 / 60)
         space.debug_draw(draw_options)
         ### Update physics
         fps = 50

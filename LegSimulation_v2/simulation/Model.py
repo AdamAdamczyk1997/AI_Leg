@@ -18,7 +18,7 @@ from math import sin, cos, pi, sqrt
 from LegSimulation_v2.simulation.LegPartBone import LegPartBone
 from LegSimulation_v2.simulation.LegPartJoint import LegPartJoint
 from LegSimulation_v2.simulation.constants import JOINT_RADIUS, CORPS_WIDTH, CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
-    CALE_WIDTH, CALE_HEIGHT, FOOT_HEIGHT, FOOT_WIDTH, MIN_CTBJ, MIN_CORPS_THIGH
+    CALE_WIDTH, CALE_HEIGHT, FOOT_HEIGHT, FOOT_WIDTH, MIN_CTBJ, MIN_CORPS_THIGH, MIN_CMFJ, MIN_CMBJ
 
 random.seed(1)  # make the simulation the same each time, easier to debug
 
@@ -35,23 +35,22 @@ class Model:
     time: int = 0
 
     def __init__(self, space):
-        self.corps = LegPartBone(space, "corps", 10, (CORPS_WIDTH, CORPS_HEIGHT), Vec2d(1000, 550))
-        self.thigh = LegPartBone(space, "thigh", 1, (THIGH_WIDTH, THIGH_HEIGHT),
+        self.corps = LegPartBone(space, "corps", 10, (CORPS_WIDTH, CORPS_HEIGHT), Vec2d(1000, 450))
+        self.thigh = LegPartBone(space, "thigh", 5, (THIGH_WIDTH, THIGH_HEIGHT),
                                  (self.corps.body.position - (
                                      0, (((1 / 2) * CORPS_HEIGHT) + ((1 / 2) * THIGH_HEIGHT)))))
-        self.cale = LegPartBone(space, "cale", 1, (CALE_WIDTH, CALE_HEIGHT),
+        self.cale = LegPartBone(space, "cale", 5, (CALE_WIDTH, CALE_HEIGHT),
                                 (self.thigh.body.position - (
                                     0, (((1 / 2) * THIGH_HEIGHT) + ((1 / 2) * CALE_HEIGHT)))))
-        self.foot = LegPartBone(space, "foot", 10, (FOOT_WIDTH, FOOT_HEIGHT),
-                                (self.cale.body.position - ((-(1 / 4) * FOOT_WIDTH), (
-                                        ((1 / 2) * CALE_HEIGHT) + ((1 / 2) * FOOT_HEIGHT)))))
+        self.foot = LegPartBone(space, "foot", 50, (FOOT_WIDTH, FOOT_HEIGHT),
+                                self.cale.body.position - (0, (1 / 2) * CALE_HEIGHT + (1 / 2) * FOOT_HEIGHT))
 
         pivots = self.add_pivot_joints(space)
         # self.hip = LegPartJoint(space, "hip", 10, JOINT_RADIUS, pivots[0].position)
         # self.knee = LegPartJoint(space, "knee", 10, JOINT_RADIUS, pivots[1].position)
         # self.ankle = LegPartJoint(space, "ankle", 10, JOINT_RADIUS, pivots[2].position)
         #
-        # add_pin_joints_parts(space, self.corps, self.hip, self.thigh, self.knee, self.cale, self.ankle, self.foot)
+        add_pin_joints_parts(space, self.corps, self.thigh, self.cale, self.foot)
         self.muscles = self.add_muscles_joints(space)
 
         # patella = self.knee.add_patella((1 / 2) * THIGH_WIDTH + 4, 10, 4)
@@ -60,7 +59,7 @@ class Model:
         # space.add(part1, part2)
 
         # ---prevent collisions with ShapeFilter
-        shape_filter = pymunk.ShapeFilter(group=1)
+        shape_filter = pymunk.ShapeFilter(group=0)
         self.corps.shape.filter = shape_filter
         self.thigh.shape.filter = shape_filter
         self.cale.shape.filter = shape_filter
@@ -69,28 +68,43 @@ class Model:
         add_floor(space)
 
     def tick(self):
-        self.muscles[2].max -= 10
+        self.corps.position = self.corps.body._get_position()
+        self.thigh.position = self.thigh.body._get_position()
+        self.cale.position = self.cale.body._get_position()
+        self.foot.position = self.foot.body._get_position()
         pass
 
     def move_muscles(self, index):
         if index == 0:
-            self.muscles.__getitem__(index).max -= 10
-            self.muscles.__getitem__(index + 1).max += 10
+            self.muscles.__getitem__(index).max -= 1
+            self.muscles.__getitem__(index + 1).max += 1
+            self.muscles.__getitem__(index).min -= 1
+            self.muscles.__getitem__(index + 1).min += 1
         elif index == 1:
-            self.muscles.__getitem__(index).max -= 10
-            self.muscles.__getitem__(index - 1).max += 10
+            self.muscles.__getitem__(index).max -= 1
+            self.muscles.__getitem__(index - 1).max += 1
+            self.muscles.__getitem__(index).min -= 1
+            self.muscles.__getitem__(index - 1).min += 1
         elif index == 2:
-            self.muscles.__getitem__(index).max -= 10
-            self.muscles.__getitem__(index + 1).max += 10
+            self.muscles.__getitem__(index).max -= 1
+            self.muscles.__getitem__(index + 1).max += 1
+            self.muscles.__getitem__(index).min -= 1
+            self.muscles.__getitem__(index + 1).min += 1
         elif index == 3:
-            self.muscles.__getitem__(index).max -= 10
-            self.muscles.__getitem__(index - 1).max += 10
+            self.muscles.__getitem__(index).max -= 1
+            self.muscles.__getitem__(index - 1).max += 1
+            self.muscles.__getitem__(index).min -= 1
+            self.muscles.__getitem__(index - 1).min += 1
         elif index == 4:
-            self.muscles.__getitem__(index).max -= 10
-            self.muscles.__getitem__(index + 1).max += 10
+            self.muscles.__getitem__(index).max -= 1
+            self.muscles.__getitem__(index + 1).max += 1
+            self.muscles.__getitem__(index).min -= 1
+            self.muscles.__getitem__(index + 1).min += 1
         elif index == 5:
-            self.muscles.__getitem__(index).max -= 10
-            self.muscles.__getitem__(index - 1).max += 10
+            self.muscles.__getitem__(index).max -= 1
+            self.muscles.__getitem__(index - 1).max += 1
+            self.muscles.__getitem__(index).min -= 1
+            self.muscles.__getitem__(index - 1).min += 1
         pass
 
     def add_pivot_joints(self, space):
@@ -111,46 +125,38 @@ class Model:
 
     def add_muscles_joints(self, space):
         cale_muscle_front_joint = LegPartsHelper.add_body_limit_slide_joint(space, self.cale.body, self.foot.body,
-                                                                            (20, (1 / 2) * CALE_HEIGHT),
-                                                                            (0, 0.5 * FOOT_HEIGHT),
-                                                                            CALE_HEIGHT,
-                                                                            180)
+                                                                            (20, ((1 / 2) * CALE_HEIGHT)),
+                                                                            (20, (0.5 * FOOT_HEIGHT)),
+                                                                            CALE_HEIGHT, CALE_HEIGHT + 1)
         cale_muscle_back_joint = LegPartsHelper.add_body_limit_slide_joint(space, self.cale.body, self.foot.body,
-                                                                           (-20, (1 / 2) * CALE_HEIGHT),
-                                                                           (-0.5 * FOOT_WIDTH, 0.5 * FOOT_HEIGHT),
-                                                                           CALE_HEIGHT,
-                                                                           180)
+                                                                           (-20, ((1 / 2) * CALE_HEIGHT)),
+                                                                           (-20, 0.5 * FOOT_HEIGHT),
+                                                                           CALE_HEIGHT, CALE_HEIGHT + 1)
         thigh_cale_muscle_front_joint = LegPartsHelper.add_body_limit_slide_joint(space, self.thigh.body,
                                                                                   self.cale.body,
                                                                                   (20, (0.5 * THIGH_HEIGHT)),
                                                                                   (20, (0.5 * CALE_HEIGHT)),
-                                                                                  THIGH_HEIGHT + 2,
-                                                                                  200)
+                                                                                  THIGH_HEIGHT, THIGH_HEIGHT + 1)
         thigh_cale_muscle_back_joint = LegPartsHelper.add_body_limit_slide_joint(space, self.thigh.body, self.cale.body,
                                                                                  (-20, (0.5 * THIGH_HEIGHT)),
                                                                                  (-20, (0.5 * CALE_HEIGHT)),
-                                                                                 THIGH_HEIGHT,
-                                                                                 200)
+                                                                                 THIGH_HEIGHT, THIGH_HEIGHT + 1)
         thigh_corps_muscle_front_joint = LegPartsHelper.add_body_limit_slide_joint(space, self.corps.body,
                                                                                    self.thigh.body,
                                                                                    (0.5 * CORPS_WIDTH,
                                                                                     (-0.5 * CORPS_HEIGHT)),
                                                                                    (0, (0.25 * THIGH_HEIGHT)),
-                                                                                   (sqrt(pow(((1 / 2) * CORPS_WIDTH), 2)
-                                                                                         + pow((0.25 * THIGH_HEIGHT), 2))), 150)
+                                                                                   MIN_CMFJ, MIN_CMFJ)
         thigh_cops_muscle_back_joint = LegPartsHelper.add_body_limit_slide_joint(space, self.corps.body,
                                                                                  self.thigh.body,
                                                                                  (-0.5 * CORPS_WIDTH,
                                                                                   (-0.5 * CORPS_HEIGHT)),
-                                                                                 (0,
-                                                                                  (0.25 * THIGH_HEIGHT)),
-                                                                                 (sqrt(pow(((1 / 2) * CORPS_WIDTH), 2)
-                                                                                       + pow((0.25 * THIGH_HEIGHT),
-                                                                                             2))), 150)
+                                                                                 (0, (0.25 * THIGH_HEIGHT)),
+                                                                                 MIN_CMBJ, MIN_CMBJ)
 
         slides_joints = [cale_muscle_front_joint, cale_muscle_back_joint,
-                         thigh_cale_muscle_front_joint, thigh_cale_muscle_back_joint
-            # ,thigh_corps_muscle_front_joint, thigh_cops_muscle_back_joint,
+                         thigh_cale_muscle_front_joint, thigh_cale_muscle_back_joint,
+                         thigh_corps_muscle_front_joint, thigh_cops_muscle_back_joint,
                          ]
         return slides_joints
 
@@ -159,25 +165,24 @@ class Model:
         pass
 
 
-def add_pin_joints_parts(space, corps, hip, thigh, knee, cale, ankle, foot):
+def add_pin_joints_parts(space, corps, thigh, cale, foot):
     corps_rotation_center = LegPartsHelper.add_body_rotation_center(space, corps.body.position)
-    # corps_temp_pin_joint = LegPartsHelper.add_body_pin_joint(space, corps.body, corps.body.position, (0, 0), (0, 0))
-    corps_hip_pin_joint = LegPartsHelper.add_body_pin_joint(space, corps.body, hip.body,
-                                                            (0, (-(1 / 2) * CORPS_HEIGHT)), (0, 0))
-    hip_thigh_pin_joint = LegPartsHelper.add_body_pin_joint(space, hip.body, thigh.body,
-                                                            (0, 0), (0, ((1 / 2) * THIGH_HEIGHT)))
-    thigh_knee_pin_joint = LegPartsHelper.add_body_pin_joint(space, thigh.body, knee.body,
-                                                             (0, (-(1 / 2) * THIGH_HEIGHT)), (0, 0))
-    knee_cale_pin_joint = LegPartsHelper.add_body_pin_joint(space, knee.body, cale.body,
-                                                            (0, 0), (0, ((1 / 2) * CALE_HEIGHT)))
-    cale_ankle_pin_joint = LegPartsHelper.add_body_pin_joint(space, cale.body, ankle.body,
-                                                             (0, (-(1 / 2) * CALE_HEIGHT)), (0, 0))
-    ankle_foot_pin_joint = LegPartsHelper.add_body_pin_joint(space, ankle.body, foot.body,
-                                                             (0, 0),
-                                                             (JOINT_RADIUS + (-((1 / 2) * FOOT_WIDTH)),
-                                                              ((1 / 2) * FOOT_HEIGHT)))
+    #corps_temp_pin_joint = LegPartsHelper.add_body_pin_joint(space, corps.body, corps_rotation_center, (0, 0), (0, 0))
+    hip_pin_joint = LegPartsHelper.add_body_pin_joint(space, corps.body, thigh.body,
+                                                      (0, (-(1 / 2) * CORPS_HEIGHT)), (0, (1 / 2) * THIGH_HEIGHT))
+    knee_pin_joint = LegPartsHelper.add_body_pin_joint(space, thigh.body, cale.body,
+                                                       (0, (-(1 / 2) * THIGH_HEIGHT)), (0, (1 / 2) * CALE_HEIGHT))
+    ankle_pin_joint = LegPartsHelper.add_body_pin_joint(space, cale.body, foot.body,
+                                                        (0, (-(1 / 2) * CALE_HEIGHT)), (0, (1 / 2) * FOOT_HEIGHT))
 
     return space
+
+
+def add_patella(self: LegPartJoint, place, height, width):
+    static = pymunk.Segment(self.body, (place, height), (place, -height), width)
+    static.collision_type = 0
+
+    return static
 
 
 def add_floor(space):
