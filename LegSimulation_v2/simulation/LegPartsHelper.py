@@ -53,7 +53,7 @@ class LegPartsHelper:
         self.body = None
 
     def get_current_location(self):
-        self.position.change_location(self.body.position)
+        self.position.change_location(self.body.part_vector_position)
         self.position.get_current_location()
         pass
 
