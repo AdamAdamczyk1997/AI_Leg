@@ -22,6 +22,7 @@ MIN_Y: float = -MAX_Y
 VIEW_HEIGHT: int = BOUNDS_HEIGHT + 20
 
 CONVERTER: float = 0.5
+HANDLER_LENGTH: float = 300
 
 CORPS_HEIGHT: float = 150 * CONVERTER
 CORPS_WIDTH: float = 150 * CONVERTER
@@ -37,6 +38,9 @@ PATELLA_WIDTH: float = 40 * CONVERTER
 
 FOOT_HEIGHT: float = 20 * CONVERTER
 FOOT_WIDTH: float = 200 * CONVERTER
+FLOOR_HEIGHT: float = 6
+
+LEG_HEIGHT: float = (0.5*CORPS_HEIGHT) + THIGH_HEIGHT + CALE_HEIGHT + FOOT_HEIGHT + FLOOR_HEIGHT
 
 JOINT_RADIUS: float = 20 * CONVERTER
 
@@ -49,9 +53,6 @@ MIN_CMBJ: float = (sqrt(pow(((1 / 2) * CORPS_WIDTH), 2) + pow((0.25 * THIGH_HEIG
 
 MIN_PTJ: float = (sqrt(pow(PATELLA_WIDTH, 2) + pow((0.25 * THIGH_HEIGHT) - ((1 / 8) * THIGH_HEIGHT), 2)))
 MIN_PCJ: float = (sqrt(pow(PATELLA_WIDTH, 2) + pow((0.25 * CALE_HEIGHT) - ((1 / 8) * CALE_HEIGHT), 2)))
-
-
-
 
 CELL_RADIUS: float = 15
 CELL_COUNT: float = 100

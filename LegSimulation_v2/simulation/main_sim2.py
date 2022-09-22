@@ -24,6 +24,10 @@ from LegSimulation_v2.simulation import Teacher, LegPartsHelper
 from LegSimulation_v2.simulation.Location import Location
 from tabulate import tabulate
 from pygame.color import THECOLORS
+import numpy as np
+import pymunk.matplotlib_util
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 
 def table(model_object: Model.Model) -> None:
@@ -76,6 +80,7 @@ class Simulator(object):
         self.model_entity = Model.Model(self.space)
         self.screen = None
         self.draw_options = None
+        self.filter()
 
     def reset_bodies(self, dt: float):
         for body in self.space.bodies:
@@ -92,21 +97,9 @@ class Simulator(object):
         self.space.debug_draw(self.draw_options)  ### Draw space
         pygame.display.flip()  ### All done, lets flip the display
 
-    def main(self):
-        pygame.init()
-        self.screen = pygame.display.set_mode(self.display_size, self.display_flags)
-        self.draw_options = pymunk.pygame_util.DrawOptions(self.screen)
-        self.space._set_iterations(10)  ### Try another value to better experience
-
-        clock = pygame.time.Clock()
-        running = True
-
-        print(self.space.bodies)
-
-
+    def filter(self):
         # ---prevent collisions with ShapeFilter
         shape_filter = pymunk.ShapeFilter(group=1)
-        shape_filter2 = pymunk.ShapeFilter(group=5)
         self.model_entity.corps.shape.filter = shape_filter
         self.model_entity.thigh.shape.filter = shape_filter
         self.model_entity.patella_thigh_part.shape.filter = shape_filter
@@ -114,13 +107,36 @@ class Simulator(object):
         self.model_entity.patella_cale_part.shape.filter = shape_filter
         self.model_entity.foot.shape.filter = shape_filter
 
+    def main(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode(self.display_size, self.display_flags)
+        self.draw_options = pymunk.pygame_util.DrawOptions(self.screen)
+        # ax = plt.axes(xlim=(0, 700), ylim=(0, 1000))
+        # self.draw_options = pymunk.matplotlib_util.DrawOptions(ax)
+        self.space._set_iterations(10)  ### Try another value to better experience
+
+        clock = pygame.time.Clock()
+        running = True
+
+        print(self.space.bodies)
+
         simulate = False
         print_time = 0
         pressed_k_left = False
         pressed_k_right = False
+        pressed_k_a = False
         force = 0.0
+        collision_handler = False
+        stop = False
+        up = False
+
         while running:
             line = None
+
+            fps = 60
+            clock.tick(fps)
+
+            dt = 1.0 / float(fps)
 
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -129,28 +145,19 @@ class Simulator(object):
                         # running = False
                         sys.exit(0)
 
-                    # elif event.key == pygame.K_LEFT:
-                    #     x = self.model_entity.corps.body.position.x + (0.5 * constants.CORPS_WIDTH)
-                    #     y = self.model_entity.corps.body.position.y
-                    #     self.model_entity.corps.body.apply_force_at_local_point((-50000, 0), (x, y))
-                    # elif event.key == pygame.K_RIGHT:
-                    #     x = self.model_entity.corps.body.position.x
-                    #     y = self.model_entity.corps.body.position.y - (0.5 * constants.CORPS_WIDTH)
-                    #     self.model_entity.corps.body.apply_force_at_local_point((50000, 0), (x, y))
                     elif event.key == pygame.K_RIGHT:
-                        if pressed_k_right:
-                            pressed_k_right = False
-                        else:
-                            pressed_k_right = True
+                        pressed_k_right = not pressed_k_right
+
                     elif event.key == pygame.K_DOWN:
                         x = self.model_entity.corps.body.position.x + (0.5 * constants.CORPS_HEIGHT)
                         y = self.model_entity.corps.body.position.y
                         self.model_entity.corps.body.apply_force_at_local_point((0, -50000), (x, y))
 
-                    # Start/stop simulation.
+                    # Start/stop simulation!!!!!!!!!!!!!!!!!!!!!!!!!.
                     elif event.key == pygame.K_s:
                         simulate = not simulate
-                        self.model_entity.teacher.floor.velocity = (-50, 0)
+                    elif event.key == pygame.K_a:
+                        pressed_k_a = not pressed_k_a
 
                     # hold the simulation
                     elif event.key == pygame.K_r:
@@ -158,27 +165,24 @@ class Simulator(object):
                         simulate = False
                     # Moving muscles
                     elif event.key == pygame.K_4:
-                        self.model_entity.move_muscles(0)
+                        self.model_entity.move_muscles(0, 10 * dt)
                     elif event.key == pygame.K_3:
-                        self.model_entity.move_muscles(1)
+                        self.model_entity.move_muscles(1, 10 * dt)
                     elif event.key == pygame.K_5:
-                        self.model_entity.move_muscles(2)
+                        self.model_entity.move_muscles(2, 10 * dt)
                     elif event.key == pygame.K_2:
-                        self.model_entity.move_muscles(3)
+                        self.model_entity.move_muscles(3, 10 * dt)
                     elif event.key == pygame.K_6:
-                        self.model_entity.move_muscles(4)
+                        self.model_entity.move_muscles(4, 10 * dt)
                     elif event.key == pygame.K_1:
-                        self.model_entity.move_muscles(5)
+                        self.model_entity.move_muscles(5, 10 * dt)
                     # Start new simulation
                     elif event.key == pygame.K_n:
                         sim1 = Simulator()
                         sim1.main()
 
                     if pygame.key.get_pressed()[pygame.K_LEFT]:
-                        if pressed_k_left:
-                            pressed_k_left = False
-                        else:
-                            pressed_k_left = True
+                        pressed_k_left = not pressed_k_left
 
             if pressed_k_left:
                 x = self.model_entity.corps.body.position.x + (0.5 * constants.CORPS_WIDTH)
@@ -186,36 +190,35 @@ class Simulator(object):
                 self.model_entity.corps.body.apply_force_at_local_point((force, 0), (x, y))
                 force = force - 5
 
+            temp_up = False
             if pressed_k_right:
-                for body in self.space.bodies:
-                    body.update_position(body, 0.01)
+                temp_up = self.model_entity.movement_scenario(up)
 
+            up = temp_up
+
+            if pressed_k_a:
+                self.model_entity.move_running_gear()
 
             # ticks_to_next_ball = Model.ball_controller(self.space, balls, ticks_to_next_ball)
             self.draw(line)
 
             pygame.display.set_caption(f"fps: {clock.get_fps()}")
             # Update physics
-            fps = 60
-            clock.tick(fps)
-
-            dt = 1.0 / float(fps)
             if simulate:
                 # for x in range(10 * iterations):  # 10 iterations to get a more stable simulation
                 self.space.step(dt)
-                damping = 1
+                damping = 0.99
 
                 limit_velocity(self.model_entity.bodies, self.space.gravity, damping, dt)
                 self.model_entity.tick()
 
-                # print(self.model_entity.corps.get_location().show_location())
-                # Print all information
                 if print_time == 0:
-                    table(self.model_entity)
-                    print(" self.space._get_iterations() = ", self.space._get_iterations(), " dt = ", dt)
+                    # table(self.model_entity)
+                    # print(" self.space._get_iterations() = ", self.space._get_iterations(), " dt = ", dt)
                     print_time = print_time + 1
                 elif print_time % 10 == 0:
-                    table(self.model_entity)
+                    # table(self.model_entity)
+                    print("floor position x = ", self.model_entity.floor.position.x)
                     print(" self.space._get_iterations() = ", self.space._get_iterations(), " print_time = ",
                           print_time)
                     print_time = print_time + 1

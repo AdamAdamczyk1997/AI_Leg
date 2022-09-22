@@ -41,6 +41,7 @@ class LegPartBone:
         self.part_vector_position = Location(vector)
         self.shape.collision_type = 0
         self.shape.friction = 0.61
+        self.shape.collision_type = 0
 
         space.add(self.body, self.shape)
 

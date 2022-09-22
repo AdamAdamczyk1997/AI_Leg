@@ -53,7 +53,6 @@ class Teacher:
 
     def add_holder(self, space):
         slide = pymunk.Segment(space.static_body, (-100, self.body.position.y), (2000, self.body.position.y), 2)
-        slide.friction = 0.30
         space.add(slide)
 
         return space
@@ -61,8 +60,9 @@ class Teacher:
     def running_gear(self, space):
         floor = pymunk.Body()
         floor.body_type = pymunk.Body.KINEMATIC
-        floor.shape = pymunk.Segment(floor, (0, 0), (100000, 0), 5)
-        floor.shape.friction = 1.0
+        floor.shape = pymunk.Segment(floor, (0, 0), (100000, 0), 6)
+        floor.shape.friction = 0.10
+        # floor.shape.collision_type = 1
         space.add(floor, floor.shape)
 
         return floor
