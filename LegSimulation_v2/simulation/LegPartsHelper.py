@@ -8,6 +8,15 @@ from pymunk import Poly, Vec2d, Body
 from LegSimulation_v2.simulation.Location import Location
 
 
+def add_body_dumped_spring(space: pymunk.Space(), body1: Body, body2: Body,
+                           how_far_from_body1: tuple[float, float], how_far_from_body2: tuple[float, float],
+                           rest_length: float, stiffness: float, damping: float):
+    body_dumped_spring = pymunk.DampedSpring(body1, body2, how_far_from_body1, how_far_from_body2, rest_length,
+                                             stiffness, damping)
+    space.add(body_dumped_spring)
+    return body_dumped_spring
+
+
 def add_body_limit_slide_joint(space: pymunk.Space(), body1: Body, body2: Body,
                                how_far_from_body1: tuple[float, float], how_far_from_body2: tuple[float, float],
                                min_distance: float, max_distance: float):

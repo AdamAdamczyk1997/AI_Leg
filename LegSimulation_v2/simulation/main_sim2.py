@@ -20,7 +20,7 @@ import pymunk.pygame_util
 import numpy as np
 import matplotlib.pyplot as plt
 
-from LegSimulation_v2.simulation import Teacher, LegPartsHelper
+from LegSimulation_v2.simulation import LegPartsHelper
 from LegSimulation_v2.simulation.Location import Location
 from tabulate import tabulate
 from pygame.color import THECOLORS
@@ -135,7 +135,6 @@ class Simulator(object):
 
             fps = 60
             clock.tick(fps)
-
             dt = 1.0 / float(fps)
 
             for event in pygame.event.get():
@@ -165,17 +164,17 @@ class Simulator(object):
                         simulate = False
                     # Moving muscles
                     elif event.key == pygame.K_4:
-                        self.model_entity.move_muscles(0, 10 * dt)
+                        self.model_entity.move_muscles(0, dt)
                     elif event.key == pygame.K_3:
-                        self.model_entity.move_muscles(1, 10 * dt)
+                        self.model_entity.move_muscles(1, dt)
                     elif event.key == pygame.K_5:
-                        self.model_entity.move_muscles(2, 10 * dt)
+                        self.model_entity.move_muscles(2, dt)
                     elif event.key == pygame.K_2:
-                        self.model_entity.move_muscles(3, 10 * dt)
+                        self.model_entity.move_muscles(3, dt)
                     elif event.key == pygame.K_6:
-                        self.model_entity.move_muscles(4, 10 * dt)
+                        self.model_entity.move_muscles(4, dt)
                     elif event.key == pygame.K_1:
-                        self.model_entity.move_muscles(5, 10 * dt)
+                        self.model_entity.move_muscles(5, dt)
                     # Start new simulation
                     elif event.key == pygame.K_n:
                         sim1 = Simulator()
@@ -221,6 +220,18 @@ class Simulator(object):
                     print("floor position x = ", self.model_entity.floor.position.x)
                     print(" self.space._get_iterations() = ", self.space._get_iterations(), " print_time = ",
                           print_time)
+                    print(" stiffness 0 = ", self.model_entity.muscles.__getitem__(0).stiffness,
+                          " stiffness 1 = ", self.model_entity.muscles.__getitem__(1).stiffness,
+                          " damping 0 = ", self.model_entity.muscles.__getitem__(0).damping,
+                          " damping 0 = ", self.model_entity.muscles.__getitem__(1).damping)
+                    print(" stiffness 2 = ", self.model_entity.muscles.__getitem__(2).stiffness,
+                          " stiffness 3 = ", self.model_entity.muscles.__getitem__(3).stiffness,
+                          " damping 2 = ", self.model_entity.muscles.__getitem__(2).damping,
+                          " damping 3 = ", self.model_entity.muscles.__getitem__(3).damping)
+                    print(" stiffness 4 = ", self.model_entity.muscles.__getitem__(4).stiffness,
+                          " stiffness 5 = ", self.model_entity.muscles.__getitem__(5).stiffness,
+                          " damping 4 = ", self.model_entity.muscles.__getitem__(4).damping,
+                          " damping 5 = ", self.model_entity.muscles.__getitem__(5).damping)
                     print_time = print_time + 1
                 else:
                     print_time = print_time + 1

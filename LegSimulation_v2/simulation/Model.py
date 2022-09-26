@@ -9,10 +9,10 @@ import pymunk
 import pymunk.pygame_util
 # from kivy.graphics import Quad, Triangle
 from pygame import Color
-from pymunk import Vec2d, SlideJoint
+from pymunk import Vec2d, SlideJoint, DampedSpring
 import LegPartBone
 import self as self
-from LegSimulation_v2.simulation import constants, LegPartsHelper, Teacher
+from LegSimulation_v2.simulation import constants, LegPartsHelper
 from math import sin, cos, pi, sqrt
 
 from LegSimulation_v2.simulation.LegPartBone import LegPartBone
@@ -44,10 +44,9 @@ class Model:
     patella_thigh_part: LegPartBone
     patella_cale_part: LegPartBone
     pivots: list[pymunk.Body]
-    muscles: list[SlideJoint]
+    muscles: list[DampedSpring | SlideJoint]
     bodies: list[pymunk.Body]
     time: int = 0
-    teacher: Teacher
     teacher_holder: list[SlideJoint]
     floor: pymunk.Body
 
@@ -76,6 +75,7 @@ class Model:
 
         add_pin_joints_parts(space, self.corps, self.thigh, self.patella_thigh_part, self.cale, self.patella_cale_part,
                              self.foot)
+
         self.muscles = self.add_muscles_joints(space)
 
         self.bodies = [self.corps.body, self.thigh.body, self.patella_thigh_part.body, self.patella_cale_part.body,
@@ -94,8 +94,8 @@ class Model:
         # self.teacher_holder = self.add_holder_joint(space)
 
     def tick(self):
-        self.corps.part_vector_position = self.corps.body._get_position()
-        self.thigh.part_vector_position = self.thigh.body._get_position()
+        self.corps.part_vector_position = self.corps.body.position
+        self.thigh.part_vector_position = self.thigh.body.position
         self.cale.part_vector_position = self.cale.body._get_position()
         self.foot.part_vector_position = self.foot.body._get_position()
         # self.corps.part_vector_position.show_location()
@@ -110,35 +110,23 @@ class Model:
 
     def move_muscles(self, index, dt: float):
         if index == 0:
-            self.muscles.__getitem__(index).max -= dt
-            self.muscles.__getitem__(index + 1).max += dt
-            self.muscles.__getitem__(index).min -= dt
-            self.muscles.__getitem__(index + 1).min += dt
+            self.muscles.__getitem__(index).stiffness += 100
+            self.muscles.__getitem__(index + 1).stiffness -= 100
         elif index == 1:
-            self.muscles.__getitem__(index).max -= dt
-            self.muscles.__getitem__(index - 1).max += dt
-            self.muscles.__getitem__(index).min -= dt
-            self.muscles.__getitem__(index - 1).min += dt
+            self.muscles.__getitem__(index).stiffness += 100
+            self.muscles.__getitem__(index - 1).stiffness -= 100
         elif index == 2:
-            self.muscles.__getitem__(index).max -= dt
-            self.muscles.__getitem__(index + 1).max += dt
-            self.muscles.__getitem__(index).min -= dt
-            self.muscles.__getitem__(index + 1).min += dt
+            self.muscles.__getitem__(index).stiffness += 100
+            self.muscles.__getitem__(index + 1).stiffness -= 100
         elif index == 3:
-            self.muscles.__getitem__(index).max -= dt
-            self.muscles.__getitem__(index - 1).max += dt
-            self.muscles.__getitem__(index).min -= dt
-            self.muscles.__getitem__(index - 1).min += dt
+            self.muscles.__getitem__(index).stiffness += 100
+            self.muscles.__getitem__(index - 1).stiffness -= 100
         elif index == 4:
-            self.muscles.__getitem__(index).max -= dt
-            self.muscles.__getitem__(index + 1).max += dt
-            self.muscles.__getitem__(index).min -= dt
-            self.muscles.__getitem__(index + 1).min += dt
+            self.muscles.__getitem__(index).stiffness += 100
+            self.muscles.__getitem__(index + 1).stiffness -= 100
         elif index == 5:
-            self.muscles.__getitem__(index).max -= dt
-            self.muscles.__getitem__(index - 1).max += dt
-            self.muscles.__getitem__(index).min -= dt
-            self.muscles.__getitem__(index - 1).min += dt
+            self.muscles.__getitem__(index).stiffness += 100
+            self.muscles.__getitem__(index - 1).stiffness -= 100
         pass
 
     def move_running_gear(self):
@@ -179,46 +167,46 @@ class Model:
                                                                 self.cale.part_vector_position.y -
                                                                 ((1 / 2) * CALE_HEIGHT)))
 
-        patella_thigh_pivot_body = LegPartsHelper.add_body_pivot_joint(space, self.patella_thigh_part.body,
-                                                                       self.thigh.body,
-                                                                       ((self.patella_thigh_part.part_vector_position.x -
-                                                                         (0.5 * PATELLA_WIDTH)),
-                                                                        self.patella_thigh_part.part_vector_position.y))
-        patella_cale_pivot_body = LegPartsHelper.add_body_pivot_joint(space, self.patella_cale_part.body, self.cale.body,
-                                                                      ((self.patella_cale_part.part_vector_position.x -
-                                                                        (0.5 * PATELLA_WIDTH)),
-                                                                          self.patella_cale_part.part_vector_position.y))
+        patella_thigh_pivot_body = \
+            LegPartsHelper.add_body_pivot_joint(space, self.patella_thigh_part.body, self.thigh.body,
+                                                ((self.patella_thigh_part.part_vector_position.x - (
+                                                        0.5 * PATELLA_WIDTH)),
+                                                 self.patella_thigh_part.part_vector_position.y))
+        patella_cale_pivot_body = \
+            LegPartsHelper.add_body_pivot_joint(space, self.patella_cale_part.body, self.cale.body,
+                                                (
+                                                    (self.patella_cale_part.part_vector_position.x - (
+                                                                0.5 * PATELLA_WIDTH)),
+                                                    self.patella_cale_part.part_vector_position.y))
         pivots = [hip_pivot_body, knee_pivot_body, ankle_pivot_body,
                   patella_thigh_pivot_body, patella_cale_pivot_body]
         return pivots
 
     def add_muscles_joints(self, space):
         cale_muscle_front_joint = \
-            LegPartsHelper.add_body_limit_slide_joint(space, self.cale.body, self.foot.body,
-                                                      (20, ((1 / 2) * CALE_HEIGHT)), (20, (0.5 * FOOT_HEIGHT)),
-                                                      CALE_HEIGHT, CALE_HEIGHT + 1)
+            LegPartsHelper.add_body_dumped_spring(space, self.cale.body, self.foot.body,
+                                                  (20, ((1 / 2) * CALE_HEIGHT)), (20, (0.5 * FOOT_HEIGHT)),
+                                                  0.5 * CALE_HEIGHT, 20000, 200)
         cale_muscle_back_joint = \
-            LegPartsHelper.add_body_limit_slide_joint(space, self.cale.body, self.foot.body,
-                                                      (-20, ((1 / 2) * CALE_HEIGHT)), (-20, 0.5 * FOOT_HEIGHT),
-                                                      CALE_HEIGHT, CALE_HEIGHT + 1)
+            LegPartsHelper.add_body_dumped_spring(space, self.cale.body, self.foot.body,
+                                                  (-20, ((1 / 2) * CALE_HEIGHT)), (-20, 0.5 * FOOT_HEIGHT),
+                                                  0.5 * CALE_HEIGHT, 20000, 200)
         thigh_cale_muscle_front_joint = \
-            LegPartsHelper.add_body_limit_slide_joint(space, self.thigh.body, self.cale.body,
-                                                      (20, (0.5 * THIGH_HEIGHT)), (20, (0.5 * CALE_HEIGHT)),
-                                                      THIGH_HEIGHT, THIGH_HEIGHT + 1)
+            LegPartsHelper.add_body_dumped_spring(space, self.thigh.body, self.cale.body,
+                                                  (20, (0.5 * THIGH_HEIGHT)), (20, (0.5 * CALE_HEIGHT)),
+                                                  0.5 * THIGH_HEIGHT, 30000, 100)
         thigh_cale_muscle_back_joint = \
-            LegPartsHelper.add_body_limit_slide_joint(space, self.thigh.body, self.cale.body,
-                                                      (-20, (0.5 * THIGH_HEIGHT)), (-20, (0.5 * CALE_HEIGHT)),
-                                                      THIGH_HEIGHT, THIGH_HEIGHT + 1)
+            LegPartsHelper.add_body_dumped_spring(space, self.thigh.body, self.cale.body,
+                                                  (-20, (0.5 * THIGH_HEIGHT)), (-20, (0.5 * CALE_HEIGHT)),
+                                                  0.5 * THIGH_HEIGHT, 30000, 100)
         thigh_corps_muscle_front_joint = \
-            LegPartsHelper.add_body_limit_slide_joint(space, self.corps.body, self.thigh.body,
-                                                      (0.5 * CORPS_WIDTH, (-0.5 * CORPS_HEIGHT)),
-                                                      (0, (0.25 * THIGH_HEIGHT)),
-                                                      MIN_CMFJ, MIN_CMFJ)
+            LegPartsHelper.add_body_dumped_spring(space, self.corps.body, self.thigh.body,
+                                                  (0.5 * CORPS_WIDTH, (-0.5 * CORPS_HEIGHT)), (0, (0.25 * THIGH_HEIGHT)),
+                                                  0.5 * MIN_CMFJ, 10000, 100)
         thigh_cops_muscle_back_joint = \
-            LegPartsHelper.add_body_limit_slide_joint(space, self.corps.body, self.thigh.body,
-                                                      (-0.5 * CORPS_WIDTH, (-0.5 * CORPS_HEIGHT)),
-                                                      (0, (0.25 * THIGH_HEIGHT)),
-                                                      MIN_CMBJ, MIN_CMBJ)
+            LegPartsHelper.add_body_dumped_spring(space, self.corps.body, self.thigh.body,
+                                                  (-0.5 * CORPS_WIDTH, (-0.5 * CORPS_HEIGHT)), (0, (0.25 * THIGH_HEIGHT)),
+                                                  0.5 * MIN_CMBJ, 10000, 100)
 
         patella_thigh_muscle_joint = \
             LegPartsHelper.add_body_limit_slide_joint(space, self.patella_thigh_part.body, self.thigh.body,
