@@ -29,6 +29,8 @@ import pymunk.matplotlib_util
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
+from LegSimulation_v2.simulation_v2.RelativeValues import RelativeValues
+
 
 def table(model_object: Model.Model) -> None:
     table_content = [['Id', 'Parts Name', 'Moment', 'Position_x', 'Position_y', 'Velocity_x', 'Velocity_y', ''],
@@ -226,12 +228,12 @@ class Simulator(object):
                         pressed_k_left = not pressed_k_left
 
                     elif event.key == pygame.K_e:
-                        motors.__getitem__(0).rate = rotation_rate
+                        motors.__getitem__(1).rate = rotation_rate
                     elif event.key == pygame.K_d:
-                        motors.__getitem__(0).rate = -rotation_rate
+                        motors.__getitem__(1).rate = -rotation_rate
                 if event.type == pygame.KEYUP:
-                    motors.__getitem__(0).rate = 0
-                    motors.__getitem__(0).rate = 0
+                    motors.__getitem__(1).rate = 0
+                    motors.__getitem__(1).rate = 0
 
             if pressed_k_left:
                 x = self.model_entity.corps.body.position.x + (0.5 * constants.CORPS_WIDTH)
@@ -269,6 +271,7 @@ class Simulator(object):
                         self.model_entity.pivots.__getitem__(0).position.x,
                         self.model_entity.right_leg.pivots.__getitem__(0).position.x,
                         self.model_entity.right_leg.pivots.__getitem__(1).position.x)
+                    self.model_entity.right_leg.relative_values.show()
                     print_time = print_time + 1
                 elif print_time % 10 == 0:
 
@@ -276,6 +279,7 @@ class Simulator(object):
                         self.model_entity.pivots.__getitem__(0).position.x,
                         self.model_entity.right_leg.pivots.__getitem__(0).position.x,
                         self.model_entity.right_leg.pivots.__getitem__(1).position.x)
+                    self.model_entity.right_leg.relative_values.show()
                     # self.model_entity.right_leg.relative_values.show()
                     #     # table(self.model_entity)
                     #     print("floor position x = ", self.model_entity.floor.position.x)

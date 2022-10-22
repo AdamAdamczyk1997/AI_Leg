@@ -59,7 +59,7 @@ class Model:
         self.right_leg = Leg(space)
         self.left_leg = Leg(space)
 
-        self.pivots = self.add_pivot_joints(space)
+        self.add_pivot_joints(space)
 
         self.add_pin_joints_parts(space)
 
@@ -76,6 +76,7 @@ class Model:
         # self.thigh.part_vector_position.show_location()
         # self.cale.part_vector_position.show_location()
         # self.foot.part_vector_position.show_location()
+
         pass
 
     def iterator(self):
@@ -129,17 +130,26 @@ class Model:
 
     def add_pivot_joints(self, space):
         right_hip_pivot_body = LegPartsHelper.add_body_pivot_joint(space, self.corps.body, self.right_leg.thigh.body,
-                                                                   (self.corps.part_vector_position.x,
-                                                                    self.corps.part_vector_position.y -
+                                                                   (self.corps.body.position.x,
+                                                                    self.corps.body.position.y -
                                                                     ((1 / 2) * CORPS_HEIGHT)))
         left_hip_pivot_body = LegPartsHelper.add_body_pivot_joint(space, self.corps.body, self.left_leg.thigh.body,
                                                                   (self.corps.part_vector_position.x,
                                                                    self.corps.part_vector_position.y -
                                                                    ((1 / 2) * CORPS_HEIGHT)))
-        # pivots = [right_hip_pivot_body]
-        pivots = [right_hip_pivot_body, left_hip_pivot_body]
 
-        return pivots
+        mass = 1
+        size = (1, 1)
+        moment = pymunk.moment_for_box(mass, size)
+        pivot_joint_body = pymunk.Body(mass, moment)
+        pivot_joint_body.body_type = pymunk.Body.DYNAMIC
+        pivot_joint_body.position = (self.corps.body.position.x,
+                                            self.corps.body.position.y -
+                                            ((1 / 2) * CORPS_HEIGHT))
+        space.add(pivot_joint_body)
+        # pivots = [right_hip_pivot_body]
+        self.pivots = [pivot_joint_body]
+        pass
 
     def add_muscles_joints(self, space):
         # Muscles are added only to right leg
@@ -217,8 +227,17 @@ class Model:
         left_hip_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.left_leg.thigh.body,
                                                                (0, (-(1 / 2) * CORPS_HEIGHT)),
                                                                (0, (1 / 2) * THIGH_HEIGHT))
+        r_hip_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.pivots.__getitem__(0),
+                                                            (0, (-(1 / 2) * CORPS_HEIGHT)),
+                                                            (0, 0))
+        # l_hip_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.pivots.__getitem__(1),
+        #                                                     (0, (-(1 / 2) * CORPS_HEIGHT)),
+        #                                                     (0, 0))
 
         # pin_joints = [corps_rotation_center, right_hip_pin_joint]
-        pin_joints = [corps_rotation_center, right_hip_pin_joint, left_hip_pin_joint]
+        pin_joints = [corps_rotation_center, right_hip_pin_joint]
 
         return pin_joints
+
+    # def update_pivots(self):
+    #     self.pivots.__getitem__(0).position =

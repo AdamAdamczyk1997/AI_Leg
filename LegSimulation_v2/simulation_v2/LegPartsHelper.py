@@ -49,10 +49,8 @@ def add_body_rotation_limit(space, body_rotation_limit_position):
 
 def add_body_pivot_joint(space, body1: Body, body2: Body, position_arg):
     pivot_joint = pymunk.PivotJoint(body1, body2, Vec2d(*position_arg))
-    pivot_joint_body = pymunk.Body(body_type=pymunk.Body.STATIC)
-    pivot_joint_body.position = Vec2d(*position_arg)
-    space.add(pivot_joint, pivot_joint_body)
-    return pivot_joint_body
+    space.add(pivot_joint)
+    return pivot_joint
 
 
 class LegPartsHelper:
