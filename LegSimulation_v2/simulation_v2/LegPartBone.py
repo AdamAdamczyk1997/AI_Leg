@@ -5,8 +5,8 @@ from random import random
 import pymunk
 from pymunk import Poly, Vec2d, Body
 
-from LegSimulation_v2.simulation import LegPartsHelper
-from LegSimulation_v2.simulation.Location import Location
+from LegSimulation_v2.simulation_v2 import LegPartsHelper
+from LegSimulation_v2.simulation_v2.Location import Location
 
 
 class LegPartBone:

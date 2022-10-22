@@ -20,8 +20,8 @@ import pymunk.pygame_util
 import numpy as np
 import matplotlib.pyplot as plt
 
-from LegSimulation_v2.simulation import LegPartsHelper
-from LegSimulation_v2.simulation.Location import Location
+from LegSimulation_v2.simulation_v2 import LegPartsHelper
+from LegSimulation_v2.simulation_v2.Location import Location
 from tabulate import tabulate
 from pygame.color import THECOLORS
 import numpy as np
