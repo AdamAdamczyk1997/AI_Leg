@@ -101,11 +101,44 @@ class Simulator(object):
         # ---prevent collisions with ShapeFilter
         shape_filter = pymunk.ShapeFilter(group=1)
         self.model_entity.corps.shape.filter = shape_filter
-        self.model_entity.thigh.shape.filter = shape_filter
-        self.model_entity.patella_thigh_part.shape.filter = shape_filter
-        self.model_entity.cale.shape.filter = shape_filter
-        self.model_entity.patella_cale_part.shape.filter = shape_filter
-        self.model_entity.foot.shape.filter = shape_filter
+        self.model_entity.right_leg.thigh.shape.filter = shape_filter
+        self.model_entity.right_leg.patella_thigh_part.shape.filter = shape_filter
+        self.model_entity.right_leg.cale.shape.filter = shape_filter
+        self.model_entity.right_leg.patella_cale_part.shape.filter = shape_filter
+        self.model_entity.right_leg.foot.shape.filter = shape_filter
+
+        self.model_entity.corps.shape.filter = shape_filter
+        self.model_entity.left_leg.thigh.shape.filter = shape_filter
+        self.model_entity.left_leg.patella_thigh_part.shape.filter = shape_filter
+        self.model_entity.left_leg.cale.shape.filter = shape_filter
+        self.model_entity.left_leg.patella_cale_part.shape.filter = shape_filter
+        self.model_entity.left_leg.foot.shape.filter = shape_filter
+
+    def motor_right_leg(self, relative_angu_vel_right_leg, relative_angu_vel_left_leg):
+        left_thigh_motor = pymunk.SimpleMotor(self.model_entity.left_leg.thigh.body, self.model_entity.corps.body,
+                                              relative_angu_vel_left_leg)
+        left_cale_motor = pymunk.SimpleMotor(self.model_entity.left_leg.cale.body,
+                                             self.model_entity.left_leg.thigh.body, relative_angu_vel_left_leg)
+        left_foot_motor = pymunk.SimpleMotor(self.model_entity.left_leg.foot.body,
+                                             self.model_entity.left_leg.cale.body, relative_angu_vel_left_leg)
+
+        right_thigh_motor = pymunk.SimpleMotor(self.model_entity.right_leg.thigh.body, self.model_entity.corps.body,
+                                               relative_angu_vel_right_leg)
+        right_cale_motor = pymunk.SimpleMotor(self.model_entity.right_leg.cale.body,
+                                              self.model_entity.right_leg.thigh.body, relative_angu_vel_right_leg)
+        right_foot_motor = pymunk.SimpleMotor(self.model_entity.right_leg.foot.body,
+                                              self.model_entity.right_leg.cale.body, relative_angu_vel_right_leg)
+
+        # self.space.add(right_thigh_motor, right_cale_motor, right_foot_motor)
+        self.space.add(right_thigh_motor, right_cale_motor,
+                       right_foot_motor, left_thigh_motor, left_cale_motor, left_foot_motor)
+
+        self.filter()
+        # motors = [left_thigh_motor, left_cale_motor, left_foot_motor]
+        motors = [right_thigh_motor, right_cale_motor,
+                  right_foot_motor, left_thigh_motor, left_cale_motor, left_foot_motor]
+
+        return motors
 
     def main(self):
         pygame.init()
@@ -129,6 +162,12 @@ class Simulator(object):
         collision_handler = False
         stop = False
         up = False
+
+        relative_angu_vel_right_leg = 0
+        relative_angu_vel_left_leg = 0
+
+        motors = self.motor_right_leg(relative_angu_vel_right_leg, relative_angu_vel_left_leg)
+        rotation_rate = 1
 
         while running:
             line = None
@@ -180,8 +219,19 @@ class Simulator(object):
                         sim1 = Simulator()
                         sim1.main()
 
+                    # elif event.key == K_C:
+                    #     motor_ac1Left.rate = rotationRate
+
                     if pygame.key.get_pressed()[pygame.K_LEFT]:
                         pressed_k_left = not pressed_k_left
+
+                    elif event.key == pygame.K_e:
+                        motors.__getitem__(0).rate = rotation_rate
+                    elif event.key == pygame.K_d:
+                        motors.__getitem__(0).rate = -rotation_rate
+                if event.type == pygame.KEYUP:
+                    motors.__getitem__(0).rate = 0
+                    motors.__getitem__(0).rate = 0
 
             if pressed_k_left:
                 x = self.model_entity.corps.body.position.x + (0.5 * constants.CORPS_WIDTH)
@@ -208,30 +258,48 @@ class Simulator(object):
                 self.space.step(dt)
                 damping = 0.99
 
-                limit_velocity(self.model_entity.bodies, self.space.gravity, damping, dt)
+                limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, damping, dt)
                 self.model_entity.tick()
 
                 if print_time == 0:
-                    # table(self.model_entity)
-                    # print(" self.space._get_iterations() = ", self.space._get_iterations(), " dt = ", dt)
+                    #     # table(self.model_entity)
+                    #     # print(" self.space._get_iterations() = ", self.space._get_iterations(), " dt = ", dt)
+
+                    self.model_entity.right_leg.relative_values.calculate_angles(
+                        self.model_entity.pivots.__getitem__(0).position.x,
+                        self.model_entity.right_leg.pivots.__getitem__(0).position.x,
+                        self.model_entity.right_leg.pivots.__getitem__(1).position.x)
                     print_time = print_time + 1
                 elif print_time % 10 == 0:
-                    # table(self.model_entity)
-                    print("floor position x = ", self.model_entity.floor.position.x)
-                    print(" self.space._get_iterations() = ", self.space._get_iterations(), " print_time = ",
-                          print_time)
-                    print(" stiffness 0 = ", self.model_entity.muscles.__getitem__(0).stiffness,
-                          " stiffness 1 = ", self.model_entity.muscles.__getitem__(1).stiffness,
-                          " damping 0 = ", self.model_entity.muscles.__getitem__(0).damping,
-                          " damping 0 = ", self.model_entity.muscles.__getitem__(1).damping)
-                    print(" stiffness 2 = ", self.model_entity.muscles.__getitem__(2).stiffness,
-                          " stiffness 3 = ", self.model_entity.muscles.__getitem__(3).stiffness,
-                          " damping 2 = ", self.model_entity.muscles.__getitem__(2).damping,
-                          " damping 3 = ", self.model_entity.muscles.__getitem__(3).damping)
-                    print(" stiffness 4 = ", self.model_entity.muscles.__getitem__(4).stiffness,
-                          " stiffness 5 = ", self.model_entity.muscles.__getitem__(5).stiffness,
-                          " damping 4 = ", self.model_entity.muscles.__getitem__(4).damping,
-                          " damping 5 = ", self.model_entity.muscles.__getitem__(5).damping)
+
+                    self.model_entity.right_leg.relative_values.calculate_angles(
+                        self.model_entity.pivots.__getitem__(0).position.x,
+                        self.model_entity.right_leg.pivots.__getitem__(0).position.x,
+                        self.model_entity.right_leg.pivots.__getitem__(1).position.x)
+                    # self.model_entity.right_leg.relative_values.show()
+                    #     # table(self.model_entity)
+                    #     print("floor position x = ", self.model_entity.floor.position.x)
+                    #     print(" self.space._get_iterations() = ", self.space._get_iterations(), " print_time = ",
+                    #           print_time)
+                    #     print(" stiffness 0 = ", self.model_entity.muscles.__getitem__(0).stiffness,
+                    #           " stiffness 1 = ", self.model_entity.muscles.__getitem__(1).stiffness,
+                    #           " damping 0 = ", self.model_entity.muscles.__getitem__(0).damping,
+                    #           " damping 0 = ", self.model_entity.muscles.__getitem__(1).damping)
+                    #     print(" stiffness 2 = ", self.model_entity.muscles.__getitem__(2).stiffness,
+                    #           " stiffness 3 = ", self.model_entity.muscles.__getitem__(3).stiffness,
+                    #           " damping 2 = ", self.model_entity.muscles.__getitem__(2).damping,
+                    #           " damping 3 = ", self.model_entity.muscles.__getitem__(3).damping)
+                    #     print(" stiffness 4 = ", self.model_entity.muscles.__getitem__(4).stiffness,
+                    #           " stiffness 5 = ", self.model_entity.muscles.__getitem__(5).stiffness,
+                    #           " damping 4 = ", self.model_entity.muscles.__getitem__(4).damping,
+                    #           " damping 5 = ", self.model_entity.muscles.__getitem__(5).damping)
+
+                    # print(" motors.__getitem__(0).rate = ", motors.__getitem__(0).rate)
+                    # print(" motors.__getitem__(1).rate = ", motors.__getitem__(1).rate,
+                    # print(" motors.__getitem__(2).rate = ", motors.__getitem__(2).rate)
+                    # print(" motors.__getitem__(3).rate = ", motors.__getitem__(3).rate)
+                    # print(" motors.__getitem__(4).rate = ", motors.__getitem__(4).rate)
+                    # print(" motors.__getitem__(5).rate = ", motors.__getitem__(5).rate)
                     print_time = print_time + 1
                 else:
                     print_time = print_time + 1

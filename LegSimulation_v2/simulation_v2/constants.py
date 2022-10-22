@@ -1,9 +1,12 @@
 """Constants used through the simulation."""
 from math import sqrt, pow
 
+from pymunk import Vec2d
+
 import LegPartBone
 
 GRAVITY: float = -981.0
+
 
 CORPS_WEIGHT: int = 10
 THIGH_WEIGHT: int = 5
@@ -41,6 +44,8 @@ FOOT_WIDTH: float = 200 * CONVERTER
 FLOOR_HEIGHT: float = 6
 
 LEG_HEIGHT: float = (0.5*CORPS_HEIGHT) + THIGH_HEIGHT + CALE_HEIGHT + FOOT_HEIGHT + FLOOR_HEIGHT
+
+CORPS_POSITION = Vec2d(1000, LEG_HEIGHT + 10)
 
 JOINT_RADIUS: float = 20 * CONVERTER
 
