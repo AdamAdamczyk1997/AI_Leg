@@ -70,8 +70,8 @@ class Model:
     def tick(self):
         self.corps.part_vector_position = self.corps.body.position
         self.right_leg.thigh.part_vector_position = self.right_leg.thigh.body.position
-        self.right_leg.cale.part_vector_position = self.right_leg.cale.body._get_position()
-        self.right_leg.foot.part_vector_position = self.right_leg.foot.body._get_position()
+        self.right_leg.cale.part_vector_position = self.right_leg.cale.body.position
+        self.right_leg.foot.part_vector_position = self.right_leg.foot.body.position
         # self.corps.part_vector_position.show_location()
         # self.thigh.part_vector_position.show_location()
         # self.cale.part_vector_position.show_location()
@@ -138,17 +138,12 @@ class Model:
                                                                    self.corps.part_vector_position.y -
                                                                    ((1 / 2) * CORPS_HEIGHT)))
 
-        mass = 1
-        size = (1, 1)
-        moment = pymunk.moment_for_box(mass, size)
-        pivot_joint_body = pymunk.Body(mass, moment)
-        pivot_joint_body.body_type = pymunk.Body.DYNAMIC
-        pivot_joint_body.position = (self.corps.body.position.x,
-                                            self.corps.body.position.y -
-                                            ((1 / 2) * CORPS_HEIGHT))
-        space.add(pivot_joint_body)
+        hip_pivot_joint_body = LegPartsHelper.add_joint_body((self.corps.body.position.x,
+                                                              self.corps.body.position.y -
+                                                              ((1 / 2) * CORPS_HEIGHT)))
+        space.add(hip_pivot_joint_body)
         # pivots = [right_hip_pivot_body]
-        self.pivots = [pivot_joint_body]
+        self.pivots = [hip_pivot_joint_body]
         pass
 
     def add_muscles_joints(self, space):

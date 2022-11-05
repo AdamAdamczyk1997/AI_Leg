@@ -91,28 +91,23 @@ class Leg:
                                                             0.5 * PATELLA_WIDTH)),
                                                     self.patella_cale_part.part_vector_position.y))
 
-        mass = 1
-        size = (1, 1)
-        moment = pymunk.moment_for_box(mass, size)
-        k_pivot_joint_body = pymunk.Body(mass, moment)
-        k_pivot_joint_body.body_type = pymunk.Body.DYNAMIC
-        k_pivot_joint_body.position = (self.thigh.part_vector_position.x,
-                                       self.thigh.part_vector_position.y -
-                                       ((1 / 2) * THIGH_HEIGHT))
-        space.add(k_pivot_joint_body)
-        mass = 1
-        size = (1, 1)
-        moment = pymunk.moment_for_box(mass, size)
-        a_pivot_joint_body = pymunk.Body(mass, moment)
-        a_pivot_joint_body.body_type = pymunk.Body.DYNAMIC
-        a_pivot_joint_body.position = (self.cale.part_vector_position.x,
-                                       self.cale.part_vector_position.y -
-                                       ((1 / 2) * CALE_HEIGHT))
-        space.add(a_pivot_joint_body)
-        # pivots = [right_hip_pivot_body]
-        pivots = [k_pivot_joint_body, a_pivot_joint_body]
-        # pivots = [knee_pivot_body, ankle_pivot_body,
-        #           patella_thigh_pivot_body, patella_cale_pivot_body]
+        knee_pivot_joint_body = LegPartsHelper.add_joint_body((self.thigh.body.position.x,
+                                                               self.thigh.body.position.y -
+                                                               ((1 / 2) * THIGH_HEIGHT)))
+        ankle_pivot_joint_body = LegPartsHelper.add_joint_body((self.cale.body.position.x,
+                                                                self.cale.body.position.y -
+                                                                ((1 / 2) * CALE_HEIGHT)))
+        foot_toe_pivot_joint_body = LegPartsHelper.add_joint_body((self.foot.body.position.x +
+                                                                   ((1 / 2) * FOOT_WIDTH),
+                                                                   self.foot.body.position.y + (0.5 * FOOT_HEIGHT)))
+        foot_heel_pivot_joint_body = LegPartsHelper.add_joint_body((self.foot.body.position.x -
+                                                                    ((1 / 2) * FOOT_WIDTH),
+                                                                    self.foot.body.position.y + (0.5 * FOOT_HEIGHT)))
+        space.add(knee_pivot_joint_body, ankle_pivot_joint_body, foot_toe_pivot_joint_body,
+                  foot_heel_pivot_joint_body)
+        pivots = [knee_pivot_joint_body, ankle_pivot_joint_body, foot_toe_pivot_joint_body,
+                  foot_heel_pivot_joint_body]
+
         return pivots
 
     def add_pin_joints_parts(self, space):
@@ -124,6 +119,10 @@ class Leg:
                                                              (0, (-(1 / 2) * THIGH_HEIGHT)), (0, 0))
         s_ankle_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.cale.body, self.pivots.__getitem__(1),
                                                               (0, (-(1 / 2) * CALE_HEIGHT)), (0, 0))
+        s_toe_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.foot.body, self.pivots.__getitem__(2),
+                                                            ((1 / 2) * FOOT_WIDTH, ((1 / 2) * FOOT_HEIGHT)), (0, 0))
+        s_heel_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.foot.body, self.pivots.__getitem__(3),
+                                                             (-(1 / 2) * FOOT_WIDTH, ((1 / 2) * FOOT_HEIGHT)), (0, 0))
 
         pin_joints = [knee_pin_joint, ankle_pin_joint]
         return pin_joints

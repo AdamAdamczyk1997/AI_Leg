@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List
+from typing import List, Union
 from random import random
 
 import pymunk
@@ -51,6 +51,16 @@ def add_body_pivot_joint(space, body1: Body, body2: Body, position_arg):
     pivot_joint = pymunk.PivotJoint(body1, body2, Vec2d(*position_arg))
     space.add(pivot_joint)
     return pivot_joint
+
+
+def add_joint_body(position: Union[Vec2d, tuple[float, float]]):
+    mass = 1
+    size = (1, 1)
+    moment = pymunk.moment_for_box(mass, size)
+    pivot_joint_body = pymunk.Body(mass, moment)
+    pivot_joint_body.body_type = pymunk.Body.DYNAMIC
+    pivot_joint_body.position = position
+    return pivot_joint_body
 
 
 class LegPartsHelper:

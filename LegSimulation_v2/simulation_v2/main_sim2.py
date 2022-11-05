@@ -8,7 +8,7 @@ from numpy import equal
 import constants
 import LegPartBone
 import Model
-from pymunk import Vec2d
+from pymunk import Vec2d, SimpleMotor
 
 import constants
 import model
@@ -30,29 +30,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 from LegSimulation_v2.simulation_v2.RelativeValues import RelativeValues
-
-
-def table(model_object: Model.Model) -> None:
-    table_content = [['Id', 'Parts Name', 'Moment', 'Position_x', 'Position_y', 'Velocity_x', 'Velocity_y', ''],
-                     [model_object.corps.id, model_object.corps.name, model_object.corps.moment,
-                      model_object.corps.body.position.x,
-                      model_object.corps.body.position.y,
-                      model_object.corps.body.velocity.x, model_object.corps.body.velocity.y],
-                     [model_object.thigh.id, model_object.thigh.name, model_object.thigh.moment,
-                      model_object.thigh.body.position.x,
-                      model_object.thigh.body.position.y,
-                      model_object.thigh.body.velocity.x, model_object.thigh.body.velocity.y],
-                     [model_object.cale.id, model_object.cale.name, model_object.cale.moment,
-                      model_object.cale.body.position.x,
-                      model_object.cale.body.position.y,
-                      model_object.cale.body.velocity.x, model_object.cale.body.velocity.y],
-                     [model_object.foot.id, model_object.foot.name, model_object.foot.moment,
-                      model_object.foot.body.position.x,
-                      model_object.foot.body.position.y,
-                      model_object.foot.body.velocity.x, model_object.foot.body.velocity.y]]
-
-    print(tabulate(table_content, headers='firstrow', tablefmt='fancy_grid'))
-    print('Amount of bodies =', model_object.num_bodies)
 
 
 def calculate_distance(p1, p2):
@@ -99,6 +76,20 @@ class Simulator(object):
         self.space.debug_draw(self.draw_options)  ### Draw space
         pygame.display.flip()  ### All done, lets flip the display
 
+    def movement_scenario_v1(self, motors: list[SimpleMotor]):
+        if self.model_entity.right_leg.pivots.__getitem__(2).position.y >= self.model_entity.right_leg.pivots.__getitem__(3).position.y + 2:
+            motors.__getitem__(2).rate = -constants.ROTATION_RATE
+        elif self.model_entity.right_leg.pivots.__getitem__(2).position.y < self.model_entity.right_leg.pivots.__getitem__(3).position.y - 2:
+            motors.__getitem__(2).rate = constants.ROTATION_RATE
+
+        if self.model_entity.left_leg.pivots.__getitem__(2).position.y > self.model_entity.left_leg.pivots.__getitem__(3).position.y + 2:
+            motors.__getitem__(5).rate = -constants.ROTATION_RATE
+        elif self.model_entity.left_leg.pivots.__getitem__(2).position.y < self.model_entity.left_leg.pivots.__getitem__(3).position.y - 2:
+            motors.__getitem__(5).rate = constants.ROTATION_RATE
+
+        pass
+
+
     def filter(self):
         # ---prevent collisions with ShapeFilter
         shape_filter = pymunk.ShapeFilter(group=1)
@@ -116,7 +107,7 @@ class Simulator(object):
         self.model_entity.left_leg.patella_cale_part.shape.filter = shape_filter
         self.model_entity.left_leg.foot.shape.filter = shape_filter
 
-    def motor_right_leg(self, relative_angu_vel_right_leg, relative_angu_vel_left_leg):
+    def motor_leg(self, relative_angu_vel_right_leg, relative_angu_vel_left_leg):
         left_thigh_motor = pymunk.SimpleMotor(self.model_entity.left_leg.thigh.body, self.model_entity.corps.body,
                                               relative_angu_vel_left_leg)
         left_cale_motor = pymunk.SimpleMotor(self.model_entity.left_leg.cale.body,
@@ -168,8 +159,7 @@ class Simulator(object):
         relative_angu_vel_right_leg = 0
         relative_angu_vel_left_leg = 0
 
-        motors = self.motor_right_leg(relative_angu_vel_right_leg, relative_angu_vel_left_leg)
-        rotation_rate = 1
+        motors = self.motor_leg(relative_angu_vel_right_leg, relative_angu_vel_left_leg)
 
         while running:
             line = None
@@ -228,12 +218,18 @@ class Simulator(object):
                         pressed_k_left = not pressed_k_left
 
                     elif event.key == pygame.K_e:
-                        motors.__getitem__(1).rate = rotation_rate
+                        motors.__getitem__(0).rate = constants.ROTATION_RATE
+                        motors.__getitem__(4).rate = constants.ROTATION_RATE
+
                     elif event.key == pygame.K_d:
-                        motors.__getitem__(1).rate = -rotation_rate
+                        motors.__getitem__(0).rate = -constants.ROTATION_RATE
+                        motors.__getitem__(4).rate = -constants.ROTATION_RATE
+
                 if event.type == pygame.KEYUP:
-                    motors.__getitem__(1).rate = 0
-                    motors.__getitem__(1).rate = 0
+                    motors.__getitem__(0).rate = 0
+                    motors.__getitem__(0).rate = 0
+                    motors.__getitem__(4).rate = 0
+                    motors.__getitem__(4).rate = 0
 
             if pressed_k_left:
                 x = self.model_entity.corps.body.position.x + (0.5 * constants.CORPS_WIDTH)
@@ -268,18 +264,31 @@ class Simulator(object):
                     #     # print(" self.space._get_iterations() = ", self.space._get_iterations(), " dt = ", dt)
 
                     self.model_entity.right_leg.relative_values.calculate_angles(
-                        self.model_entity.pivots.__getitem__(0).position.x,
-                        self.model_entity.right_leg.pivots.__getitem__(0).position.x,
-                        self.model_entity.right_leg.pivots.__getitem__(1).position.x)
-                    self.model_entity.right_leg.relative_values.show()
+                        self.model_entity.pivots.__getitem__(0).position,
+                        self.model_entity.right_leg.pivots.__getitem__(0).position,
+                        self.model_entity.right_leg.pivots.__getitem__(1).position,
+                        self.model_entity.right_leg.pivots.__getitem__(2).position,
+                        self.model_entity.right_leg.pivots.__getitem__(3).position)
+
+                    self.model_entity.right_leg.relative_values.show(1)
                     print_time = print_time + 1
                 elif print_time % 10 == 0:
+                    self.movement_scenario_v1(motors)
 
                     self.model_entity.right_leg.relative_values.calculate_angles(
-                        self.model_entity.pivots.__getitem__(0).position.x,
-                        self.model_entity.right_leg.pivots.__getitem__(0).position.x,
-                        self.model_entity.right_leg.pivots.__getitem__(1).position.x)
-                    self.model_entity.right_leg.relative_values.show()
+                        self.model_entity.pivots.__getitem__(0).position,
+                        self.model_entity.right_leg.pivots.__getitem__(0).position,
+                        self.model_entity.right_leg.pivots.__getitem__(1).position,
+                        self.model_entity.right_leg.pivots.__getitem__(2).position,
+                        self.model_entity.right_leg.pivots.__getitem__(3).position)
+                    self.model_entity.right_leg.relative_values.show(1)
+                    self.model_entity.left_leg.relative_values.calculate_angles(
+                        self.model_entity.pivots.__getitem__(0).position,
+                        self.model_entity.left_leg.pivots.__getitem__(0).position,
+                        self.model_entity.left_leg.pivots.__getitem__(1).position,
+                        self.model_entity.left_leg.pivots.__getitem__(2).position,
+                        self.model_entity.left_leg.pivots.__getitem__(3).position)
+                    self.model_entity.left_leg.relative_values.show(2)
                     # self.model_entity.right_leg.relative_values.show()
                     #     # table(self.model_entity)
                     #     print("floor position x = ", self.model_entity.floor.position.x)
