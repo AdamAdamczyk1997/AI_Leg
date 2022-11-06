@@ -21,6 +21,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from LegSimulation_v2.simulation_v2 import LegPartsHelper
+from LegSimulation_v2.simulation_v2.LegMotorController import Controller
 from LegSimulation_v2.simulation_v2.Location import Location
 from tabulate import tabulate
 from pygame.color import THECOLORS
@@ -60,6 +61,8 @@ class Simulator(object):
         self.screen = None
         self.draw_options = None
         self.filter()
+        self.motors = self.motor_leg(0, 0)
+        self.controller = Controller(self.model_entity)
 
     def reset_bodies(self, dt: float):
         for body in self.space.bodies:
@@ -75,20 +78,6 @@ class Simulator(object):
             pygame.draw.line(self.screen, "black", line[0], line[1], 3)
         self.space.debug_draw(self.draw_options)  ### Draw space
         pygame.display.flip()  ### All done, lets flip the display
-
-    def movement_scenario_v1(self, motors: list[SimpleMotor]):
-        if self.model_entity.right_leg.pivots.__getitem__(2).position.y >= self.model_entity.right_leg.pivots.__getitem__(3).position.y + 2:
-            motors.__getitem__(2).rate = -constants.ROTATION_RATE
-        elif self.model_entity.right_leg.pivots.__getitem__(2).position.y < self.model_entity.right_leg.pivots.__getitem__(3).position.y - 2:
-            motors.__getitem__(2).rate = constants.ROTATION_RATE
-
-        if self.model_entity.left_leg.pivots.__getitem__(2).position.y > self.model_entity.left_leg.pivots.__getitem__(3).position.y + 2:
-            motors.__getitem__(5).rate = -constants.ROTATION_RATE
-        elif self.model_entity.left_leg.pivots.__getitem__(2).position.y < self.model_entity.left_leg.pivots.__getitem__(3).position.y - 2:
-            motors.__getitem__(5).rate = constants.ROTATION_RATE
-
-        pass
-
 
     def filter(self):
         # ---prevent collisions with ShapeFilter
@@ -108,19 +97,19 @@ class Simulator(object):
         self.model_entity.left_leg.foot.shape.filter = shape_filter
 
     def motor_leg(self, relative_angu_vel_right_leg, relative_angu_vel_left_leg):
-        left_thigh_motor = pymunk.SimpleMotor(self.model_entity.left_leg.thigh.body, self.model_entity.corps.body,
-                                              relative_angu_vel_left_leg)
-        left_cale_motor = pymunk.SimpleMotor(self.model_entity.left_leg.cale.body,
-                                             self.model_entity.left_leg.thigh.body, relative_angu_vel_left_leg)
-        left_foot_motor = pymunk.SimpleMotor(self.model_entity.left_leg.foot.body,
-                                             self.model_entity.left_leg.cale.body, relative_angu_vel_left_leg)
-
         right_thigh_motor = pymunk.SimpleMotor(self.model_entity.right_leg.thigh.body, self.model_entity.corps.body,
                                                relative_angu_vel_right_leg)
         right_cale_motor = pymunk.SimpleMotor(self.model_entity.right_leg.cale.body,
                                               self.model_entity.right_leg.thigh.body, relative_angu_vel_right_leg)
         right_foot_motor = pymunk.SimpleMotor(self.model_entity.right_leg.foot.body,
                                               self.model_entity.right_leg.cale.body, relative_angu_vel_right_leg)
+
+        left_thigh_motor = pymunk.SimpleMotor(self.model_entity.left_leg.thigh.body, self.model_entity.corps.body,
+                                              relative_angu_vel_left_leg)
+        left_cale_motor = pymunk.SimpleMotor(self.model_entity.left_leg.cale.body,
+                                             self.model_entity.left_leg.thigh.body, relative_angu_vel_left_leg)
+        left_foot_motor = pymunk.SimpleMotor(self.model_entity.left_leg.foot.body,
+                                             self.model_entity.left_leg.cale.body, relative_angu_vel_left_leg)
 
         # self.space.add(right_thigh_motor, right_cale_motor, right_foot_motor)
         self.space.add(right_thigh_motor, right_cale_motor,
@@ -158,8 +147,7 @@ class Simulator(object):
 
         relative_angu_vel_right_leg = 0
         relative_angu_vel_left_leg = 0
-
-        motors = self.motor_leg(relative_angu_vel_right_leg, relative_angu_vel_left_leg)
+        counter = 0
 
         while running:
             line = None
@@ -167,6 +155,7 @@ class Simulator(object):
             fps = 60
             clock.tick(fps)
             dt = 1.0 / float(fps)
+            counter += 1
 
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
@@ -214,22 +203,22 @@ class Simulator(object):
                     # elif event.key == K_C:
                     #     motor_ac1Left.rate = rotationRate
 
-                    if pygame.key.get_pressed()[pygame.K_LEFT]:
-                        pressed_k_left = not pressed_k_left
-
-                    elif event.key == pygame.K_e:
-                        motors.__getitem__(0).rate = constants.ROTATION_RATE
-                        motors.__getitem__(4).rate = constants.ROTATION_RATE
-
-                    elif event.key == pygame.K_d:
-                        motors.__getitem__(0).rate = -constants.ROTATION_RATE
-                        motors.__getitem__(4).rate = -constants.ROTATION_RATE
-
-                if event.type == pygame.KEYUP:
-                    motors.__getitem__(0).rate = 0
-                    motors.__getitem__(0).rate = 0
-                    motors.__getitem__(4).rate = 0
-                    motors.__getitem__(4).rate = 0
+                #     if pygame.key.get_pressed()[pygame.K_LEFT]:
+                #         pressed_k_left = not pressed_k_left
+                #
+                #     elif event.key == pygame.K_e:
+                #         motors.__getitem__(0).rate = constants.ROTATION_RATE
+                #         motors.__getitem__(4).rate = constants.ROTATION_RATE
+                #
+                #     elif event.key == pygame.K_d:
+                #         motors.__getitem__(0).rate = -constants.ROTATION_RATE
+                #         motors.__getitem__(4).rate = -constants.ROTATION_RATE
+                #
+                # if event.type == pygame.KEYUP:
+                #     motors.__getitem__(0).rate = 0
+                #     motors.__getitem__(0).rate = 0
+                #     motors.__getitem__(4).rate = 0
+                #     motors.__getitem__(4).rate = 0
 
             if pressed_k_left:
                 x = self.model_entity.corps.body.position.x + (0.5 * constants.CORPS_WIDTH)
@@ -250,6 +239,7 @@ class Simulator(object):
             self.draw(line)
 
             pygame.display.set_caption(f"fps: {clock.get_fps()}")
+            self.controller.movement_scenario_controller(self.model_entity, self.motors, simulate, counter)
             # Update physics
             if simulate:
                 # for x in range(10 * iterations):  # 10 iterations to get a more stable simulation
@@ -273,7 +263,6 @@ class Simulator(object):
                     self.model_entity.right_leg.relative_values.show(1)
                     print_time = print_time + 1
                 elif print_time % 10 == 0:
-                    self.movement_scenario_v1(motors)
 
                     self.model_entity.right_leg.relative_values.calculate_angles(
                         self.model_entity.pivots.__getitem__(0).position,

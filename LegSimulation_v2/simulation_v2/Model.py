@@ -56,8 +56,8 @@ class Model:
         self.floor = running_gear(space)
         self.corps = LegPartBone(space, self.iterator(), "corps", CORPS_WEIGHT, (CORPS_WIDTH, CORPS_HEIGHT),
                                  CORPS_POSITION)
-        self.right_leg = Leg(space)
-        self.left_leg = Leg(space)
+        self.right_leg = Leg(space, 0)
+        self.left_leg = Leg(space, 1)
 
         self.add_pivot_joints(space)
 

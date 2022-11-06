@@ -26,6 +26,7 @@ random.seed(1)  # make the simulation the same each time, easier to debug
 
 
 class Leg:
+    name: str
     num_bodies: int = 0
     thigh: LegPartBone
     cale: LegPartBone
@@ -39,8 +40,9 @@ class Leg:
 
     relative_values: RelativeValues
 
-    def __init__(self, space: pymunk.Space()):
+    def __init__(self, space: pymunk.Space(), leg_id):
         self.relative_values = RelativeValues()
+        self.name = "right" if leg_id == 0 else "left"
         self.thigh = LegPartBone(space, self.iterator(), "thigh", THIGH_WEIGHT, (THIGH_WIDTH, THIGH_HEIGHT),
                                  (CORPS_POSITION - (
                                      0, (((1 / 2) * CORPS_HEIGHT) + ((1 / 2) * THIGH_HEIGHT)))))

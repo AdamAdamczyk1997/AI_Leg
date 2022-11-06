@@ -25,20 +25,27 @@ class RelativeValues:
     y_heel: float
     angle_foot: float
 
+    usage_counter: int
+    histories: list
+
     def __init__(self):
         self.x_hip = 0.0
         self.y_hip = 0.0
+        self.angle_thigh = 0.0
         self.x_knee = 0.0
         self.y_knee = 0.0
-        self.angle_thigh = 0.0
+        self.angle_cale = 0.0
         self.x_ankle = 0.0
         self.y_ankle = 0.0
-        self.angle_cale = 0.0
         self.x_toe = 0.0
         self.y_toe = 0.0
         self.x_heel = 0.0
         self.y_heel = 0.0
         self.angle_foot = 0.0
+        self.usage_counter = 1
+        self.histories = [[self.usage_counter, self.x_hip, self.y_hip, self.angle_thigh,
+                           self.x_knee, self.y_knee, self.angle_cale,
+                           self.x_toe, self.y_toe, self.x_heel, self.y_heel, self.angle_foot]]
 
     def calculate_angles(self, real_hips_position: Vec2d, real_knee_position: Vec2d, real_ankle_position: Vec2d,
                          real_toe_position: Vec2d, real_heel_position: Vec2d):
@@ -65,6 +72,12 @@ class RelativeValues:
         self.x_heel = real_heel_position.x - real_hips_position.x
         self.y_heel = real_heel_position.y - real_hips_position.y
 
+        self.histories.append(
+            [self.usage_counter, int(self.x_hip), int(self.y_hip), round(self.angle_thigh, 2),
+             int(self.x_knee), int(self.y_knee), round(self.angle_cale, 2),
+             int(self.x_toe), int(self.y_toe), int(self.x_heel), int(self.y_heel), self.angle_foot])
+        self.usage_counter += 1
+
         pass
 
     def show(self, leg_number: int):
@@ -74,3 +87,6 @@ class RelativeValues:
               "), ankle=(", int(self.x_ankle), ",", int(self.y_ankle), ", angle_foot",
               "), toe=(", int(self.x_toe), ",", int(self.y_toe), "), heel=(", int(self.x_heel), ",", int(self.y_heel),
               ")")
+
+        print(self.histories[-1])
+        print("---------------------------------------------------------------------------------")

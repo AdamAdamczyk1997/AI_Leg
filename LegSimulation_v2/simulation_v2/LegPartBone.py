@@ -21,8 +21,8 @@ class LegPartBone:
     shape: Poly
     shape_friction: shape.friction = 1
     shape_color: shape.color = "black"
-    part_vector_position: Location
     body: Body
+
 
     # helper: LegPartsHelper
 
@@ -51,8 +51,6 @@ class LegPartBone:
 
         pass
 
-    def update(self, position):
-        self.part_vector_position = position
 
     def add_bone_part(self: LegPartBone, place, height, width):
         static = pymunk.Segment(self.body, (width, place), (-width, place), height)
