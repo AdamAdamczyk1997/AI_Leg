@@ -11,7 +11,6 @@ import pymunk.pygame_util
 from pygame import Color
 from pymunk import Vec2d, SlideJoint, DampedSpring
 import LegPartBone
-import self as self
 from LegSimulation_v2.simulation_v2 import constants, LegPartsHelper
 from math import sin, cos, pi, sqrt
 
@@ -88,8 +87,7 @@ class Leg:
                                                  self.patella_thigh_part.part_vector_position.y))
         patella_cale_pivot_body = \
             LegPartsHelper.add_body_pivot_joint(space, self.patella_cale_part.body, self.cale.body,
-                                                (
-                                                    (self.patella_cale_part.part_vector_position.x - (
+                                                ((self.patella_cale_part.part_vector_position.x - (
                                                             0.5 * PATELLA_WIDTH)),
                                                     self.patella_cale_part.part_vector_position.y))
 
@@ -101,10 +99,10 @@ class Leg:
                                                                 ((1 / 2) * CALE_HEIGHT)))
         foot_toe_pivot_joint_body = LegPartsHelper.add_joint_body((self.foot.body.position.x +
                                                                    ((1 / 2) * FOOT_WIDTH),
-                                                                   self.foot.body.position.y + (0.5 * FOOT_HEIGHT)))
+                                                                   self.foot.body.position.y - (0.5 * FOOT_HEIGHT)))
         foot_heel_pivot_joint_body = LegPartsHelper.add_joint_body((self.foot.body.position.x -
                                                                     ((1 / 2) * FOOT_WIDTH),
-                                                                    self.foot.body.position.y + (0.5 * FOOT_HEIGHT)))
+                                                                    self.foot.body.position.y - (0.5 * FOOT_HEIGHT)))
         space.add(knee_pivot_joint_body, ankle_pivot_joint_body, foot_toe_pivot_joint_body,
                   foot_heel_pivot_joint_body)
         pivots = [knee_pivot_joint_body, ankle_pivot_joint_body, foot_toe_pivot_joint_body,
@@ -122,9 +120,9 @@ class Leg:
         s_ankle_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.cale.body, self.pivots.__getitem__(1),
                                                               (0, (-(1 / 2) * CALE_HEIGHT)), (0, 0))
         s_toe_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.foot.body, self.pivots.__getitem__(2),
-                                                            ((1 / 2) * FOOT_WIDTH, ((1 / 2) * FOOT_HEIGHT)), (0, 0))
+                                                            ((1 / 2) * FOOT_WIDTH, (-(1 / 2) * FOOT_HEIGHT)), (0, 0))
         s_heel_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.foot.body, self.pivots.__getitem__(3),
-                                                             (-(1 / 2) * FOOT_WIDTH, ((1 / 2) * FOOT_HEIGHT)), (0, 0))
+                                                             (-(1 / 2) * FOOT_WIDTH, (-(1 / 2) * FOOT_HEIGHT)), (0, 0))
 
         pin_joints = [knee_pin_joint, ankle_pin_joint]
         return pin_joints

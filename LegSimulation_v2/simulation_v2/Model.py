@@ -11,7 +11,6 @@ import pymunk.pygame_util
 from pygame import Color
 from pymunk import Vec2d, SlideJoint, DampedSpring
 import LegPartBone
-import self as self
 from LegSimulation_v2.simulation_v2 import constants, LegPartsHelper
 from math import sin, cos, pi, sqrt
 
@@ -29,8 +28,8 @@ def running_gear(space):
     floor = pymunk.Body()
     floor.body_type = pymunk.Body.KINEMATIC
     floor.shape = pymunk.Segment(floor, (0, 0), (100000, 0), FLOOR_HEIGHT)
-    floor.shape.friction = 0.5
-    # floor.shape.collision_type = 1
+    floor.shape.friction = 1.0
+    floor.shape.collision_type = 1
     space.add(floor, floor.shape)
 
     return floor

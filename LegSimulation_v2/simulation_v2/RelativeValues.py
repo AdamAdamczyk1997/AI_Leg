@@ -3,7 +3,7 @@ from math import sin, cos
 from numpy import double
 from pymunk import Vec2d
 
-from LegSimulation_v2.simulation_v2.constants import THIGH_HEIGHT, CALE_HEIGHT
+from LegSimulation_v2.simulation_v2.constants import THIGH_HEIGHT, CALE_HEIGHT, CORPS_POSITION, CORPS_HEIGHT
 
 
 class RelativeValues:
@@ -50,8 +50,8 @@ class RelativeValues:
     def calculate_angles(self, real_hips_position: Vec2d, real_knee_position: Vec2d, real_ankle_position: Vec2d,
                          real_toe_position: Vec2d, real_heel_position: Vec2d):
         # calculate angles for right leg
-        self.x_hip = 0
-        self.y_hip = real_hips_position.y - 375
+        self.x_hip = real_hips_position.x - CORPS_POSITION.x
+        self.y_hip = real_hips_position.y - (CORPS_POSITION.y - ((1/2) * CORPS_HEIGHT))
 
         # knee position relative to the hip
         self.x_knee = real_knee_position.x - real_hips_position.x
@@ -63,8 +63,8 @@ class RelativeValues:
         # ankle position relative to the hip
         self.x_ankle = real_ankle_position.x - real_hips_position.x
         # angle between corps and cale
-        sin_ankle_cale = (self.x_ankle - self.x_knee) / CALE_HEIGHT
-        self.angle_cale = sin(sin_ankle_cale)
+        sin_angle_cale = (self.x_ankle - self.x_knee) / CALE_HEIGHT
+        self.angle_cale = sin(sin_angle_cale)
         self.y_ankle = real_ankle_position.y - real_hips_position.y
 
         self.x_toe = real_toe_position.x - real_hips_position.x
@@ -81,12 +81,15 @@ class RelativeValues:
         pass
 
     def show(self, leg_number: int):
-        print(leg_number, ": hip=(", int(self.x_hip), ",", int(self.y_hip), ",",
+        leg = ""
+        if leg_number == 1:
+            leg = "right_leg"
+        elif leg_number == 2:
+            leg = "left_leg"
+        print("leg:", leg, ", usage_counter:", self.usage_counter, ": hip=(", int(self.x_hip), ",", int(self.y_hip), ",",
               "{:.2f}".format(round(self.angle_thigh, 2)),
               "), knee=(", int(self.x_knee), ",", int(self.y_knee), ",", "{:.2f}".format(round(self.angle_cale, 2)),
               "), ankle=(", int(self.x_ankle), ",", int(self.y_ankle), ", angle_foot",
               "), toe=(", int(self.x_toe), ",", int(self.y_toe), "), heel=(", int(self.x_heel), ",", int(self.y_heel),
               ")")
 
-        print(self.histories[-1])
-        print("---------------------------------------------------------------------------------")
