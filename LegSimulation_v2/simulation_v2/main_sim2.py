@@ -1,43 +1,16 @@
-import math
-import sys
-
-import pygame
-import pymunk
-from numpy import equal
-
-import constants
-import LegPartBone
 import Model
-from pymunk import Vec2d, SimpleMotor
 
-import constants
-import model
-import random
 import sys
+
 import pygame
 import pymunk
-import pymunk.pygame_util
-import numpy as np
-import matplotlib.pyplot as plt
-
-from LegSimulation_v2.simulation_v2 import LegPartsHelper
-from LegSimulation_v2.simulation_v2.LegMotorController import Controller
-from LegSimulation_v2.simulation_v2.Location import Location
-from pygame.color import THECOLORS
-import numpy as np
 import pymunk.matplotlib_util
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+import pymunk.pygame_util
+from pygame.color import THECOLORS
 
-from LegSimulation_v2.simulation_v2.RelativeValues import RelativeValues
-
-
-def calculate_distance(p1, p2):
-    return math.sqrt((p2[1] - p1[1]) ** 2 + (p2[0] - p1[0]) ** 2)
-
-
-def calculate_angle(p1, p2):
-    return math.atan2(p2[1] - p1[1], p2[0] - p1[0])
+import Model
+import constants
+from LegSimulation_v2.simulation_v2.LegMotorController import Controller
 
 
 def limit_velocity(bodies: list[pymunk.Body], gravity, damping, dt):
@@ -49,19 +22,22 @@ def limit_velocity(bodies: list[pymunk.Body], gravity, damping, dt):
 
 
 class Simulator(object):
+    mode: str
 
     def __init__(self):
+        self.mode = "Non-AI mode"
+        # self.mode = "AI mode"
         self.display_flags = 0
         self.display_size = (constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT)
         self.space = pymunk.Space()
         self.space.gravity = (0, constants.GRAVITY)
         pymunk.pygame_util.positive_y_is_up = True
-        self.model_entity = Model.Model(self.space)
+        self.model_entity = Model.Model(self.space, self.mode)
         self.screen = None
         self.draw_options = None
         self.filter()
         self.motors = self.motor_leg(0, 0)
-        self.controller = Controller(self.model_entity)
+        self.controller = Controller(self.model_entity, self.mode)
 
     def reset_bodies(self, dt: float):
         for body in self.space.bodies:
@@ -83,19 +59,19 @@ class Simulator(object):
         shape_filter = pymunk.ShapeFilter(group=1)
         self.model_entity.corps.shape.filter = shape_filter
         self.model_entity.right_leg.thigh.shape.filter = shape_filter
-        self.model_entity.right_leg.patella_thigh_part.shape.filter = shape_filter
         self.model_entity.right_leg.cale.shape.filter = shape_filter
-        self.model_entity.right_leg.patella_cale_part.shape.filter = shape_filter
         self.model_entity.right_leg.foot.shape.filter = shape_filter
         self.model_entity.right_leg.foot.shape.collision_type = 1
 
         self.model_entity.corps.shape.filter = shape_filter
         self.model_entity.left_leg.thigh.shape.filter = shape_filter
-        self.model_entity.left_leg.patella_thigh_part.shape.filter = shape_filter
         self.model_entity.left_leg.cale.shape.filter = shape_filter
-        self.model_entity.left_leg.patella_cale_part.shape.filter = shape_filter
         self.model_entity.left_leg.foot.shape.filter = shape_filter
         self.model_entity.left_leg.foot.shape.collision_type = 1
+
+        if self.mode == "AI mode":
+            self.model_entity.right_leg.patella_thigh_part.shape.filter = shape_filter
+            self.model_entity.right_leg.patella_cale_part.shape.filter = shape_filter
 
     def motor_leg(self, relative_angu_vel_right_leg, relative_angu_vel_left_leg):
         right_thigh_motor = pymunk.SimpleMotor(self.model_entity.right_leg.thigh.body, self.model_entity.corps.body,
@@ -112,14 +88,15 @@ class Simulator(object):
         left_foot_motor = pymunk.SimpleMotor(self.model_entity.left_leg.foot.body,
                                              self.model_entity.left_leg.cale.body, relative_angu_vel_left_leg)
 
+        corps_motor = pymunk.SimpleMotor(self.model_entity.corps.body, self.model_entity.floor, 0)
         # self.space.add(right_thigh_motor, right_cale_motor, right_foot_motor)
         self.space.add(right_thigh_motor, right_cale_motor,
-                       right_foot_motor, left_thigh_motor, left_cale_motor, left_foot_motor)
+                       right_foot_motor, left_thigh_motor, left_cale_motor, left_foot_motor, corps_motor)
 
         self.filter()
         # motors = [left_thigh_motor, left_cale_motor, left_foot_motor]
         motors = [right_thigh_motor, right_cale_motor,
-                  right_foot_motor, left_thigh_motor, left_cale_motor, left_foot_motor]
+                  right_foot_motor, left_thigh_motor, left_cale_motor, left_foot_motor, corps_motor]
 
         return motors
 
@@ -133,8 +110,6 @@ class Simulator(object):
 
         clock = pygame.time.Clock()
         running = True
-
-        print(self.space.bodies)
 
         simulate = False
         print_time = 0
@@ -217,20 +192,15 @@ class Simulator(object):
             if pressed_k_a:
                 self.model_entity.move_running_gear()
 
-            # ticks_to_next_ball = Model.ball_controller(self.space, balls, ticks_to_next_ball)
             self.draw(line)
-
             pygame.display.set_caption(f"fps: {clock.get_fps()}")
             self.controller.movement_scenario_controller(self.model_entity, self.motors, simulate, counter)
-            # Update physics
             if simulate:
-                # for x in range(10 * iterations):  # 10 iterations to get a more stable simulation
                 self.space.step(dt)
                 damping = 0.99
 
                 limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, damping, dt)
                 limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, damping, dt)
-                self.model_entity.tick()
 
 
 if __name__ == "__main__":

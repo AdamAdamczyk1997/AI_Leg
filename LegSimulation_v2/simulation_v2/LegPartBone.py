@@ -5,8 +5,6 @@ from random import random
 import pymunk
 from pymunk import Poly, Vec2d, Body
 
-from LegSimulation_v2.simulation_v2 import LegPartsHelper
-from LegSimulation_v2.simulation_v2.Location import Location
 
 
 class LegPartBone:
@@ -23,7 +21,6 @@ class LegPartBone:
     shape_color: shape.color = "black"
     body: Body
 
-
     # helper: LegPartsHelper
 
     def __init__(self, space: pymunk.Space(), body_id, name, mass, size, vector: Vec2d):
@@ -38,19 +35,11 @@ class LegPartBone:
         self.shape = pymunk.Poly.create_box(self.body, size)
         self.body_rotation_limit = None
         self.body_rotation_center = None
-        self.part_vector_position = Location(vector)
         self.shape.collision_type = 0
         self.shape.friction = 0.61
         self.shape.collision_type = 0
 
         space.add(self.body, self.shape)
-
-    def get_location(self):
-        self.part_vector_position.change_location(self.body.position)
-        self.part_vector_position.body_position = self.body.position._get_position()
-
-        pass
-
 
     def add_bone_part(self: LegPartBone, place, height, width):
         static = pymunk.Segment(self.body, (width, place), (-width, place), height)

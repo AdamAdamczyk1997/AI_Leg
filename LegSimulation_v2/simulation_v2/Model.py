@@ -51,32 +51,18 @@ class Model:
     left_cale: pymunk.Body
     left_foot: pymunk.Body
 
-    def __init__(self, space: pymunk.Space()):
+    def __init__(self, space: pymunk.Space(), mode: str):
         self.floor = running_gear(space)
         self.corps = LegPartBone(space, self.iterator(), "corps", CORPS_WEIGHT, (CORPS_WIDTH, CORPS_HEIGHT),
                                  CORPS_POSITION)
-        self.right_leg = Leg(space, 0)
-        self.left_leg = Leg(space, 1)
+        self.right_leg = Leg(space, mode, 0)
+        self.left_leg = Leg(space, mode, 1)
 
         self.add_pivot_joints(space)
-
         self.add_pin_joints_parts(space)
-
-        # self.muscles = self.add_muscles_joints(space)
-
         self.bodies = [self.corps.body, self.right_leg.bodies]
-
-    def tick(self):
-        self.corps.part_vector_position = self.corps.body.position
-        self.right_leg.thigh.part_vector_position = self.right_leg.thigh.body.position
-        self.right_leg.cale.part_vector_position = self.right_leg.cale.body.position
-        self.right_leg.foot.part_vector_position = self.right_leg.foot.body.position
-        # self.corps.part_vector_position.show_location()
-        # self.thigh.part_vector_position.show_location()
-        # self.cale.part_vector_position.show_location()
-        # self.foot.part_vector_position.show_location()
-
-        pass
+        if mode == "AI mode":
+            self.muscles = self.add_muscles_joints(space)
 
     def iterator(self):
         self.num_bodies = self.num_bodies + 1
@@ -104,8 +90,7 @@ class Model:
         pass
 
     def move_running_gear(self):
-        self.floor.velocity = (-30, 0)
-        self.corps.body.body_type = pymunk.Body.KINEMATIC
+        self.floor.velocity = (-20, 0)
 
     def movement_scenario(self, up: bool) -> bool:
         temp_up = up
@@ -133,8 +118,8 @@ class Model:
                                                                     self.corps.body.position.y -
                                                                     ((1 / 2) * CORPS_HEIGHT)))
         left_hip_pivot_body = LegPartsHelper.add_body_pivot_joint(space, self.corps.body, self.left_leg.thigh.body,
-                                                                  (self.corps.part_vector_position.x,
-                                                                   self.corps.part_vector_position.y -
+                                                                  (self.corps.body.position.x,
+                                                                   self.corps.body.position.y -
                                                                    ((1 / 2) * CORPS_HEIGHT)))
 
         hip_pivot_joint_body = LegPartsHelper.add_joint_body((self.corps.body.position.x,
@@ -180,15 +165,15 @@ class Model:
             LegPartsHelper.add_body_limit_slide_joint(space, self.right_leg.patella_thigh_part.body,
                                                       self.right_leg.patella_cale_part.body,
                                                       (0.5 * PATELLA_WIDTH, 0), (0.5 * PATELLA_WIDTH, 0),
-                                                      (self.right_leg.patella_thigh_part.part_vector_position.first_y -
-                                                       self.right_leg.patella_cale_part.part_vector_position.first_y),
+                                                      (self.right_leg.patella_thigh_part.body.position.y -
+                                                       self.right_leg.patella_cale_part.body.position.y),
                                                       70)
         patellas_muscle_joint_2 = \
             LegPartsHelper.add_body_limit_slide_joint(space, self.right_leg.patella_thigh_part.body,
                                                       self.right_leg.patella_cale_part.body,
                                                       (-0.5 * PATELLA_WIDTH, 0), (-0.5 * PATELLA_WIDTH, 0),
-                                                      (self.right_leg.patella_thigh_part.part_vector_position.first_y -
-                                                       self.right_leg.patella_cale_part.part_vector_position.first_y),
+                                                      (self.right_leg.patella_thigh_part.body.position.y -
+                                                       self.right_leg.patella_cale_part.body.position.y),
                                                       70)
 
         thigh_corps_muscle_front_joint = \
@@ -213,8 +198,9 @@ class Model:
 
     def add_pin_joints_parts(self, space):
         corps_rotation_center = LegPartsHelper.add_body_rotation_center(space, self.corps.body.position)
-        corps_temp_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.corps.body, corps_rotation_center, (0, 0),
-                                                                 (0, 0))
+        # corps_temp_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.corps.body, corps_rotation_center, (0, 0),
+        #                                                          (0, 0))
+
         right_hip_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.right_leg.thigh.body,
                                                                 (0, (-(1 / 2) * CORPS_HEIGHT)),
                                                                 (0, (1 / 2) * THIGH_HEIGHT))
@@ -224,14 +210,7 @@ class Model:
         r_hip_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.pivots.__getitem__(0),
                                                             (0, (-(1 / 2) * CORPS_HEIGHT)),
                                                             (0, 0))
-        # l_hip_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.pivots.__getitem__(1),
-        #                                                     (0, (-(1 / 2) * CORPS_HEIGHT)),
-        #                                                     (0, 0))
 
-        # pin_joints = [corps_rotation_center, right_hip_pin_joint]
         pin_joints = [corps_rotation_center, right_hip_pin_joint]
 
         return pin_joints
-
-    # def update_pivots(self):
-    #     self.pivots.__getitem__(0).position =
