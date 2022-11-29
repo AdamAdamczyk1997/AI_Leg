@@ -6,7 +6,6 @@ import pymunk
 from pymunk import Poly, Vec2d, Body
 
 
-
 class LegPartBone:
     time: int = 0
 
@@ -17,7 +16,7 @@ class LegPartBone:
     size: tuple[int, int]
     moment: float
     shape: Poly
-    shape_friction: shape.friction = 1
+    shape_friction: float
     shape_color: shape.color = "black"
     body: Body
 

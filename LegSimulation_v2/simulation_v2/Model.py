@@ -90,7 +90,7 @@ class Model:
         pass
 
     def move_running_gear(self):
-        self.floor.velocity = (-20, 0)
+        self.floor.velocity = (-40, 0)
 
     def movement_scenario(self, up: bool) -> bool:
         temp_up = up
@@ -134,11 +134,11 @@ class Model:
         # Muscles are added only to right leg
         cale_muscle_front_joint = \
             LegPartsHelper.add_body_dumped_spring(space, self.right_leg.cale.body, self.right_leg.foot.body,
-                                                  (20, ((1 / 2) * CALE_HEIGHT)), (20, (0.5 * FOOT_HEIGHT)),
+                                                  (20, ((1 / 2) * CALE_HEIGHT)), (0, (0.5 * FOOT_HEIGHT)),
                                                   0.5 * CALE_HEIGHT, 20000, 200)
         cale_muscle_back_joint = \
             LegPartsHelper.add_body_dumped_spring(space, self.right_leg.cale.body, self.right_leg.foot.body,
-                                                  (-20, ((1 / 2) * CALE_HEIGHT)), (-20, 0.5 * FOOT_HEIGHT),
+                                                  (-20, ((1 / 2) * CALE_HEIGHT)), (-0.5 * FOOT_WIDTH, 0.5 * FOOT_HEIGHT),
                                                   0.5 * CALE_HEIGHT, 20000, 200)
         thigh_cale_muscle_front_joint = \
             LegPartsHelper.add_body_dumped_spring(space, self.right_leg.thigh.body, self.right_leg.cale.body,
@@ -181,7 +181,7 @@ class Model:
                                                   (0.5 * CORPS_WIDTH, (-0.5 * CORPS_HEIGHT)),
                                                   (0, (0.25 * THIGH_HEIGHT)),
                                                   0.5 * MIN_CMFJ, 10000, 100)
-        thigh_cops_muscle_back_joint = \
+        thigh_corps_muscle_back_joint = \
             LegPartsHelper.add_body_dumped_spring(space, self.corps.body, self.right_leg.thigh.body,
                                                   (-0.5 * CORPS_WIDTH, (-0.5 * CORPS_HEIGHT)),
                                                   (0, (0.25 * THIGH_HEIGHT)),
@@ -189,10 +189,10 @@ class Model:
 
         slides_joints = [cale_muscle_front_joint, cale_muscle_back_joint,
                          thigh_cale_muscle_front_joint, thigh_cale_muscle_back_joint,
+                         thigh_corps_muscle_front_joint, thigh_corps_muscle_back_joint,
                          patellas_muscle_joint_1, patellas_muscle_joint_2,
                          patella_thigh_muscle_joint,
-                         patella_cale_muscle_joint,
-                         thigh_corps_muscle_front_joint, thigh_cops_muscle_back_joint
+                         patella_cale_muscle_joint
                          ]
         return slides_joints
 
