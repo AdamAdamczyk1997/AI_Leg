@@ -47,9 +47,6 @@ class Model:
     floor: pymunk.Body
     pivots: list[pymunk.Body]
 
-    left_thigh: pymunk.Body
-    left_cale: pymunk.Body
-    left_foot: pymunk.Body
 
     def __init__(self, space: pymunk.Space(), mode: str):
         self.floor = running_gear(space)
@@ -90,7 +87,7 @@ class Model:
         pass
 
     def move_running_gear(self):
-        self.floor.velocity = (-40, 0)
+        self.floor.velocity = (-45, 0)
 
     def movement_scenario(self, up: bool) -> bool:
         temp_up = up

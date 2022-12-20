@@ -115,15 +115,27 @@ class Leg:
         return pivots
 
     def add_pin_joints_parts(self, space):
+        # s_knee_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.thigh.body, self.knee_body,
+        #                                                      (0, (-(1 / 2) * THIGH_HEIGHT)), (0, 0))
+        # knee_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.knee_body, self.cale.body,
+        #                                                    (0, 0), (0, (1 / 2) * CALE_HEIGHT))
+        #
+        # s_ankle_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.cale.body, self.ankle_body,
+        #                                                       (0, (-(1 / 2) * CALE_HEIGHT)), (0, 0))
+        # ankle_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.ankle_body, self.foot.body,
+        #                                                     (0, 0), ((-1 / 4) * FOOT_WIDTH, (1 / 2) * FOOT_HEIGHT))
+
+        # zmien spowrotem na udo do cale bo model się chwieje jak jest połączony na stawach a nie potrzebnie
+        knee_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.thigh.body, self.cale.body,
+                                                           (0, (-(1 / 2) * THIGH_HEIGHT)), (0, (1 / 2) * CALE_HEIGHT))
         s_knee_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.thigh.body, self.knee_body,
                                                              (0, (-(1 / 2) * THIGH_HEIGHT)), (0, 0))
-        knee_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.knee_body, self.cale.body,
-                                                           (0, 0), (0, (1 / 2) * CALE_HEIGHT))
 
+        ankle_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.cale.body, self.foot.body,
+                                                            (0, (-(1 / 2) * CALE_HEIGHT)),
+                                                            ((-1 / 4) * FOOT_WIDTH, (1 / 2) * FOOT_HEIGHT))
         s_ankle_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.cale.body, self.ankle_body,
                                                               (0, (-(1 / 2) * CALE_HEIGHT)), (0, 0))
-        ankle_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.ankle_body, self.foot.body,
-                                                            (0, 0), ((-1 / 4) * FOOT_WIDTH, (1 / 2) * FOOT_HEIGHT))
 
         s_toe_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.foot.body, self.pivots.__getitem__(2),
                                                             ((1 / 2) * FOOT_WIDTH, (-(1 / 2) * FOOT_HEIGHT)), (0, 0))

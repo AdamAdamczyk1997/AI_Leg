@@ -42,9 +42,9 @@ class LegStatus:
         self.is_straight = False if (leg.relative_values.angle_thigh - leg.relative_values.angle_cale) > 0.05 else True
         if len(leg.relative_values.histories) > 2:
             self.check_leader(model_entity, leg)
-            self.check_is_lifting(leg)
-            self.check_is_straightening(leg)
-            self.check_is_standing_on_the_ground(leg)
+            # self.check_is_lifting(leg)
+            # self.check_is_straightening(leg)
+            # self.check_is_standing_on_the_ground(leg)
 
     def check_leader(self, model_entity: Model, leg: Leg):
         lead = model_entity.right_leg.name if \
@@ -129,15 +129,17 @@ class Controller:
         pass
 
     def movement_scenario_controller(self, model_entity: Model, motors: list[SimpleMotor], simulate, time):
-        if simulate & (time % 5 == 0):
-            model_entity.right_leg.relative_values.calculate_angles(
+        # self.right_leg_status.update(model_entity, model_entity.right_leg)
+        # self.left_leg_status.update(model_entity, model_entity.left_leg)
+
+        model_entity.right_leg.relative_values.calculate_angles(
                 model_entity.pivots.__getitem__(0).position,
                 model_entity.right_leg.knee_body.position,
                 model_entity.right_leg.ankle_body.position,
                 model_entity.right_leg.pivots.__getitem__(2).position,
                 model_entity.right_leg.pivots.__getitem__(3).position,
                 model_entity.right_leg.pivots.__getitem__(4).position)
-            model_entity.left_leg.relative_values.calculate_angles(
+        model_entity.left_leg.relative_values.calculate_angles(
                 model_entity.pivots.__getitem__(0).position,
                 model_entity.left_leg.knee_body.position,
                 model_entity.left_leg.ankle_body.position,
@@ -145,23 +147,26 @@ class Controller:
                 model_entity.left_leg.pivots.__getitem__(3).position,
                 model_entity.right_leg.pivots.__getitem__(4).position)
 
-            self.right_leg_status.update(model_entity, model_entity.right_leg)
-            self.left_leg_status.update(model_entity, model_entity.left_leg)
-
+        if simulate & (time % 5 == 0):
             if self.loop_counter == 0:
                 self.loop_counter += 1
                 print("loop_counter =", self.loop_counter)
                 self.change_current_phase()
 
             self.choose_function_due_to_phase(model_entity, motors)
-            self.foot_stabilize(model_entity, motors, self.right_foot_stabilize, self.left_foot_stabilize)
+            # self.foot_stabilize(model_entity, motors, self.right_foot_stabilize, self.left_foot_stabilize)
 
         pass
 
     def choose_function_due_to_phase(self, model_entity: Model, motors: list[SimpleMotor]):
         if self.loop_counter == 1:
+            if -0.1 < model_entity.right_leg.relative_values.angle_cale:
+                move_right_leg(motors, "thigh", "backward")
+            else:
+                stop_moving_right_leg(motors, "thigh")
             end = lift_leg(model_entity.left_leg, motors)
             if end:
+                stop_moving_right_leg(motors, "cale")
                 self.change_current_phase()
         else:
             if self.current_phase == 1:
@@ -182,8 +187,8 @@ class Controller:
         elif self.current_phase == 3:
             end_first = put_leg_down(model_entity.left_leg, motors)
             if self.mode == "Non-AI mode":
-                end_second = move_thigh_backward(model_entity.right_leg, motors)
                 self.right_foot_stabilize = False
+                end_second = move_thigh_backward(model_entity.right_leg, motors)
             else:
                 end_second = True
             if end_first & end_second:
@@ -209,25 +214,23 @@ class Controller:
                 self.change_current_phase()
 
         elif self.current_phase == 6:
-            self.left_foot_stabilize = False
+            # self.left_foot_stabilize = False
             end_second = move_thigh_backward(model_entity.left_leg, motors)
             if self.mode == "Non-AI mode":
                 end_first = put_leg_down(model_entity.right_leg, motors)
             else:
                 end_first = True
             if end_first & end_second:
-                self.left_foot_stabilize = True
-                self.change_current_phase()
-                print("loop_counter =", self.loop_counter)
+                # self.left_foot_stabilize = True
                 self.loop_counter += 1
+                print("loop_counter =", self.loop_counter)
+                self.change_current_phase()
 
     def change_current_phase(self):
         if self.current_phase < 6:
             self.current_phase += 1
         elif self.current_phase == 6:
             self.current_phase = 1
-        index = self.current_phase
-        # self.left_leg_status = self.walk_phases_leg_left.__getitem__(index)
         print("Phase left:", self.current_phase)
 
 
@@ -270,28 +273,28 @@ def move_heel_down(leg: Leg, motors: list[SimpleMotor]):
 def move_thigh_backward(leg: Leg, motors: list[SimpleMotor]):
     if leg.name == "right":
         if -0.15 < leg.relative_values.angle_thigh:
-            move_heel_up(leg, motors)
+            # move_heel_up(leg, motors)
             move_right_leg(motors, "thigh", "backward")
-            if -0.3 < leg.relative_values.angle_cale:
+            if -0.2 < leg.relative_values.angle_cale:
                 move_right_leg(motors, "cale", "backward")
             else:
                 stop_moving_right_leg(motors, "cale")
         else:
-            move_heel_down(leg, motors)
+            # move_heel_down(leg, motors)
             stop_moving_right_leg(motors, "cale")
             stop_moving_right_leg(motors, "thigh")
             return True
 
     elif leg.name == "left":
         if -0.15 < leg.relative_values.angle_thigh:
-            move_heel_up(leg, motors)
+            # move_heel_up(leg, motors)
             move_left_leg(motors, "thigh", "backward")
-            if -0.3 < leg.relative_values.angle_cale:
+            if -0.2 < leg.relative_values.angle_cale:
                 move_left_leg(motors, "cale", "backward")
             else:
                 stop_moving_left_leg(motors, "cale")
         else:
-            move_heel_down(leg, motors)
+            # move_heel_down(leg, motors)
             stop_moving_left_leg(motors, "cale")
             stop_moving_left_leg(motors, "thigh")
             return True
@@ -321,7 +324,7 @@ def lift_leg(leg: Leg, motors: list[SimpleMotor]):
     complete_one = False
     complete_second = False
     if leg.name == "right":
-        if -0.3 < leg.relative_values.angle_cale:
+        if -0.2 < leg.relative_values.angle_cale:
             move_right_leg(motors, "cale", "backward")
         else:
             stop_moving_right_leg(motors, "cale")
@@ -333,7 +336,7 @@ def lift_leg(leg: Leg, motors: list[SimpleMotor]):
             complete_one = True
 
     elif leg.name == "left":
-        if -0.3 < leg.relative_values.angle_cale:
+        if -0.2 < leg.relative_values.angle_cale:
             move_left_leg(motors, "cale", "backward")
         else:
             stop_moving_left_leg(motors, "cale")

@@ -7,6 +7,8 @@ import pymunk
 import pymunk.matplotlib_util
 import pymunk.pygame_util
 from pygame.color import THECOLORS
+import xlsx
+import pandas as pd
 
 import Model
 import constants
@@ -78,15 +80,15 @@ class Simulator(object):
                                                relative_angu_vel_right_leg)
         right_cale_motor = pymunk.SimpleMotor(self.model_entity.right_leg.cale.body,
                                               self.model_entity.right_leg.thigh.body, relative_angu_vel_right_leg)
-        right_foot_motor = pymunk.SimpleMotor(self.model_entity.right_leg.foot.body,
-                                              self.model_entity.right_leg.cale.body, relative_angu_vel_right_leg)
+
+        right_foot_motor = pymunk.SimpleMotor(self.model_entity.right_leg.foot.body, self.model_entity.floor, 0)
 
         left_thigh_motor = pymunk.SimpleMotor(self.model_entity.left_leg.thigh.body, self.model_entity.corps.body,
                                               relative_angu_vel_left_leg)
         left_cale_motor = pymunk.SimpleMotor(self.model_entity.left_leg.cale.body,
                                              self.model_entity.left_leg.thigh.body, relative_angu_vel_left_leg)
-        left_foot_motor = pymunk.SimpleMotor(self.model_entity.left_leg.foot.body,
-                                             self.model_entity.left_leg.cale.body, relative_angu_vel_left_leg)
+
+        left_foot_motor = pymunk.SimpleMotor(self.model_entity.left_leg.foot.body, self.model_entity.floor, 0)
 
         corps_motor = pymunk.SimpleMotor(self.model_entity.corps.body, self.model_entity.floor, 0)
         # self.space.add(right_thigh_motor, right_cale_motor, right_foot_motor)
@@ -99,6 +101,82 @@ class Simulator(object):
                   right_foot_motor, left_thigh_motor, left_cale_motor, left_foot_motor, corps_motor]
 
         return motors
+
+    def write_data_to_excel(self):
+
+        columns = ['x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_cale', 'x_ankle',
+                   'y_ankle', 'x_toe', 'y_toe', 'x_heel', 'y_heel', 'x_foot', 'y_foot', 'angle_foot']
+
+        usage_counter = []
+        x_hip = []
+        y_hip = []
+        angle_thigh = []
+        x_knee = []
+        y_knee = []
+        angle_cale = []
+        x_ankle = []
+        y_ankle = []
+        x_toe = []
+        y_toe = []
+        x_heel = []
+        y_heel = []
+        x_foot = []
+        y_foot = []
+        angle_foot = []
+        i = 0
+
+        right_leg = self.model_entity.right_leg.relative_values
+        for r in right_leg.histories:
+            usage_counter.append(right_leg.histories[i][0])
+            x_hip.append(right_leg.histories[i][1])
+            y_hip.append(right_leg.histories[i][2])
+            angle_thigh.append(self.model_entity.right_leg.relative_values.histories[i][3])
+            x_knee.append(self.model_entity.right_leg.relative_values.histories[i][4])
+            y_knee.append(self.model_entity.right_leg.relative_values.histories[i][5])
+            angle_cale.append(self.model_entity.right_leg.relative_values.histories[i][6])
+            x_ankle.append(self.model_entity.right_leg.relative_values.histories[i][7])
+            y_ankle.append(self.model_entity.right_leg.relative_values.histories[i][8])
+            x_toe.append(self.model_entity.right_leg.relative_values.histories[i][9])
+            y_toe.append(self.model_entity.right_leg.relative_values.histories[i][10])
+            x_heel.append(self.model_entity.right_leg.relative_values.histories[i][11])
+            y_heel.append(self.model_entity.right_leg.relative_values.histories[i][12])
+            x_foot.append(self.model_entity.right_leg.relative_values.histories[i][13])
+            y_foot.append(self.model_entity.right_leg.relative_values.histories[i][14])
+            angle_foot.append(self.model_entity.right_leg.relative_values.histories[i][15])
+            i += 1
+
+        df1 = pd.DataFrame(list(zip(x_hip, y_hip, angle_thigh, x_knee, y_knee, angle_cale, x_ankle, y_ankle,
+                                    x_toe, y_toe, x_heel, y_heel, x_foot, y_foot, angle_foot)), index=usage_counter,
+                           columns=columns)
+
+        for r in self.model_entity.right_leg.relative_values.histories:
+            usage_counter.append(self.model_entity.right_leg.relative_values.histories[i][0])
+            x_hip.append(self.model_entity.right_leg.relative_values.histories[i][1])
+            y_hip.append(self.model_entity.right_leg.relative_values.histories[i][2])
+            angle_thigh.append(self.model_entity.right_leg.relative_values.histories[i][3])
+            x_knee.append(self.model_entity.right_leg.relative_values.histories[i][4])
+            y_knee.append(self.model_entity.right_leg.relative_values.histories[i][5])
+            angle_cale.append(self.model_entity.right_leg.relative_values.histories[i][6])
+            x_ankle.append(self.model_entity.right_leg.relative_values.histories[i][7])
+            y_ankle.append(self.model_entity.right_leg.relative_values.histories[i][8])
+            x_toe.append(self.model_entity.right_leg.relative_values.histories[i][9])
+            y_toe.append(self.model_entity.right_leg.relative_values.histories[i][10])
+            x_heel.append(self.model_entity.right_leg.relative_values.histories[i][11])
+            y_heel.append(self.model_entity.right_leg.relative_values.histories[i][12])
+            x_foot.append(self.model_entity.right_leg.relative_values.histories[i][13])
+            y_foot.append(self.model_entity.right_leg.relative_values.histories[i][14])
+            angle_foot.append(self.model_entity.right_leg.relative_values.histories[i][15])
+            i += 1
+
+        df2 = pd.DataFrame(list(zip(x_hip, y_hip, angle_thigh, x_knee, y_knee, angle_cale, x_ankle, y_ankle,
+                                    x_toe, y_toe, x_heel, y_heel, x_foot, y_foot, angle_foot)), index=usage_counter,
+                           columns=columns)
+
+        with pd.ExcelWriter("data.xlsx") as writer:
+            df1.to_excel(writer, sheet_name="Leg_right", engine="xlsxwriter")
+            df2.to_excel(writer, sheet_name="Leg_right", engine="xlsxwriter")
+
+
 
     def main(self):
         pygame.init()
@@ -126,6 +204,7 @@ class Simulator(object):
         counter = 0
 
         while running:
+
             line = None
 
             fps = 60
@@ -138,7 +217,9 @@ class Simulator(object):
                     if event.type == pygame.QUIT or (
                             event.key in (pygame.K_q, pygame.K_ESCAPE)):
                         # running = False
-                        print(self.model_entity.right_leg.relative_values.histories)
+                        # print("initial_array : ", str(self.model_entity.left_leg.relative_values.data))
+
+                        self.write_data_to_excel()
                         sys.exit(0)
 
                     elif event.key == pygame.K_RIGHT:
@@ -194,10 +275,10 @@ class Simulator(object):
 
             self.draw(line)
             pygame.display.set_caption(f"fps: {clock.get_fps()}")
-            self.controller.movement_scenario_controller(self.model_entity, self.motors, simulate, counter)
             if simulate:
                 self.space.step(dt)
                 damping = 0.99
+                self.controller.movement_scenario_controller(self.model_entity, self.motors, simulate, counter)
 
                 limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, damping, dt)
                 limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, damping, dt)

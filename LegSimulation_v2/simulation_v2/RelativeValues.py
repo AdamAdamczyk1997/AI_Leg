@@ -2,6 +2,7 @@ from math import sin, cos
 
 from numpy import double
 from pymunk import Vec2d
+import numpy as np
 
 from LegSimulation_v2.simulation_v2.constants import THIGH_HEIGHT, CALE_HEIGHT, CORPS_POSITION, CORPS_HEIGHT, FOOT_WIDTH
 
@@ -47,15 +48,17 @@ class RelativeValues:
         self.y_foot = 0.0
         self.angle_foot = 0.0
         self.usage_counter = 1
-        self.histories = [[self.usage_counter, self.x_hip, self.y_hip, self.angle_thigh,
-                           self.x_knee, self.y_knee, self.angle_cale,
-                           self.x_toe, self.y_toe, self.x_heel, self.y_heel, self.angle_foot]]
+        self.history_record = [self.usage_counter, self.x_hip, self.y_hip, self.angle_thigh,
+                               self.x_knee, self.y_knee, self.angle_cale, self.x_ankle, self.y_ankle,
+                               self.x_toe, self.y_toe, self.x_heel, self.y_heel, self.x_foot, self.y_foot,
+                               self.angle_foot]
+        self.histories = [self.history_record]
 
     def calculate_angles(self, real_hips_position: Vec2d, real_knee_position: Vec2d, real_ankle_position: Vec2d,
                          real_toe_position: Vec2d, real_heel_position: Vec2d, real_center_foot_position: Vec2d):
         # calculate angles for right leg
         self.x_hip = real_hips_position.x - CORPS_POSITION.x
-        self.y_hip = real_hips_position.y - (CORPS_POSITION.y - ((1/2) * CORPS_HEIGHT))
+        self.y_hip = real_hips_position.y - (CORPS_POSITION.y - ((1 / 2) * CORPS_HEIGHT))
 
         # knee position relative to the hip
         self.x_knee = real_knee_position.x - real_hips_position.x
@@ -81,10 +84,13 @@ class RelativeValues:
         sin_angle_foot = (self.y_foot - self.y_toe) / (0.75 * FOOT_WIDTH)
         self.angle_foot = sin(sin_angle_foot)
 
-        self.histories.append(
-            [self.usage_counter, int(self.x_hip), int(self.y_hip), round(self.angle_thigh, 2),
-             int(self.x_knee), int(self.y_knee), round(self.angle_cale, 2),
-             int(self.x_toe), int(self.y_toe), int(self.x_heel), int(self.y_heel), round(self.angle_foot, 2)])
+        self.history_record = [self.usage_counter, int(self.x_hip), int(self.y_hip), round(self.angle_thigh, 2),
+                               int(self.x_knee), int(self.y_knee), round(self.angle_cale, 2), int(self.x_ankle), int(self.y_ankle),
+                               int(self.x_toe), int(self.y_toe), int(self.x_heel), int(self.y_heel), int(self.x_foot),
+                               int(self.y_foot), round(self.angle_foot, 2)]
+
+        self.histories.append(self.history_record)
+
         self.usage_counter += 1
 
         pass
@@ -95,10 +101,10 @@ class RelativeValues:
             leg = "right_leg"
         elif leg_number == 2:
             leg = "left_leg"
-        print("leg:", leg, ", usage_counter:", self.usage_counter, ": hip=(", int(self.x_hip), ",", int(self.y_hip), ",",
+        print("leg:", leg, ", usage_counter:", self.usage_counter, ": hip=(", int(self.x_hip), ",", int(self.y_hip),
+              ",",
               "{:.2f}".format(round(self.angle_thigh, 2)),
               "), knee=(", int(self.x_knee), ",", int(self.y_knee), ",", "{:.2f}".format(round(self.angle_cale, 2)),
               "), ankle=(", int(self.x_ankle), ",", int(self.y_ankle), ", angle_foot",
               "), toe=(", int(self.x_toe), ",", int(self.y_toe), "), heel=(", int(self.x_heel), ",", int(self.y_heel),
               ")")
-
