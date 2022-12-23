@@ -47,7 +47,6 @@ class Model:
     floor: pymunk.Body
     pivots: list[pymunk.Body]
 
-
     def __init__(self, space: pymunk.Space(), mode: str):
         self.floor = running_gear(space)
         self.corps = LegPartBone(space, self.iterator(), "corps", CORPS_WEIGHT, (CORPS_WIDTH, CORPS_HEIGHT),
@@ -87,7 +86,7 @@ class Model:
         pass
 
     def move_running_gear(self):
-        self.floor.velocity = (-45, 0)
+        self.floor.velocity = (-30, 0)
 
     def movement_scenario(self, up: bool) -> bool:
         temp_up = up
@@ -135,7 +134,8 @@ class Model:
                                                   0.5 * CALE_HEIGHT, 20000, 200)
         cale_muscle_back_joint = \
             LegPartsHelper.add_body_dumped_spring(space, self.right_leg.cale.body, self.right_leg.foot.body,
-                                                  (-20, ((1 / 2) * CALE_HEIGHT)), (-0.5 * FOOT_WIDTH, 0.5 * FOOT_HEIGHT),
+                                                  (-20, ((1 / 2) * CALE_HEIGHT)),
+                                                  (-0.5 * FOOT_WIDTH, 0.5 * FOOT_HEIGHT),
                                                   0.5 * CALE_HEIGHT, 20000, 200)
         thigh_cale_muscle_front_joint = \
             LegPartsHelper.add_body_dumped_spring(space, self.right_leg.thigh.body, self.right_leg.cale.body,

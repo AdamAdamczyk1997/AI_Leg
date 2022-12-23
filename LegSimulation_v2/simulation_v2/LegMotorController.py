@@ -133,49 +133,10 @@ class Controller:
         self.run_phase_async(model_entity, motors, 0)
         self.run_phase_async(model_entity, motors, 1)
         self.run_phase_async(model_entity, motors, 2)
-
-        if self.current_phase_for_right == 3 and self.current_phase_for_left == 3:
-            end1 = phase_three(model_entity.right_leg, motors, 0)
-            if end1:
-                stop_moving_right_leg(motors, "thigh")
-            end2 = phase_three(model_entity.right_leg, motors, 1)
-            if end2:
-                stop_moving_right_leg(motors, "cale")
-
-            end3 = phase_three(model_entity.left_leg, motors, 0)
-            if end3:
-                stop_moving_left_leg(motors, "thigh")
-            end4 = phase_three(model_entity.left_leg, motors, 1)
-            if end4:
-                stop_moving_left_leg(motors, "cale")
-            if end1 and end2 and end3 and end4:
-                self.change_current_phase("right")
-                print("Phase current_phase_for_right:", self.current_phase_for_right)
-                self.change_current_phase("left")
-                print("Phase current_phase_for_left:", self.current_phase_for_left)
-
+        self.run_phase_async(model_entity, motors, 3)
         self.run_phase_async(model_entity, motors, 4)
         self.run_phase_async(model_entity, motors, 5)
-
-        if self.current_phase_for_right == 6 and self.current_phase_for_left == 6:
-            end1 = phase_six(model_entity.right_leg, motors, 0)
-            if end1:
-                stop_moving_right_leg(motors, "thigh")
-            end2 = phase_six(model_entity.right_leg, motors, 1)
-            if end2:
-                stop_moving_right_leg(motors, "cale")
-
-            end3 = phase_six(model_entity.left_leg, motors, 0)
-            if end3:
-                stop_moving_left_leg(motors, "thigh")
-            end4 = phase_six(model_entity.left_leg, motors, 1)
-            if end4:
-                stop_moving_left_leg(motors, "cale")
-            if end1 and end2 and end3 and end4:
-                self.change_current_phase("right")
-                print("Phase current_phase_for_right:", self.current_phase_for_right)
-                self.change_current_phase("left")
-                print("Phase current_phase_for_left:", self.current_phase_for_left)
+        self.run_phase_async(model_entity, motors, 6)
 
         pass
 
@@ -185,316 +146,463 @@ class Controller:
                 if self.current_phase_for_right < 6:
                     self.current_phase_for_right += 1
                 elif self.current_phase_for_right == 6:
-                    self.current_phase_for_right = 0
+                    self.current_phase_for_right = 1
             case "left":
                 if self.current_phase_for_left < 6:
                     self.current_phase_for_left += 1
                 elif self.current_phase_for_left == 6:
-                    self.current_phase_for_left = 0
+                    self.current_phase_for_left = 1
 
     def run_phase_async(self, model_entity, motors, phase_nr: int):
-        phaze_function = ""
+        first_part = 0
+        second_part = 1
+        phase_function = ""
         match phase_nr:
             case 0:
-                phaze_function = phase_zero
+                phase_function = phase_zero
             case 1:
-                phaze_function = phase_one
+                phase_function = phase_one
             case 2:
-                phaze_function = phase_two
+                phase_function = phase_two
+            case 3:
+                phase_function = phase_three
             case 4:
-                phaze_function = phase_four
+                phase_function = phase_four
             case 5:
-                phaze_function = phase_five
-        if self.current_phase_for_right == phase_nr:
-            end = phaze_function(model_entity.right_leg, motors, 0)
-            if end:
-                stop_moving_right_leg(motors, "thigh")
-            end2 = phaze_function(model_entity.right_leg, motors, 1)
-            if end2:
-                stop_moving_right_leg(motors, "cale")
-            if end and end2:
+                phase_function = phase_five
+            case 6:
+                phase_function = phase_six
+        end_right = False
+        end_left = False
+        if self.run_flag:
+            if self.current_phase_for_right == phase_nr:
+                end_right = phase_function(model_entity.right_leg, motors, first_part)
+                if end_right:
+                    stop_moving_right_leg(motors, "thigh")
+                    stop_moving_right_leg(motors, "cale")
+                    print("End ", first_part, " R:", self.current_phase_for_right)
+            if self.current_phase_for_left == phase_nr:
+                end_left = phase_function(model_entity.left_leg, motors, first_part)
+                if end_left:
+                    stop_moving_left_leg(motors, "thigh")
+                    stop_moving_left_leg(motors, "cale")
+                    print("End ", first_part, " L:", self.current_phase_for_left)
+            if end_right and end_left:
+                self.run_flag = False
+                print("End first_part current phases")
+
+        if not self.run_flag:
+            if self.current_phase_for_right == phase_nr:
+                end_right = phase_function(model_entity.right_leg, motors, second_part)
+                if end_right:
+                    stop_moving_right_leg(motors, "thigh")
+                    stop_moving_right_leg(motors, "cale")
+                    print("End R:", self.current_phase_for_right)
+            if self.current_phase_for_left == phase_nr:
+                end_left = phase_function(model_entity.left_leg, motors, second_part)
+                if end_left:
+                    stop_moving_left_leg(motors, "thigh")
+                    stop_moving_left_leg(motors, "cale")
+                    print("End L:", self.current_phase_for_left)
+            if end_right and end_left:
+                print("End second_part current phases")
                 self.change_current_phase("right")
-                print("Phase current_phase_for_right:", self.current_phase_for_right)
-        if self.current_phase_for_left == phase_nr:
-            end = phaze_function(model_entity.left_leg, motors, 0)
-            if end:
-                stop_moving_left_leg(motors, "thigh")
-            end2 = phaze_function(model_entity.left_leg, motors, 1)
-            if end2:
-                stop_moving_left_leg(motors, "cale")
-            if end and end2:
                 self.change_current_phase("left")
-                print("Phase current_phase_for_left:", self.current_phase_for_left)
+                self.run_flag = True
+
 
 def phase_zero(leg: Leg, motors: list[SimpleMotor], flag: int):
+    end_thigh = False
+    end_cale = False
     if flag == 0:
-        if leg.name == "right":
-            if leg.relative_values.angle_thigh < 0.2:
-                move_right_leg(motors, "thigh", "forward")
-            else:
-                stop_moving_right_leg(motors, "thigh")
-                return True
-
-        if leg.name == "left":
-            if leg.relative_values.angle_thigh < 0.2:
-                move_left_leg(motors, "thigh", "forward")
-            else:
-                stop_moving_left_leg(motors, "thigh")
-                return True
+        end_thigh = align_thigh(leg, motors, 0.5)
+        end_cale = align_cale(leg, motors, 0.5)
+        if end_thigh and end_cale:
+            return True
 
     if flag == 1:
         if leg.name == "right":
-            if leg.relative_values.angle_cale > -0.2:
-                move_right_leg(motors, "cale", "backward")
+            if leg.relative_values.angle_cale >= -0.25:
+                move_right_leg(motors, "cale", "backward", 1)
+            # elif -0.2 > leg.relative_values.angle_cale >= -0.25:
+            #     move_right_leg(motors, "cale", "backward", 0.5)
             else:
                 stop_moving_right_leg(motors, "cale")
-                return True
+                end_cale = True
+            if leg.relative_values.angle_thigh <= 0.25:
+                move_right_leg(motors, "thigh", "forward", 1)
+            # elif 0.2 < leg.relative_values.angle_thigh <= 0.25:
+            #     move_right_leg(motors, "thigh", "forward", 0.5)
+            else:
+                stop_moving_right_leg(motors, "thigh")
+                end_thigh = True
+
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_cale > -0.2:
-                move_left_leg(motors, "cale", "backward")
+            if leg.relative_values.angle_cale >= -0.25:
+                move_left_leg(motors, "cale", "backward", 1)
+            # elif -0.2 > leg.relative_values.angle_cale >= -0.25:
+            #     move_left_leg(motors, "cale", "backward", 0.5)
             else:
                 stop_moving_left_leg(motors, "cale")
-                return True
+                end_cale = True
+            if leg.relative_values.angle_thigh <= 0.25:
+                move_left_leg(motors, "thigh", "forward", 1)
+            # elif 0.2 < leg.relative_values.angle_thigh <= 0.25:
+            #     move_left_leg(motors, "thigh", "forward", 0.5)
+            else:
+                stop_moving_left_leg(motors, "thigh")
+                end_thigh = True
+
+        if end_thigh and end_cale:
+            return True
 
     return False
 
 
 def phase_one(leg: Leg, motors: list[SimpleMotor], flag: int):
+    end_thigh = False
+    end_cale = False
     if flag == 0:
         if leg.name == "right":
-            if leg.relative_values.angle_thigh > 0.1:
-                move_right_leg(motors, "thigh", "backward")
-            else:
-                stop_moving_right_leg(motors, "thigh")
+            stop_moving_right_leg(motors, "thigh")
+            end_thigh = True
+            stop_moving_right_leg(motors, "cale")
+            end_cale = True
+            if end_thigh and end_cale:
                 return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_thigh < 0.3:
-                move_left_leg(motors, "thigh", "forward")
+            if leg.relative_values.angle_thigh <= 0.3:
+                move_left_leg(motors, "thigh", "forward", 1)
             else:
                 stop_moving_left_leg(motors, "thigh")
-                return True
+                end_thigh = True
+            if leg.relative_values.angle_cale >= -0.3:
+                move_left_leg(motors, "cale", "backward", 1)
+            else:
+                stop_moving_left_leg(motors, "cale")
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     if flag == 1:
         if leg.name == "right":
-            if leg.relative_values.angle_cale > -0.2:
-                move_right_leg(motors, "cale", "backward")
+            if leg.relative_values.angle_thigh >= 0.12:
+                move_right_leg(motors, "thigh", "backward", 1)
+            elif 0.12 > leg.relative_values.angle_thigh >= 0.1:
+                move_right_leg(motors, "thigh", "backward", 0.5)
+            else:
+                stop_moving_right_leg(motors, "thigh")
+                end_thigh = True
+            if leg.relative_values.angle_cale >= -0.28:
+                move_right_leg(motors, "cale", "backward", 1)
             else:
                 stop_moving_right_leg(motors, "cale")
-                return True
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_cale > -0.4:
-                move_left_leg(motors, "cale", "backward")
+            if leg.relative_values.angle_thigh <= 0.45:
+                move_left_leg(motors, "thigh", "forward", 1)
+            else:
+                stop_moving_left_leg(motors, "thigh")
+                end_thigh = True
+            if leg.relative_values.angle_cale <= -0.25:
+                move_left_leg(motors, "cale", "forward", 0.5)
             else:
                 stop_moving_left_leg(motors, "cale")
-                return True
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     return False
 
 
 def phase_two(leg: Leg, motors: list[SimpleMotor], flag: int):
+    end_thigh = False
+    end_cale = False
     if flag == 0:
         if leg.name == "right":
-            if leg.relative_values.angle_thigh > 0.0:
-                move_right_leg(motors, "thigh", "backward")
+            stop_moving_right_leg(motors, "thigh")
+            end_thigh = True
+            if leg.relative_values.angle_cale >= -0.3:
+                move_right_leg(motors, "cale", "backward", 0.5)
             else:
-                stop_moving_right_leg(motors, "thigh")
-                return True
+                stop_moving_right_leg(motors, "cale")
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_thigh > 0.3:
-                move_left_leg(motors, "thigh", "backward")
+            stop_moving_left_leg(motors, "thigh")
+            end_thigh = True
+            if leg.relative_values.angle_cale <= -0.1:
+                move_left_leg(motors, "cale", "forward", 1)
             else:
-                stop_moving_left_leg(motors, "thigh")
-                return True
+                stop_moving_left_leg(motors, "cale")
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     if flag == 1:
         if leg.name == "right":
-            if leg.relative_values.angle_cale > -0.3:
-                move_right_leg(motors, "cale", "backward")
+            if leg.relative_values.angle_thigh >= 0.0:
+                move_right_leg(motors, "thigh", "backward", 0.5)
             else:
+                stop_moving_right_leg(motors, "thigh")
+                end_thigh = True
                 stop_moving_right_leg(motors, "cale")
-                return True
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_cale < -0.3:
-                move_left_leg(motors, "cale", "forward")
-            else:
-                stop_moving_left_leg(motors, "cale")
-                return True
+            end_thigh = put_leg_down(leg, motors)
+            stop_moving_left_leg(motors, "cale")
+            end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     return False
 
 
 def phase_three(leg: Leg, motors: list[SimpleMotor], flag: int):
+    end_thigh = False
+    end_cale = False
     if flag == 0:
         if leg.name == "right":
-            if leg.relative_values.angle_thigh < 0.2:
-                move_right_leg(motors, "thigh", "forward")
+            if leg.relative_values.angle_thigh <= 0.0:
+                move_right_leg(motors, "thigh", "forward", 1)
             else:
                 stop_moving_right_leg(motors, "thigh")
-                return True
+                end_thigh = True
+            if leg.relative_values.angle_cale >= -0.6:
+                move_right_leg(motors, "cale", "backward", 1)
+            else:
+                stop_moving_right_leg(motors, "cale")
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_thigh > 0.2:
-                move_left_leg(motors, "thigh", "backward")
+            if leg.relative_values.angle_thigh <= 0.25:
+                move_left_leg(motors, "thigh", "forward", 1)
             else:
                 stop_moving_left_leg(motors, "thigh")
-                return True
+                end_thigh = True
+            if leg.relative_values.angle_cale >= -0.3:
+                move_left_leg(motors, "cale", "backward", 1)
+            else:
+                stop_moving_left_leg(motors, "cale")
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     if flag == 1:
         if leg.name == "right":
-            if leg.relative_values.angle_cale > -0.2:
-                move_right_leg(motors, "cale", "backward")
+            if leg.relative_values.angle_thigh <= 0.3:
+                move_right_leg(motors, "thigh", "forward", 1)
+            else:
+                stop_moving_right_leg(motors, "thigh")
+                end_thigh = True
+            if leg.relative_values.angle_cale >= -0.7:
+                move_right_leg(motors, "cale", "backward", 1)
             else:
                 stop_moving_right_leg(motors, "cale")
-                return True
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_cale < -0.2:
-                move_left_leg(motors, "cale", "forward")
+            if leg.relative_values.angle_thigh >= 0.25:
+                move_left_leg(motors, "thigh", "backward", 1)
+            else:
+                stop_moving_left_leg(motors, "thigh")
+                end_thigh = True
+            if leg.relative_values.angle_cale <= -0.3:
+                move_left_leg(motors, "cale", "forward", 1)
             else:
                 stop_moving_left_leg(motors, "cale")
-                return True
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     return False
 
 
 def phase_four(leg: Leg, motors: list[SimpleMotor], flag: int):
+    end_thigh = False
+    end_cale = False
     if flag == 0:
         if leg.name == "right":
-            if leg.relative_values.angle_thigh > 0.3:
-                move_right_leg(motors, "thigh", "forward")
+            if leg.relative_values.angle_thigh <= 0.3:
+                move_right_leg(motors, "thigh", "forward", 1)
             else:
                 stop_moving_right_leg(motors, "thigh")
-                return True
+                end_thigh = True
+            if leg.relative_values.angle_cale <= -0.3:
+                move_right_leg(motors, "cale", "forward", 1)
+            else:
+                stop_moving_right_leg(motors, "cale")
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_thigh > 0.1:
-                move_left_leg(motors, "thigh", "backward")
-            else:
-                stop_moving_left_leg(motors, "thigh")
-                return True
+            stop_moving_left_leg(motors, "thigh")
+            end_thigh = True
+            stop_moving_left_leg(motors, "cale")
+            end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     if flag == 1:
         if leg.name == "right":
-            if leg.relative_values.angle_cale > -0.4:
-                move_right_leg(motors, "cale", "backward")
+            if leg.relative_values.angle_thigh <= 0.45:
+                move_right_leg(motors, "thigh", "forward", 1)
+            else:
+                stop_moving_right_leg(motors, "thigh")
+                end_thigh = True
+            if leg.relative_values.angle_cale <= -0.25:
+                move_right_leg(motors, "cale", "forward", 0.5)
             else:
                 stop_moving_right_leg(motors, "cale")
-                return True
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_cale > -0.2:
-                move_left_leg(motors, "cale", "backward")
+            if leg.relative_values.angle_thigh >= 0.12:
+                move_left_leg(motors, "thigh", "backward", 1)
+            elif 0.12 > leg.relative_values.angle_thigh >= 0.1:
+                move_left_leg(motors, "thigh", "backward", 0.5)
+            else:
+                stop_moving_left_leg(motors, "thigh")
+                end_thigh = True
+            if leg.relative_values.angle_cale >= -0.28:
+                move_left_leg(motors, "cale", "backward", 1)
+            elif -0.28 > leg.relative_values.angle_cale >= -0.3:
+                move_left_leg(motors, "cale", "backward", 0.5)
             else:
                 stop_moving_left_leg(motors, "cale")
-                return True
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     return False
 
 
 def phase_five(leg: Leg, motors: list[SimpleMotor], flag: int):
+    end_thigh = False
+    end_cale = False
     if flag == 0:
         if leg.name == "right":
-            if leg.relative_values.angle_thigh > 0.3:
-                move_right_leg(motors, "thigh", "backward")
+            stop_moving_right_leg(motors, "thigh")
+            end_thigh = True
+            if leg.relative_values.angle_cale <= -0.1:
+                move_right_leg(motors, "cale", "forward", 1)
             else:
-                stop_moving_right_leg(motors, "thigh")
-                return True
+                stop_moving_right_leg(motors, "cale")
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_thigh > 0.0:
-                move_left_leg(motors, "thigh", "backward")
+            stop_moving_left_leg(motors, "thigh")
+            end_thigh = True
+            if leg.relative_values.angle_cale >= -0.35:
+                move_left_leg(motors, "cale", "backward", 0.5)
             else:
-                stop_moving_left_leg(motors, "thigh")
-                return True
+                stop_moving_left_leg(motors, "cale")
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     if flag == 1:
         if leg.name == "right":
-            if leg.relative_values.angle_cale < -0.3:
-                move_right_leg(motors, "cale", "forward")
-            else:
-                stop_moving_right_leg(motors, "cale")
-                return True
+            end_thigh = put_leg_down(leg, motors)
+            stop_moving_right_leg(motors, "cale")
+            end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_cale > -0.3:
-                move_left_leg(motors, "cale", "backward")
+            if leg.relative_values.angle_thigh >= 0.0:
+                move_left_leg(motors, "thigh", "backward", 0.5)
             else:
+                stop_moving_left_leg(motors, "thigh")
+                end_thigh = True
                 stop_moving_left_leg(motors, "cale")
-                return True
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     return False
 
 
 def phase_six(leg: Leg, motors: list[SimpleMotor], flag: int):
+    end_thigh = False
+    end_cale = False
     if flag == 0:
         if leg.name == "right":
-            if leg.relative_values.angle_thigh > 0.2:
-                move_right_leg(motors, "thigh", "backward")
+            if leg.relative_values.angle_thigh <= 0.25:
+                move_right_leg(motors, "thigh", "forward", 1)
             else:
                 stop_moving_right_leg(motors, "thigh")
-                return True
+                end_thigh = True
+            if leg.relative_values.angle_cale >= -0.3:
+                move_right_leg(motors, "cale", "backward", 1)
+            else:
+                stop_moving_right_leg(motors, "cale")
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_thigh < 0.2:
-                move_left_leg(motors, "thigh", "forward")
+            if leg.relative_values.angle_thigh <= 0.0:
+                move_left_leg(motors, "thigh", "forward", 1)
             else:
                 stop_moving_left_leg(motors, "thigh")
-                return True
+                end_thigh = True
+            if leg.relative_values.angle_cale >= -0.6:
+                move_left_leg(motors, "cale", "backward", 1)
+            else:
+                stop_moving_left_leg(motors, "cale")
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
     if flag == 1:
         if leg.name == "right":
-            if leg.relative_values.angle_cale < -0.2:
-                move_right_leg(motors, "cale", "forward")
+            if leg.relative_values.angle_thigh >= 0.25:
+                move_right_leg(motors, "thigh", "backward", 1)
+            else:
+                stop_moving_right_leg(motors, "thigh")
+                end_thigh = True
+            if leg.relative_values.angle_cale <= -0.3:
+                move_right_leg(motors, "cale", "forward", 1)
             else:
                 stop_moving_right_leg(motors, "cale")
-                return True
+                end_cale = True
+        if end_thigh and end_cale:
+            return True
 
         if leg.name == "left":
-            if leg.relative_values.angle_cale < -0.2:
-                move_left_leg(motors, "cale", "forward")
+            if leg.relative_values.angle_thigh <= 0.3:
+                move_left_leg(motors, "thigh", "forward", 1)
+            else:
+                stop_moving_left_leg(motors, "thigh")
+                end_thigh = True
+            if leg.relative_values.angle_cale >= -0.7:
+                move_left_leg(motors, "cale", "backward", 1)
             else:
                 stop_moving_left_leg(motors, "cale")
-                return True
-
-    return False
-
-
-def move_heel_up(leg: Leg, motors: list[SimpleMotor]):
-    if leg.name == "right":
-        if -0.1 < leg.relative_values.angle_foot:
-            move_right_leg(motors, "foot", "backward")
-        else:
-            stop_moving_right_leg(motors, "foot")
-            return True
-
-    elif leg.name == "left":
-        if -0.1 < leg.relative_values.angle_foot:
-            move_left_leg(motors, "foot", "backward")
-        else:
-            stop_moving_left_leg(motors, "foot")
-            return True
-
-    return False
-
-
-def move_heel_down(leg: Leg, motors: list[SimpleMotor]):
-    if leg.name == "right":
-        if leg.relative_values.angle_foot < 0.0:
-            move_right_leg(motors, "foot", "forward")
-        else:
-            stop_moving_right_leg(motors, "foot")
-            return True
-
-    elif leg.name == "left":
-        if leg.relative_values.angle_foot < 0.0:
-            move_left_leg(motors, "foot", "forward")
-        else:
-            stop_moving_left_leg(motors, "foot")
+                end_cale = True
+        if end_thigh and end_cale:
             return True
 
     return False
@@ -532,19 +640,41 @@ def move_thigh_backward(leg: Leg, motors: list[SimpleMotor]):
     return False
 
 
-def align_thigh(leg: Leg, motors: list[SimpleMotor]):
+def align_thigh(leg: Leg, motors: list[SimpleMotor], multiplication: float):
     if leg.name == "right":
-        if leg.relative_values.angle_thigh > 0.1:
-            move_right_leg(motors, "thigh", "backward")
+        if leg.relative_values.angle_thigh > 0.05:
+            move_right_leg(motors, "thigh", "backward", multiplication)
+        elif leg.relative_values.angle_thigh < -0.05:
+            move_right_leg(motors, "thigh", "forward", multiplication)
         else:
             stop_moving_right_leg(motors, "thigh")
             return True
 
     elif leg.name == "left":
-        if leg.relative_values.angle_thigh > 0.1:
-            move_left_leg(motors, "thigh", "backward")
+        if leg.relative_values.angle_thigh > 0.05:
+            move_left_leg(motors, "thigh", "backward", multiplication)
+        elif leg.relative_values.angle_thigh < -0.05:
+            move_left_leg(motors, "thigh", "backward", multiplication)
         else:
             stop_moving_left_leg(motors, "thigh")
+            return True
+
+    return False
+
+
+def align_cale(leg: Leg, motors: list[SimpleMotor], multiplication: float):
+    if leg.name == "right":
+        if leg.relative_values.angle_cale < -0.05:
+            move_right_leg(motors, "cale", "forward", multiplication)
+        else:
+            stop_moving_right_leg(motors, "cale")
+            return True
+
+    elif leg.name == "left":
+        if leg.relative_values.angle_cale < -0.05:
+            move_left_leg(motors, "cale", "forward", multiplication)
+        else:
+            stop_moving_left_leg(motors, "cale")
             return True
 
     return False
@@ -585,15 +715,15 @@ def lift_leg(leg: Leg, motors: list[SimpleMotor]):
 
 def put_leg_down(leg: Leg, motors: list[SimpleMotor]):
     if leg.name == "right":
-        if leg.pivots.__getitem__(3).position.y == 6:
-            move_right_leg(motors, "thigh", "backward")
+        if leg.relative_values.angle_thigh >= 0.4:
+            move_right_leg(motors, "thigh", "backward", 1)
         else:
             stop_moving_right_leg(motors, "thigh")
             return True
 
     elif leg.name == "left":
-        if leg.pivots.__getitem__(3).position.y == 6:
-            move_left_leg(motors, "thigh", "backward")
+        if leg.relative_values.angle_thigh >= 0.4:
+            move_left_leg(motors, "thigh", "backward", 1)
         else:
             stop_moving_left_leg(motors, "thigh")
             return True
@@ -623,43 +753,57 @@ def straight_leg(leg: Leg, motors: list[SimpleMotor], entirely: bool):
     return False
 
 
-def move_right_leg(motors: list[SimpleMotor], leg_part: str, direction: str):
+def move_right_leg(motors: list[SimpleMotor], leg_part: str, direction: str, multiplication: float):
+    velocity = constants.ROTATION_RATE * multiplication
     if direction == "forward":  # for foot toe up
         match leg_part:
             case "thigh":
-                motors.__getitem__(0).rate = constants.ROTATION_RATE
+                if motors.__getitem__(0).rate != velocity:
+                    motors.__getitem__(0).rate = velocity
             case "cale":
-                motors.__getitem__(1).rate = constants.ROTATION_RATE
+                if motors.__getitem__(1).rate != velocity:
+                    motors.__getitem__(1).rate = velocity
             case "foot":
-                motors.__getitem__(2).rate = constants.ROTATION_RATE
+                if motors.__getitem__(2).rate != velocity:
+                    motors.__getitem__(2).rate = velocity
     elif direction == "backward":  # for foot toe down
         match leg_part:
             case "thigh":
-                motors.__getitem__(0).rate = -constants.ROTATION_RATE
+                if motors.__getitem__(0).rate != -velocity:
+                    motors.__getitem__(0).rate = -velocity
             case "cale":
-                motors.__getitem__(1).rate = -constants.ROTATION_RATE
+                if motors.__getitem__(1).rate != -velocity:
+                    motors.__getitem__(1).rate = -velocity
             case "foot":
-                motors.__getitem__(2).rate = -constants.ROTATION_RATE
+                if motors.__getitem__(2).rate != -velocity:
+                    motors.__getitem__(2).rate = -velocity
     pass
 
 
-def move_left_leg(motors: list[SimpleMotor], leg_part: str, direction: str):
+def move_left_leg(motors: list[SimpleMotor], leg_part: str, direction: str, multiplication: float):
+    velocity = constants.ROTATION_RATE * multiplication
     if direction == "forward":
         match leg_part:
             case "thigh":
-                motors.__getitem__(3).rate = constants.ROTATION_RATE
+                if motors.__getitem__(3).rate != velocity:
+                    motors.__getitem__(3).rate = velocity
             case "cale":
-                motors.__getitem__(4).rate = constants.ROTATION_RATE
+                if motors.__getitem__(4).rate != velocity:
+                    motors.__getitem__(4).rate = velocity
             case "foot":
-                motors.__getitem__(5).rate = constants.ROTATION_RATE
+                if motors.__getitem__(5).rate != velocity:
+                    motors.__getitem__(5).rate = velocity
     elif direction == "backward":
         match leg_part:
             case "thigh":
-                motors.__getitem__(3).rate = -constants.ROTATION_RATE
+                if motors.__getitem__(3).rate != -velocity:
+                    motors.__getitem__(3).rate = -velocity
             case "cale":
-                motors.__getitem__(4).rate = -constants.ROTATION_RATE
+                if motors.__getitem__(4).rate != -velocity:
+                    motors.__getitem__(4).rate = -velocity
             case "foot":
-                motors.__getitem__(5).rate = -constants.ROTATION_RATE
+                if motors.__getitem__(5).rate != -velocity:
+                    motors.__getitem__(5).rate = -velocity
     pass
 
 

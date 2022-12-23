@@ -165,7 +165,7 @@ class Simulator(object):
         self.draw_options = pymunk.pygame_util.DrawOptions(self.screen)
         # ax = plt.axes(xlim=(0, 700), ylim=(0, 1000))
         # self.draw_options = pymunk.matplotlib_util.DrawOptions(ax)
-        self.space._set_iterations(10)  ### Try another value to better experience
+        self.space._set_iterations(20)  ### Try another value to better experience
 
         clock = pygame.time.Clock()
         running = True

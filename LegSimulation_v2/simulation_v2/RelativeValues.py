@@ -57,7 +57,7 @@ class RelativeValues:
     def calculate_angles(self, real_hips_position: Vec2d, real_knee_position: Vec2d, real_ankle_position: Vec2d,
                          real_toe_position: Vec2d, real_heel_position: Vec2d, real_center_foot_position: Vec2d):
         # calculate angles for right leg
-        self.x_hip = real_hips_position.x - CORPS_POSITION.x
+        self.x_hip = 0.0
         self.y_hip = real_hips_position.y - (CORPS_POSITION.y - ((1 / 2) * CORPS_HEIGHT))
 
         # knee position relative to the hip
