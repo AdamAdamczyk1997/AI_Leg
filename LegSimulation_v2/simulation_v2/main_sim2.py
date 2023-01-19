@@ -25,7 +25,6 @@ def limit_velocity(bodies: list[pymunk.Body], gravity, damping, dt):
 
 
 def write_data_to_excel(leg: Leg):
-
     columns = ['x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_cale', 'x_ankle',
                'y_ankle', 'x_toe', 'y_toe', 'x_heel', 'y_heel', 'x_foot', 'y_foot', 'angle_foot']
 
@@ -133,13 +132,7 @@ class Simulator(object):
             self.model_entity.right_leg.patella_cale_part.shape.filter = shape_filter
 
     def motor_leg(self, relative_angu_vel_right_leg, relative_angu_vel_left_leg):
-        right_thigh_motor = pymunk.SimpleMotor(self.model_entity.right_leg.thigh.body, self.model_entity.corps.body,
-                                               relative_angu_vel_right_leg)
-        right_cale_motor = pymunk.SimpleMotor(self.model_entity.right_leg.cale.body,
-                                              self.model_entity.right_leg.thigh.body, relative_angu_vel_right_leg)
-
-        right_foot_motor = pymunk.SimpleMotor(self.model_entity.right_leg.foot.body, self.model_entity.floor, 0)
-
+        corps_motor = pymunk.SimpleMotor(self.model_entity.corps.body, self.model_entity.floor, 0)
         left_thigh_motor = pymunk.SimpleMotor(self.model_entity.left_leg.thigh.body, self.model_entity.corps.body,
                                               relative_angu_vel_left_leg)
         left_cale_motor = pymunk.SimpleMotor(self.model_entity.left_leg.cale.body,
@@ -147,10 +140,16 @@ class Simulator(object):
 
         left_foot_motor = pymunk.SimpleMotor(self.model_entity.left_leg.foot.body, self.model_entity.floor, 0)
 
-        corps_motor = pymunk.SimpleMotor(self.model_entity.corps.body, self.model_entity.floor, 0)
-        # self.space.add(right_thigh_motor, right_cale_motor, right_foot_motor)
+        right_thigh_motor = pymunk.SimpleMotor(self.model_entity.right_leg.thigh.body, self.model_entity.corps.body,
+                                               relative_angu_vel_right_leg)
+        right_cale_motor = pymunk.SimpleMotor(self.model_entity.right_leg.cale.body,
+                                              self.model_entity.right_leg.thigh.body, relative_angu_vel_right_leg)
+        right_foot_motor = pymunk.SimpleMotor(self.model_entity.right_leg.foot.body, self.model_entity.floor, 0)
+
         self.space.add(right_thigh_motor, right_cale_motor,
                        right_foot_motor, left_thigh_motor, left_cale_motor, left_foot_motor, corps_motor)
+
+        # self.space.add(right_thigh_motor, right_cale_motor, right_foot_motor)
 
         self.filter()
         # motors = [left_thigh_motor, left_cale_motor, left_foot_motor]

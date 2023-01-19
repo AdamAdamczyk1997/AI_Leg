@@ -7,8 +7,8 @@ import LegPartBone
 
 GRAVITY: float = -981.0
 
-CORPS_WEIGHT: int = 10
-THIGH_WEIGHT: int = 5
+CORPS_WEIGHT: int = 50
+THIGH_WEIGHT: int = 10
 PATELLA_WEIGHT: int = 1
 CALE_WEIGHT: int = 10
 FOOT_WEIGHT: int = 10

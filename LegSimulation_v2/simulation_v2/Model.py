@@ -36,6 +36,7 @@ def running_gear(space):
 
 
 class Model:
+    mode: str
     num_bodies: int = 0
     corps: LegPartBone
     right_leg: Leg
@@ -48,6 +49,7 @@ class Model:
     pivots: list[pymunk.Body]
 
     def __init__(self, space: pymunk.Space(), mode: str):
+        self.mode = mode
         self.floor = running_gear(space)
         self.corps = LegPartBone(space, self.iterator(), "corps", CORPS_WEIGHT, (CORPS_WIDTH, CORPS_HEIGHT),
                                  CORPS_POSITION)
