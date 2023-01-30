@@ -12,6 +12,7 @@ import pandas as pd
 
 import Model
 import constants
+from LegSimulation_v2.simulation_v2.ControllerRightLegAI import VisualizeDataMatplotlib, write_data_to_excel
 from LegSimulation_v2.simulation_v2.Leg import Leg
 from LegSimulation_v2.simulation_v2.LegMotorController import Controller
 
@@ -22,61 +23,6 @@ def limit_velocity(bodies: list[pymunk.Body], gravity, damping, dt):
         pymunk.Body.update_velocity(bodies[x], gravity, damping, dt)
         if bodies[x].velocity.length > max_velocity:
             bodies[x].velocity = bodies[x].velocity * 0.99
-
-
-def write_data_to_excel(leg: Leg):
-    columns = ['x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_cale', 'x_ankle',
-               'y_ankle', 'x_toe', 'y_toe', 'x_heel', 'y_heel', 'x_foot', 'y_foot', 'angle_foot']
-
-    usage_counter = []
-    x_hip = []
-    y_hip = []
-    angle_thigh = []
-    x_knee = []
-    y_knee = []
-    angle_cale = []
-    x_ankle = []
-    y_ankle = []
-    x_toe = []
-    y_toe = []
-    x_heel = []
-    y_heel = []
-    x_foot = []
-    y_foot = []
-    angle_foot = []
-    i = 0
-
-    for r in leg.relative_values.histories:
-        usage_counter.append(leg.relative_values.histories[i][0])
-        x_hip.append(leg.relative_values.histories[i][1])
-        y_hip.append(leg.relative_values.histories[i][2])
-        angle_thigh.append(leg.relative_values.histories[i][3])
-        x_knee.append(leg.relative_values.histories[i][4])
-        y_knee.append(leg.relative_values.histories[i][5])
-        angle_cale.append(leg.relative_values.histories[i][6])
-        x_ankle.append(leg.relative_values.histories[i][7])
-        y_ankle.append(leg.relative_values.histories[i][8])
-        x_toe.append(leg.relative_values.histories[i][9])
-        y_toe.append(leg.relative_values.histories[i][10])
-        x_heel.append(leg.relative_values.histories[i][11])
-        y_heel.append(leg.relative_values.histories[i][12])
-        x_foot.append(leg.relative_values.histories[i][13])
-        y_foot.append(leg.relative_values.histories[i][14])
-        angle_foot.append(leg.relative_values.histories[i][15])
-        i += 1
-
-    df = pd.DataFrame(list(zip(x_hip, y_hip, angle_thigh, x_knee, y_knee, angle_cale, x_ankle, y_ankle,
-                               x_toe, y_toe, x_heel, y_heel, x_foot, y_foot, angle_foot)),
-                      index=usage_counter,
-                      columns=columns)
-
-    match leg.name:
-        case "right":
-            with pd.ExcelWriter("right_leg_data.xlsx") as writer:
-                df.to_excel(writer, sheet_name="right_leg", engine="xlsxwriter")
-        case "left":
-            with pd.ExcelWriter("left_leg_data.xlsx") as writer:
-                df.to_excel(writer, sheet_name="left_leg", engine="xlsxwriter")
 
 
 class Simulator(object):
@@ -96,6 +42,7 @@ class Simulator(object):
         self.filter()
         self.motors = self.motor_leg(0, 0)
         self.controller = Controller(self.model_entity, self.mode)
+        self.matplotlib = VisualizeDataMatplotlib()
 
     def reset_bodies(self, dt: float):
         for body in self.space.bodies:
@@ -199,8 +146,8 @@ class Simulator(object):
                         # running = False
                         # print("initial_array : ", str(self.model_entity.left_leg.relative_values.data))
 
-                        write_data_to_excel(self.model_entity.right_leg)
-                        write_data_to_excel(self.model_entity.left_leg)
+                        write_data_to_excel(self.model_entity)
+                        self.matplotlib.run("right_leg_data.xlsx")
 
                         sys.exit(0)
 

@@ -3,6 +3,7 @@ from math import sin, cos
 from numpy import double
 from pymunk import Vec2d
 import numpy as np
+from numpy import pi
 
 from LegSimulation_v2.simulation_v2.constants import THIGH_HEIGHT, CALE_HEIGHT, CORPS_POSITION, CORPS_HEIGHT, FOOT_WIDTH
 
@@ -30,8 +31,10 @@ class RelativeValues:
 
     usage_counter: int
     histories: list
+    oscillation: float
 
     def __init__(self):
+        self.oscillation = 0.0
         self.x_hip = 0.0
         self.y_hip = 0.0
         self.angle_thigh = 0.0
@@ -51,7 +54,7 @@ class RelativeValues:
         self.history_record = [self.usage_counter, self.x_hip, self.y_hip, self.angle_thigh,
                                self.x_knee, self.y_knee, self.angle_cale, self.x_ankle, self.y_ankle,
                                self.x_toe, self.y_toe, self.x_heel, self.y_heel, self.x_foot, self.y_foot,
-                               self.angle_foot]
+                               self.angle_foot, self.oscillation]
         self.histories = [self.history_record]
 
     def calculate_angles(self, real_hips_position: Vec2d, real_knee_position: Vec2d, real_ankle_position: Vec2d,
@@ -85,9 +88,10 @@ class RelativeValues:
         self.angle_foot = sin(sin_angle_foot)
 
         self.history_record = [self.usage_counter, int(self.x_hip), int(self.y_hip), round(self.angle_thigh, 2),
-                               int(self.x_knee), int(self.y_knee), round(self.angle_cale, 2), int(self.x_ankle), int(self.y_ankle),
+                               int(self.x_knee), int(self.y_knee), round(self.angle_cale, 2), int(self.x_ankle),
+                               int(self.y_ankle),
                                int(self.x_toe), int(self.y_toe), int(self.x_heel), int(self.y_heel), int(self.x_foot),
-                               int(self.y_foot), round(self.angle_foot, 2)]
+                               int(self.y_foot), round(self.angle_foot, 2), self.oscillation]
 
         self.histories.append(self.history_record)
 
@@ -108,3 +112,9 @@ class RelativeValues:
               "), ankle=(", int(self.x_ankle), ",", int(self.y_ankle), ", angle_foot",
               "), toe=(", int(self.x_toe), ",", int(self.y_toe), "), heel=(", int(self.x_heel), ",", int(self.y_heel),
               ")")
+
+    def change_oscillation(self, phase_nr: int):
+        pi_value = pi
+        value = phase_nr * (2 * pi_value/6)
+        self.oscillation = value
+        pass

@@ -10,6 +10,7 @@ from LegSimulation_v2.simulation_v2.Model import Model
 from LegSimulation_v2.simulation_v2.constants import FOOT_HEIGHT, FLOOR_HEIGHT
 
 
+
 def print_bool(status: bool):
     if status:
         return 'True'
@@ -153,7 +154,7 @@ class Controller:
                 elif self.current_phase_for_left == 6:
                     self.current_phase_for_left = 1
 
-    def run_phase_async(self, model_entity, motors, phase_nr: int):
+    def run_phase_async(self, model_entity: Model, motors, phase_nr: int):
         first_part = 0
         second_part = 1
         phase_function = ""
@@ -217,6 +218,8 @@ class Controller:
                 self.change_current_phase("right")
                 self.change_current_phase("left")
                 self.run_flag = True
+                model_entity.right_leg.relative_values.change_oscillation(self.current_phase_for_right)
+                model_entity.left_leg.relative_values.change_oscillation(self.current_phase_for_left)
 
 
 def phase_zero(leg: Leg, motors: list[SimpleMotor], flag: int):
