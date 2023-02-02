@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 import pandas as pd
 
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 
 from LegSimulation_v2.simulation_v2.Model import Model
@@ -69,39 +70,48 @@ def fill_date(model: Model, leg_nr: int):
         oscillation.append(leg.relative_values.histories[i][16])
         i += 1
 
-    the_same_counter = 0
-    oscillation_value_amount_temp = 0
-    j = 0
-    m = 1
+    moves_counter_for_phase = 1
+    phase_number = 0
+    number_of_records = 0
+    loop_number = 0
+    previous_phase_value = 0
+    total_value = 0
     for r in oscillation:
-        j += 1
+        number_of_records += 1
 
-    print("j =", j)
-    while m < j - 1:
-        if oscillation[m] == oscillation[m - 1]:
-            the_same_counter += 1
+    print("number_of_records =", number_of_records)
+    while loop_number < number_of_records - 1:
+        loop_number += 1
+        if oscillation[loop_number] == oscillation[loop_number - 1]:
+            moves_counter_for_phase += 1
         else:
             i = 0
-            print("oscillation_value_amount_temp =", oscillation_value_amount_temp)
-            print("the_same_counter =", the_same_counter)
-            print("m =", m)
-            while i <= the_same_counter:
-                val = oscillation.__getitem__(m - 1)
-                if the_same_counter == 0:
-                    oscillation_time.append((val * i))
-                else:
-                    oscillation_time.append(((val / the_same_counter) * i))
+            print("phase_number =", phase_number)
+            print("previous_phase_value =", previous_phase_value)
+            print("moves_counter_for_phase =", moves_counter_for_phase)
+            print("loop_number =", loop_number)
+            while i <= moves_counter_for_phase:
                 i += 1
+                last_phase_move_value = oscillation.__getitem__(loop_number - 1)
+                oscillation_time.append((((
+                                                      last_phase_move_value - previous_phase_value) / moves_counter_for_phase) * i) + previous_phase_value + total_value)
 
-            if oscillation_value_amount_temp < 6:
-                oscillation_value_amount_temp += 1
+            moves_counter_for_phase = 0
+            previous_phase_value += (last_phase_move_value - previous_phase_value)
+            print("last_phase_move_value =", last_phase_move_value)
+            print("previous_phase_value =", previous_phase_value)
+            if phase_number < 6:
+                phase_number += 1
             else:
-                oscillation_value_amount_temp = 1
-            the_same_counter = 0
-        m += 1
+                phase_number = 1
+                total_value += previous_phase_value
+                previous_phase_value = 0
+                print("previous_phase_value =", previous_phase_value)
+            print("total_value =", total_value)
+            print("-------------------------------------------------------------")
 
-    print("m =", m)
-    while oscillation_time.__len__() != j:
+    print("loop_number =", loop_number)
+    while oscillation_time.__len__() != number_of_records:
         oscillation_time.append(0.0)
     print(oscillation_time)
 
@@ -129,10 +139,21 @@ class VisualizeDataMatplotlib:
     def run(self, name: str):
         data = pd.read_excel(name)
         # print(data)
+        angle_thigh = list(data['angle_thigh'])
+        oscillation_time = list(data['oscillation_time'])
 
         df = pd.DataFrame(data)
         # plt.plot(df)
         # plt.hist(df)
+        # plt.show()
+
+        plt.style.use('_mpl-gallery')
+
+        # plot
+        fig, ax = plt.subplots()
+
+        ax.plot(oscillation_time, angle_thigh, linewidth=1.0)
+
         # plt.show()
 
         print(df)

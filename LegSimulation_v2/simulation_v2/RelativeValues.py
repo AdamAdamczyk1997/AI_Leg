@@ -61,6 +61,11 @@ class RelativeValues:
                          real_toe_position: Vec2d, real_heel_position: Vec2d, real_center_foot_position: Vec2d):
         # calculate angles for right leg
         self.x_hip = 0.0
+        self.y_hip = 0.0
+        self.angle_thigh = 0.0
+        self.x_knee = 0.0
+        self.y_knee = 0.0
+        self.angle_cale = 0.0
         self.y_hip = real_hips_position.y - (CORPS_POSITION.y - ((1 / 2) * CORPS_HEIGHT))
 
         # knee position relative to the hip

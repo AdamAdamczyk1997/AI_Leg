@@ -1,25 +1,19 @@
 from __future__ import annotations
-from typing import List
-from random import random
 
-import pymunk
-from typing import List
 import random
+
 import pymunk
 import pymunk.pygame_util
 # from kivy.graphics import Quad, Triangle
-from pygame import Color
-from pymunk import Vec2d, SlideJoint, DampedSpring
-import LegPartBone
-from LegSimulation_v2.simulation_v2 import constants, LegPartsHelper
-from math import sin, cos, pi, sqrt
+from pymunk import SlideJoint, DampedSpring
 
-from LegSimulation_v2.simulation_v2.LegPartBone import LegPartBone
-from LegSimulation_v2.simulation_v2.constants import JOINT_RADIUS, CORPS_WIDTH, CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
-    CALE_WIDTH, CALE_HEIGHT, FOOT_HEIGHT, FOOT_WIDTH, MIN_CORPS_THIGH, MIN_CMFJ, MIN_CMBJ, PATELLA_HEIGHT, \
-    PATELLA_WIDTH, MIN_PTJ, MIN_PCJ, CORPS_WEIGHT, THIGH_WEIGHT, FOOT_WEIGHT, PATELLA_WEIGHT, CALE_WEIGHT, \
-    HANDLER_LENGTH, LEG_HEIGHT, FLOOR_HEIGHT, CORPS_POSITION
+import LegPartBone
+from LegSimulation_v2.simulation_v2 import LegPartsHelper
 from LegSimulation_v2.simulation_v2.Leg import Leg
+from LegSimulation_v2.simulation_v2.LegPartBone import LegPartBone
+from LegSimulation_v2.simulation_v2.constants import CORPS_WIDTH, CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
+    CALE_WIDTH, CALE_HEIGHT, FOOT_HEIGHT, FOOT_WIDTH, MIN_CMFJ, MIN_CMBJ, PATELLA_WIDTH, MIN_PTJ, MIN_PCJ, CORPS_WEIGHT, \
+    LEG_HEIGHT, FLOOR_HEIGHT, CORPS_POSITION
 
 random.seed(1)  # make the simulation the same each time, easier to debug
 

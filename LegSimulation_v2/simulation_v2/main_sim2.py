@@ -146,8 +146,8 @@ class Simulator(object):
                         # running = False
                         # print("initial_array : ", str(self.model_entity.left_leg.relative_values.data))
 
-                        write_data_to_excel(self.model_entity)
-                        self.matplotlib.run("right_leg_data.xlsx")
+                        # write_data_to_excel(self.model_entity)
+                        # self.matplotlib.run("right_leg_data.xlsx")
 
                         sys.exit(0)
 
