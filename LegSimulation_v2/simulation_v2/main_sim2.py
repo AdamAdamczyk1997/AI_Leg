@@ -12,7 +12,7 @@ import pandas as pd
 
 import Model
 import constants
-from LegSimulation_v2.simulation_v2.ControllerRightLegAI import VisualizeDataMatplotlib, write_data_to_excel
+from LegSimulation_v2.simulation_v2.FillDataAnd import VisualizeDataMatplotlib, write_data_to_excel
 from LegSimulation_v2.simulation_v2.Leg import Leg
 from LegSimulation_v2.simulation_v2.LegMotorController import Controller
 
@@ -143,10 +143,18 @@ class Simulator(object):
                 if event.type == pygame.KEYDOWN:
                     if event.type == pygame.QUIT or (
                             event.key in (pygame.K_q, pygame.K_ESCAPE)):
+
+                        self.model_entity.right_leg.relative_values.counters[0].show_counters()
+                        self.model_entity.left_leg.relative_values.counters[0].show_counters()
+                        if self.controller.loop_counter > 0:
+                            self.model_entity.right_leg.relative_values.counters[1].show_counters()
+                            self.model_entity.left_leg.relative_values.counters[1].show_counters()
+                        self.model_entity.right_leg.relative_values.velocities.show_velocity_lists()
+                        self.model_entity.left_leg.relative_values.velocities.show_velocity_lists()
                         # running = False
                         # print("initial_array : ", str(self.model_entity.left_leg.relative_values.data))
 
-                        # write_data_to_excel(self.model_entity)
+                        write_data_to_excel(self.model_entity)
                         # self.matplotlib.run("right_leg_data.xlsx")
 
                         sys.exit(0)
@@ -162,6 +170,9 @@ class Simulator(object):
                     # Start/stop simulation!!!!!!!!!!!!!!!!!!!!!!!!!.
                     elif event.key == pygame.K_s:
                         simulate = not simulate
+                        self.model_entity.right_leg.relative_values.velocities.show_velocity_lists()
+                        self.model_entity.left_leg.relative_values.velocities.show_velocity_lists()
+
                     elif event.key == pygame.K_a:
                         pressed_k_a = not pressed_k_a
 
@@ -207,8 +218,9 @@ class Simulator(object):
             if simulate:
                 self.space.step(dt)
                 damping = 0.99
-                self.controller.movement_scenario_controller(self.model_entity, self.motors, simulate, counter)
-
+                temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors, simulate, counter)
+                if temp_end:
+                    simulate = False
                 limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, damping, dt)
                 limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, damping, dt)
 

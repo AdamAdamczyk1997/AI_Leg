@@ -1,10 +1,9 @@
 from __future__ import annotations
-from typing import List, Union
-from random import random
+
+from typing import Union
 
 import pymunk
-from pymunk import Poly, Vec2d, Body
-
+from pymunk import Vec2d, Body
 
 
 def add_body_dumped_spring(space: pymunk.Space(), body1: Body, body2: Body,

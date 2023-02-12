@@ -85,19 +85,12 @@ class Leg:
                                                               self.knee_body.position)
         ankle_pivot_body = LegPartsHelper.add_body_pivot_joint(space, self.cale.body, self.foot.body,
                                                                self.ankle_body.position)
-        foot_toe_pivot_joint_body = LegPartsHelper.add_joint_body((self.foot.body.position.x +
-                                                                   ((1 / 2) * FOOT_WIDTH),
-                                                                   self.foot.body.position.y - (0.5 * FOOT_HEIGHT)))
-        foot_heel_pivot_joint_body = LegPartsHelper.add_joint_body((self.foot.body.position.x -
-                                                                    ((1 / 2) * FOOT_WIDTH),
-                                                                    self.foot.body.position.y - (0.5 * FOOT_HEIGHT)))
         foot_center_pivot_joint_body = LegPartsHelper.add_joint_body((self.foot.body.position.x -
                                                                       ((1 / 4) * FOOT_WIDTH),
                                                                       self.foot.body.position.y - (0.5 * FOOT_HEIGHT)))
-        space.add(self.knee_body, self.ankle_body, foot_toe_pivot_joint_body,
-                  foot_heel_pivot_joint_body, foot_center_pivot_joint_body)
-        pivots = [self.knee_body, self.ankle_body, foot_toe_pivot_joint_body,
-                  foot_heel_pivot_joint_body, foot_center_pivot_joint_body]
+
+        space.add(self.knee_body, self.ankle_body, foot_center_pivot_joint_body)
+        pivots = [self.knee_body, self.ankle_body, foot_center_pivot_joint_body]
 
         if self.mode == "AI mode":
             if self.name == "right":
@@ -136,12 +129,7 @@ class Leg:
                                                             ((-1 / 4) * FOOT_WIDTH, (1 / 2) * FOOT_HEIGHT))
         s_ankle_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.cale.body, self.ankle_body,
                                                               (0, (-(1 / 2) * CALE_HEIGHT)), (0, 0))
-
-        s_toe_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.foot.body, self.pivots.__getitem__(2),
-                                                            ((1 / 2) * FOOT_WIDTH, (-(1 / 2) * FOOT_HEIGHT)), (0, 0))
-        s_heel_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.foot.body, self.pivots.__getitem__(3),
-                                                             (-(1 / 2) * FOOT_WIDTH, (-(1 / 2) * FOOT_HEIGHT)), (0, 0))
-        fot_center_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.foot.body, self.pivots.__getitem__(4),
+        fot_center_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.foot.body, self.pivots.__getitem__(2),
                                                                  (-(1 / 4) * FOOT_WIDTH, (-(1 / 2) * FOOT_HEIGHT)),
                                                                  (0, 0))
 

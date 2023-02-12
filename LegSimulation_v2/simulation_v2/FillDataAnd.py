@@ -1,12 +1,7 @@
-from LegSimulation_v2.simulation_v2.Leg import Leg
-from LegSimulation_v2.simulation_v2.LegMotorController import Controller
-from matplotlib import pyplot as plt
-
-import pandas as pd
-
 import matplotlib.pyplot as plt
+import pandas as pd
 import numpy as np
-import seaborn as sns
+from numpy import matrix
 
 from LegSimulation_v2.simulation_v2.Model import Model
 
@@ -24,8 +19,9 @@ def fill_date(model: Model, leg_nr: int):
         case 1:
             leg = model.left_leg
     columns = ['x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_cale', 'x_ankle',
-               'y_ankle', 'x_toe', 'y_toe', 'x_heel', 'y_heel', 'x_foot', 'y_foot', 'angle_foot', 'real_corps_y',
-               'oscillation', 'oscillation_time']
+               'y_ankle', 'x_foot', 'y_foot', 'angle_foot', 'real_corps_y',
+               'oscillation', 'oscillation_time', 'hip_velocity', 'knee_velocity', 'ankle_velocity',
+               'current_thigh_velocity_value', 'current_cale_velocity_value']
 
     usage_counter = []
     x_hip = []
@@ -36,15 +32,16 @@ def fill_date(model: Model, leg_nr: int):
     angle_cale = []
     x_ankle = []
     y_ankle = []
-    x_toe = []
-    y_toe = []
-    x_heel = []
-    y_heel = []
     x_foot = []
     y_foot = []
     angle_foot = []
     real_corps_y = []
     oscillation = []
+    knee_velocity = []
+    hip_velocity = []
+    ankle_velocity = []
+    current_thigh_velocity_value = []
+    current_cale_velocity_value = []
     i = 0
 
     oscillation_time = []
@@ -59,15 +56,17 @@ def fill_date(model: Model, leg_nr: int):
         angle_cale.append(leg.relative_values.histories[i][6])
         x_ankle.append(leg.relative_values.histories[i][7])
         y_ankle.append(leg.relative_values.histories[i][8])
-        x_toe.append(leg.relative_values.histories[i][9])
-        y_toe.append(leg.relative_values.histories[i][10])
-        x_heel.append(leg.relative_values.histories[i][11])
-        y_heel.append(leg.relative_values.histories[i][12])
-        x_foot.append(leg.relative_values.histories[i][13])
-        y_foot.append(leg.relative_values.histories[i][14])
-        angle_foot.append(leg.relative_values.histories[i][15])
+        x_foot.append(leg.relative_values.histories[i][9])
+        y_foot.append(leg.relative_values.histories[i][10])
+        angle_foot.append(leg.relative_values.histories[i][11])
         real_corps_y.append(model.corps.body.position.y)
-        oscillation.append(leg.relative_values.histories[i][16])
+        oscillation.append(leg.relative_values.histories[i][12])
+        knee_velocity.append(leg.relative_values.histories[i][13])
+        hip_velocity.append(leg.relative_values.histories[i][14])
+        ankle_velocity.append(leg.relative_values.histories[i][15])
+        current_thigh_velocity_value.append(leg.relative_values.histories[i][16])
+        current_cale_velocity_value.append(leg.relative_values.histories[i][17])
+
         i += 1
 
     moves_counter_for_phase = 1
@@ -93,8 +92,8 @@ def fill_date(model: Model, leg_nr: int):
             while i <= moves_counter_for_phase:
                 i += 1
                 last_phase_move_value = oscillation.__getitem__(loop_number - 1)
-                oscillation_time.append((((
-                                                      last_phase_move_value - previous_phase_value) / moves_counter_for_phase) * i) + previous_phase_value + total_value)
+                oscillation_time.append((((last_phase_move_value - previous_phase_value) / moves_counter_for_phase) * i)
+                                        + previous_phase_value + total_value)
 
             moves_counter_for_phase = 0
             previous_phase_value += (last_phase_move_value - previous_phase_value)
@@ -113,11 +112,11 @@ def fill_date(model: Model, leg_nr: int):
     print("loop_number =", loop_number)
     while oscillation_time.__len__() != number_of_records:
         oscillation_time.append(0.0)
-    print(oscillation_time)
 
     df = pd.DataFrame(list(zip(x_hip, y_hip, angle_thigh, x_knee, y_knee, angle_cale, x_ankle, y_ankle,
-                               x_toe, y_toe, x_heel, y_heel, x_foot, y_foot, angle_foot, real_corps_y, oscillation,
-                               oscillation_time)),
+                               x_foot, y_foot, angle_foot, real_corps_y, oscillation,
+                               oscillation_time, hip_velocity, knee_velocity, ankle_velocity,
+                               current_thigh_velocity_value, current_cale_velocity_value)),
                       index=usage_counter,
                       columns=columns)
 
@@ -159,3 +158,119 @@ class VisualizeDataMatplotlib:
         print(df)
 
         pass
+
+# class GeneticAlgorithm:
+#
+#
+#
+#
+#     void
+#     solution::fit_fun(matrix * ud, matrix * ad)
+#     {
+#         ++f_calls;
+#     int
+#     N = 1001;
+#     static
+#     matrix
+#     X(N, 2);
+#     if (solution::f_calls == 1)
+#         {
+#             ifstream
+#         S("polozenia.txt");
+#         S >> X;
+#         S.close();
+#         }
+#
+#         matrix
+#         Y0(4, 1);
+#         matrix * Y = solve_ode(0, 0.1, 100, Y0, & x);
+#         y = 0;
+#         for (int i = 0; i < N; ++i) {
+#             y = y + abs(X(i, 0) - Y[1](i, 0)) + abs(X(i, 1) - Y[1](i, 2));
+#         }
+#         if (ud) {
+#         ( * ud)(0, 0) = Y[1](0, 0);
+#         ( * ud)(0, 1) = Y[1](0, 2);
+#         for (int i = 1; i < N; ++i) {
+#         ( * ud).add_row();
+#         ( * ud)(i, 0) = Y[1](i, 0);
+#         ( * ud)(i, 1) = Y[1](i, 2);
+#         }
+#         }
+#         y = y / (2 * N);
+#
+#         # endif
+#     }
+#
+# def hess(ud: Matrix, ad: Matrix):
+#     ++H_calls;
+#
+# solution::solution(double L)
+# {
+#     x = L;
+#     g = NAN;
+#     H = NAN;
+#     y = NAN;
+# }
+#
+# def solution(a: matrix):
+#     x = a
+#     g = not.
+#     H = NAN
+#     y = NAN
+#
+#
+# solution::solution(int n, double* A)
+# {
+#     x = matrix(n, A);
+#     g = NAN;
+#     H = NAN;
+#     y = NAN;
+# }
+#
+# int get_dim(const solution& A)
+# {
+#     return get_len(A.x);
+# }
+#
+# void solution::clear_calls()
+# {
+#     f_calls = 0;
+#     g_calls = 0;
+#     H_calls = 0;
+# }
+#
+# ostream& operator<<(ostream& S, const solution& A)
+# {
+#     S << "x = " << A.x << endl;
+#     S << "y = " << A.y << endl;
+#     S << "f_calls = " << solution::f_calls << endl;
+#     if (solution::g_calls > 0)
+#         S << "g_calls = " << solution::g_calls << endl;
+#     if (solution::H_calls)
+#         S << "H_calls = " << solution::H_calls << endl;
+#     return S;
+# }
+#
+# class Matrix:
+# 	int n, m;
+# 	double **M;
+# 	friend int *get_size(const matrix &);
+# 	friend int get_len(const matrix &); // throw (char*);
+#
+# 	matrix(double = 0.0);
+# 	matrix(int, int, double = 0.0); // throw (char*);
+# 	matrix(int, double *); // throw (char*);
+# 	matrix(int, int, double **); // throw (char*);
+# 	matrix(const matrix &);
+# 	~matrix();
+# 	matrix &operator=(const matrix &);
+# 	matrix operator[](int) const; // throw (char*);
+# 	double &operator()(int = 0, int = 0); // throw (char*);
+# 	double &operator()(int = 0, int = 0) const; // throw (char*);
+# 	void set_col(const matrix &, int); // throw (char*);
+# 	void set_row(const matrix &, int); // throw (char*);
+# 	void add_col(double = 0.0);
+# 	void add_row(double = 0.0);
+# 	void add_col(const matrix &); // throw (char*);
+# 	void add_row(const matrix &); // throw (char*);
