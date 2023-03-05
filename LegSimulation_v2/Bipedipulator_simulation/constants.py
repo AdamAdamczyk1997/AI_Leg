@@ -3,15 +3,14 @@ from math import sqrt, pow
 
 from pymunk import Vec2d
 
-import LegPartBone
-
 GRAVITY: float = -981.0
+ROTATION_RATE: float = 1
 
 CORPS_WEIGHT: int = 50
 THIGH_WEIGHT: int = 10
 PATELLA_WEIGHT: int = 1
 CALE_WEIGHT: int = 10
-FOOT_WEIGHT: int = 10
+FOOT_WEIGHT: int = 5
 
 BOUNDS_WIDTH: int = 1800
 MAX_X: float = BOUNDS_WIDTH / 2
@@ -47,7 +46,6 @@ LEG_HEIGHT: float = (0.5*CORPS_HEIGHT) + THIGH_HEIGHT + CALE_HEIGHT + FOOT_HEIGH
 CORPS_POSITION = Vec2d(1000, LEG_HEIGHT + 10)
 
 JOINT_RADIUS: float = 20 * CONVERTER
-ROTATION_RATE: float = 1/2
 
 MIN_CORPS_THIGH: float = sqrt(pow(((1 / 2) * CORPS_WIDTH - (2 * JOINT_RADIUS)), 2) + pow((2 * JOINT_RADIUS), 2))
 MIN_TCFJ: float = sqrt(pow(THIGH_HEIGHT, 2) + pow(10, 2))

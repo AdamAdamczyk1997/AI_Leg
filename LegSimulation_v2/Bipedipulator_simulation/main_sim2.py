@@ -1,5 +1,3 @@
-import Model
-
 import sys
 
 import pygame
@@ -7,14 +5,11 @@ import pymunk
 import pymunk.matplotlib_util
 import pymunk.pygame_util
 from pygame.color import THECOLORS
-import xlsx
-import pandas as pd
 
 import Model
 import constants
-from LegSimulation_v2.simulation_v2.FillDataAnd import VisualizeDataMatplotlib, write_data_to_excel
-from LegSimulation_v2.simulation_v2.Leg import Leg
-from LegSimulation_v2.simulation_v2.LegMotorController import Controller
+from LegSimulation_v2.Bipedipulator_simulation.FillDataAnd import VisualizeDataMatplotlib, write_data_to_excel
+from LegSimulation_v2.Bipedipulator_simulation.LegMotorController import Controller
 
 
 def limit_velocity(bodies: list[pymunk.Body], gravity, damping, dt):
@@ -28,21 +23,26 @@ def limit_velocity(bodies: list[pymunk.Body], gravity, damping, dt):
 class Simulator(object):
     mode: str
 
+    model_entity: Model
+    controller: Controller
+    space: pymunk.Space
+    motors: list[pymunk.SimpleMotor]
+
     def __init__(self):
         self.mode = "Non-AI mode"
         # self.mode = "AI mode"
         self.display_flags = 0
         self.display_size = (constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT)
+        self.screen = None
+        self.draw_options = None
         self.space = pymunk.Space()
         self.space.gravity = (0, constants.GRAVITY)
         pymunk.pygame_util.positive_y_is_up = True
         self.model_entity = Model.Model(self.space, self.mode)
-        self.screen = None
-        self.draw_options = None
-        self.filter()
         self.motors = self.motor_leg(0, 0)
         self.controller = Controller(self.model_entity, self.mode)
         self.matplotlib = VisualizeDataMatplotlib()
+        self.filter()
 
     def reset_bodies(self, dt: float):
         for body in self.space.bodies:
@@ -133,7 +133,6 @@ class Simulator(object):
         while running:
 
             line = None
-
             fps = 60
             clock.tick(fps)
             dt = 1.0 / float(fps)
@@ -180,19 +179,6 @@ class Simulator(object):
                     elif event.key == pygame.K_r:
                         # Reset.
                         simulate = False
-                    # Moving muscles
-                    elif event.key == pygame.K_4:
-                        self.model_entity.move_muscles(0, dt)
-                    elif event.key == pygame.K_3:
-                        self.model_entity.move_muscles(1, dt)
-                    elif event.key == pygame.K_5:
-                        self.model_entity.move_muscles(2, dt)
-                    elif event.key == pygame.K_2:
-                        self.model_entity.move_muscles(3, dt)
-                    elif event.key == pygame.K_6:
-                        self.model_entity.move_muscles(4, dt)
-                    elif event.key == pygame.K_1:
-                        self.model_entity.move_muscles(5, dt)
                     # Start new simulation
                     elif event.key == pygame.K_n:
                         sim1 = Simulator()
@@ -205,8 +191,6 @@ class Simulator(object):
                 force = force - 5
 
             temp_up = False
-            if pressed_k_right:
-                temp_up = self.model_entity.movement_scenario(up)
 
             up = temp_up
 

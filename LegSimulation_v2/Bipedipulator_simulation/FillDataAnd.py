@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from numpy import matrix
 
-from LegSimulation_v2.simulation_v2.Model import Model
+from LegSimulation_v2.Bipedipulator_simulation.Model import Model
 
 
 def write_data_to_excel(model: Model):
@@ -78,17 +78,17 @@ def fill_date(model: Model, leg_nr: int):
     for r in oscillation:
         number_of_records += 1
 
-    print("number_of_records =", number_of_records)
+    # print("number_of_records =", number_of_records)
     while loop_number < number_of_records - 1:
         loop_number += 1
         if oscillation[loop_number] == oscillation[loop_number - 1]:
             moves_counter_for_phase += 1
         else:
             i = 0
-            print("phase_number =", phase_number)
-            print("previous_phase_value =", previous_phase_value)
-            print("moves_counter_for_phase =", moves_counter_for_phase)
-            print("loop_number =", loop_number)
+            # print("phase_number =", phase_number)
+            # print("previous_phase_value =", previous_phase_value)
+            # print("moves_counter_for_phase =", moves_counter_for_phase)
+            # print("loop_number =", loop_number)
             while i <= moves_counter_for_phase:
                 i += 1
                 last_phase_move_value = oscillation.__getitem__(loop_number - 1)
@@ -97,19 +97,19 @@ def fill_date(model: Model, leg_nr: int):
 
             moves_counter_for_phase = 0
             previous_phase_value += (last_phase_move_value - previous_phase_value)
-            print("last_phase_move_value =", last_phase_move_value)
-            print("previous_phase_value =", previous_phase_value)
+            # print("last_phase_move_value =", last_phase_move_value)
+            # print("previous_phase_value =", previous_phase_value)
             if phase_number < 6:
                 phase_number += 1
             else:
                 phase_number = 1
                 total_value += previous_phase_value
                 previous_phase_value = 0
-                print("previous_phase_value =", previous_phase_value)
-            print("total_value =", total_value)
-            print("-------------------------------------------------------------")
-
-    print("loop_number =", loop_number)
+    #             print("previous_phase_value =", previous_phase_value)
+    #         print("total_value =", total_value)
+    #         print("-------------------------------------------------------------")
+    #
+    # print("loop_number =", loop_number)
     while oscillation_time.__len__() != number_of_records:
         oscillation_time.append(0.0)
 
@@ -127,6 +127,39 @@ def fill_date(model: Model, leg_nr: int):
         case "left":
             with pd.ExcelWriter("left_leg_data.xlsx") as writer:
                 df.to_excel(writer, sheet_name="left_leg", engine="xlsxwriter")
+
+    columns2 = ['right_thigh_angles_list', 'right_cale_angles_list', 'left_thigh_angles_list', 'left_cale_angles_list']
+    right_thigh_angles_list = []
+    right_cale_angles_list = []
+    left_thigh_angles_list = []
+    left_cale_angles_list = []
+
+    i = 0
+    for r in model.equations.right_thigh_angles_list:
+        right_thigh_angles_list.append(model.equations.right_thigh_angles_list[i][0][0])
+        right_thigh_angles_list.append(model.equations.right_thigh_angles_list[i][1][0])
+        i += 1
+    i = 0
+    for r in model.equations.right_cale_angles_list:
+        right_cale_angles_list.append(model.equations.right_cale_angles_list[i][0][0])
+        right_cale_angles_list.append(model.equations.right_cale_angles_list[i][1][0])
+        i += 1
+    i = 0
+    for r in model.equations.left_thigh_angles_list:
+        left_thigh_angles_list.append(model.equations.left_thigh_angles_list[i][0][0])
+        left_thigh_angles_list.append(model.equations.left_thigh_angles_list[i][1][0])
+        i += 1
+    i = 0
+    for r in model.equations.left_cale_angles_list:
+        left_cale_angles_list.append(model.equations.left_cale_angles_list[i][0][0])
+        left_cale_angles_list.append(model.equations.left_cale_angles_list[i][1][0])
+        i += 1
+
+    df2 = pd.DataFrame(list(zip(right_thigh_angles_list, right_cale_angles_list, left_thigh_angles_list,
+                                left_cale_angles_list)),
+                       columns=columns2)
+    with pd.ExcelWriter("equations.xlsx") as writer:
+        df2.to_excel(writer, sheet_name="equations", engine="xlsxwriter")
 
 
 class VisualizeDataMatplotlib:
@@ -160,6 +193,8 @@ class VisualizeDataMatplotlib:
         pass
 
 # class GeneticAlgorithm:
+
+
 #
 #
 #

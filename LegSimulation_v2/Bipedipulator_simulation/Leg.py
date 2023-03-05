@@ -7,10 +7,10 @@ import pymunk.pygame_util
 from pymunk import SlideJoint, DampedSpring
 
 import LegPartBone
-from LegSimulation_v2.simulation_v2 import LegPartsHelper
-from LegSimulation_v2.simulation_v2.LegPartBone import LegPartBone
-from LegSimulation_v2.simulation_v2.RelativeValues import RelativeValues
-from LegSimulation_v2.simulation_v2.constants import CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
+from LegSimulation_v2.Bipedipulator_simulation import LegPartsHelper
+from LegSimulation_v2.Bipedipulator_simulation.LegPartBone import LegPartBone
+from LegSimulation_v2.Bipedipulator_simulation.RelativeValues import RelativeValues
+from LegSimulation_v2.Bipedipulator_simulation.constants import CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
     CALE_WIDTH, CALE_HEIGHT, FOOT_HEIGHT, FOOT_WIDTH, PATELLA_HEIGHT, \
     PATELLA_WIDTH, THIGH_WEIGHT, FOOT_WEIGHT, PATELLA_WEIGHT, CALE_WEIGHT, \
     CORPS_POSITION

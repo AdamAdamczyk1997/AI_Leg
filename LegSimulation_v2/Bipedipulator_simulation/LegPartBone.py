@@ -1,6 +1,4 @@
 from __future__ import annotations
-from typing import List
-from random import random
 
 import pymunk
 from pymunk import Poly, Vec2d, Body
@@ -19,8 +17,6 @@ class LegPartBone:
     shape_friction: float
     shape_color: shape.color = "black"
     body: Body
-
-    # helper: LegPartsHelper
 
     def __init__(self, space: pymunk.Space(), body_id, name, mass, size, vector: Vec2d):
         self.id = body_id

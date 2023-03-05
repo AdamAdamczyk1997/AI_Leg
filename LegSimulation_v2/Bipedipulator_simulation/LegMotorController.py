@@ -1,10 +1,11 @@
 from pymunk import SimpleMotor
 
-from LegSimulation_v2.simulation_v2 import constants
-from LegSimulation_v2.simulation_v2.Leg import Leg
-from LegSimulation_v2.simulation_v2.Model import Model
-from LegSimulation_v2.simulation_v2.RelativeValues import Counters
-from LegSimulation_v2.simulation_v2.constants import FLOOR_HEIGHT
+from LegSimulation_v2.Bipedipulator_simulation import constants
+from LegSimulation_v2.Bipedipulator_simulation.Leg import Leg
+from LegSimulation_v2.Bipedipulator_simulation.Model import Model
+from LegSimulation_v2.Bipedipulator_simulation.RelativeValues import Counters
+from LegSimulation_v2.Bipedipulator_simulation.ValuesPerPhase import Equations
+from LegSimulation_v2.Bipedipulator_simulation.constants import FLOOR_HEIGHT
 
 
 def print_bool(status: bool):
@@ -105,8 +106,6 @@ class Controller:
         self.part_phase = 0
         self.right_leg_status = LegStatus(model_entity, model_entity.right_leg)
         self.left_leg_status = LegStatus(model_entity, model_entity.left_leg)
-        # self.walk_phases_leg_left = fill_walk_phases_leg_left(model_entity, model_entity.left_leg)
-        # self.walk_phases_leg_right = fill_walk_phases_leg_right(model_entity, model_entity.right_leg)
         self.current_phase = 0
         self.loop_counter = 0
         self.mode = mode
@@ -148,9 +147,13 @@ class Controller:
                 __getitem__(self.current_phase).__getitem__(self.part_phase)
 
             model_entity.right_leg.relative_values.velocities.update_current_velocity(motors.__getitem__(0).rate,
-                                                                                      motors.__getitem__(1).rate)
+                                                                                      motors.__getitem__(1).rate,
+                                                                                      self.current_phase,
+                                                                                      self.part_phase)
             model_entity.left_leg.relative_values.velocities.update_current_velocity(motors.__getitem__(3).rate,
-                                                                                     motors.__getitem__(4).rate)
+                                                                                     motors.__getitem__(4).rate,
+                                                                                     self.current_phase,
+                                                                                     self.part_phase)
             self.set_multiplication_of_motor_velocity(right_thigh_speed, right_cale_speed, left_thigh_speed,
                                                       left_cale_speed)
             temp_end = self.run_phase_async(model_entity, motors, self.current_phase)
@@ -193,66 +196,60 @@ class Controller:
         end_left = False
         match self.part_phase:
             case 0:
-                if model_entity.mode == "Non-AI mode" and self.current_phase == phase_nr:
-                    end_right = phase_function(model_entity.right_leg, motors, self.right_thigh_speed,
-                                               self.right_cale_speed, self.part_phase)
-                    model_entity.right_leg.relative_values.counters[self.loop_counter]. \
-                        phase_part_usage_increment(self.current_phase, end_right)
-                    if end_right:
-                        stop_moving_right_leg(motors, "thigh")
-                        stop_moving_right_leg(motors, "cale")
-                        print("End ", self.part_phase, " R:", self.current_phase)
-                    else:
-                        self.temp_right_phase_first_part_usage_counter += 1
-                elif model_entity.mode == "AI mode" and self.current_phase == phase_nr:
-                    end_right = True
+                end_right = phase_function(model_entity.right_leg, motors, self.right_thigh_speed,
+                                           self.right_cale_speed, self.part_phase)
+                model_entity.right_leg.relative_values.counters[self.loop_counter]. \
+                    phase_part_usage_increment(self.current_phase, end_right)
+                if end_right:
+                    stop_moving_right_leg(motors, "thigh")
+                    stop_moving_right_leg(motors, "cale")
                     print("End ", self.part_phase, " R:", self.current_phase)
+                else:
+                    self.temp_right_phase_first_part_usage_counter += 1
 
-                if self.current_phase == phase_nr:
-                    end_left = phase_function(model_entity.left_leg, motors, self.left_thigh_speed,
-                                              self.left_cale_speed, self.part_phase)
-                    model_entity.left_leg.relative_values.counters[self.loop_counter]. \
-                        phase_part_usage_increment(self.current_phase, end_left)
-                    if end_left:
-                        stop_moving_left_leg(motors, "thigh")
-                        stop_moving_left_leg(motors, "cale")
-                        print("End ", self.part_phase, " L:", self.current_phase)
-                    else:
-                        self.temp_left_phase_first_part_usage_counter += 1
+                end_left = phase_function(model_entity.left_leg, motors, self.left_thigh_speed,
+                                          self.left_cale_speed, self.part_phase)
+                model_entity.left_leg.relative_values.counters[self.loop_counter]. \
+                    phase_part_usage_increment(self.current_phase, end_left)
+                if end_left:
+                    stop_moving_left_leg(motors, "thigh")
+                    stop_moving_left_leg(motors, "cale")
+                    print("End ", self.part_phase, " L:", self.current_phase)
+                else:
+                    self.temp_left_phase_first_part_usage_counter += 1
                 if end_right and end_left:
                     self.part_phase = 1
                     print("End first_part current phases")
             case 1:
-                if model_entity.mode == "Non-AI mode" and self.current_phase == phase_nr:
-                    end_right = phase_function(model_entity.right_leg, motors, self.right_thigh_speed,
-                                               self.right_cale_speed, self.part_phase)
-                    model_entity.right_leg.relative_values.counters[self.loop_counter]. \
-                        phase_part_usage_increment(self.current_phase, end_right)
-                    if end_right:
-                        stop_moving_right_leg(motors, "thigh")
-                        stop_moving_right_leg(motors, "cale")
-                        print("End R:", self.current_phase)
-                    else:
-                        self.temp_right_phase_second_part_usage_counter += 1
-
-                elif model_entity.mode == "AI mode" and self.current_phase == phase_nr:
-                    end_right = True
+                end_right = phase_function(model_entity.right_leg, motors, self.right_thigh_speed,
+                                           self.right_cale_speed, self.part_phase)
+                model_entity.right_leg.relative_values.counters[self.loop_counter]. \
+                    phase_part_usage_increment(self.current_phase, end_right)
+                if end_right:
+                    # self.fill_time(model_entity.right_leg, motors)
+                    stop_moving_right_leg(motors, "thigh")
+                    stop_moving_right_leg(motors, "cale")
                     print("End R:", self.current_phase)
+                else:
+                    self.temp_right_phase_second_part_usage_counter += 1
 
-                if self.current_phase == phase_nr:
-                    end_left = phase_function(model_entity.left_leg, motors, self.left_thigh_speed,
-                                              self.left_cale_speed, self.part_phase)
-                    model_entity.left_leg.relative_values.counters[self.loop_counter]. \
-                        phase_part_usage_increment(self.current_phase, end_left)
-                    if end_left:
-                        stop_moving_left_leg(motors, "thigh")
-                        stop_moving_left_leg(motors, "cale")
-                        print("End L:", self.current_phase)
-                    else:
-                        self.temp_left_phase_second_part_usage_counter += 1
+                end_right = True
+                print("End R:", self.current_phase)
+
+                end_left = phase_function(model_entity.left_leg, motors, self.left_thigh_speed,
+                                          self.left_cale_speed, self.part_phase)
+                model_entity.left_leg.relative_values.counters[self.loop_counter]. \
+                    phase_part_usage_increment(self.current_phase, end_left)
+                if end_left:
+                    stop_moving_left_leg(motors, "thigh")
+                    stop_moving_left_leg(motors, "cale")
+                    print("End L:", self.current_phase)
+                else:
+                    self.temp_left_phase_second_part_usage_counter += 1
 
                 if end_right and end_left:
                     print("End second_part current phases")
+
                     self.part_phase = 0
                     model_entity.right_leg.relative_values.counters[self.loop_counter].append_phase_part_usage_counters(
                         [self.temp_right_phase_first_part_usage_counter,
@@ -457,7 +454,7 @@ def align_thigh(leg: Leg, motors: list[SimpleMotor], thigh_speed: float):
 def align_cale(leg: Leg, motors: list[SimpleMotor], cale_speed: float):
     move_leg_function = choose_leg_functions(leg, True)
     stop_leg_function = choose_leg_functions(leg, False)
-    if leg.relative_values.angle_cale < -0.1:
+    if leg.relative_values.angle_cale > -0.1:
         move_leg_function(motors, "cale", "backward", cale_speed)
     else:
         stop_leg_function(motors, "cale")
@@ -474,7 +471,7 @@ def set_thigh_start_position(leg: Leg, motors: list[SimpleMotor], thigh_speed: f
         case "right":
             thigh_value = 0.2
         case "left":
-            thigh_value = 0.25
+            thigh_value = 0.24
     if leg.relative_values.angle_thigh <= thigh_value:
         move_leg_function(motors, "thigh", "forward", thigh_speed)
     else:
@@ -492,7 +489,7 @@ def set_cale_start_position(leg: Leg, motors: list[SimpleMotor], cale_speed: flo
         case "right":
             cale_value = -0.2
         case "left":
-            cale_value = -0.30
+            cale_value = -0.40
     if leg.relative_values.angle_cale >= cale_value:
         move_leg_function(motors, "cale", "backward", cale_speed)
     else:
@@ -511,17 +508,17 @@ def lifting_leg(leg: Leg, motors: list[SimpleMotor], part: int, thigh_speed: flo
     cale_value = 0.0
     match part:
         case 0:
-            thigh_value = 0.15
-            cale_value = -0.45
+            thigh_value = 0.12
+            cale_value = -0.5
         case 1:
-            thigh_value = 0.25
-            cale_value = -0.30
+            thigh_value = 0.24
+            cale_value = -0.40
         case 2:
-            thigh_value = 0.35
-            cale_value = -0.20
+            thigh_value = 0.31
+            cale_value = -0.30
         case 3:
-            thigh_value = 0.40
-            cale_value = -0.15
+            thigh_value = 0.38
+            cale_value = -0.20
         case 4:
             thigh_value = 0.45
             cale_value = -0.10
@@ -734,155 +731,3 @@ def stop_moving_left_leg(motors: list[SimpleMotor], leg_part: str):
         case "foot":
             motors.__getitem__(5).rate = 0
     pass
-
-
-def fill_walk_phases_leg_left(model_entity: Model, leg: Leg):
-    zero = LegStatus(model_entity, leg)
-    zero.phase_id = 0
-    zero.is_moving = False
-    zero.is_standing_on_the_ground = True
-    zero.is_leading = False
-    zero.is_lifting = True
-    zero.is_up = False
-    zero.is_straightening = False
-    zero.is_straight = True
-
-    one = LegStatus(model_entity, leg)
-    one.phase_id = 1
-    one.is_moving = True
-    one.is_standing_on_the_ground = False
-    one.is_leading = True
-    one.is_lifting = True
-    one.is_up = False
-    one.is_straightening = False
-    one.is_straight = False
-
-    two = LegStatus(model_entity, leg)
-    two.phase_id = 2
-    two.is_moving = False
-    two.is_standing_on_the_ground = False
-    two.is_leading = True
-    two.is_lifting = False
-    two.is_up = True
-    two.is_straightening = False
-    two.is_straight = False
-
-    three = LegStatus(model_entity, leg)
-    three.phase_id = 3
-    three.is_moving = True
-    three.is_standing_on_the_ground = False
-    three.is_leading = True
-    three.is_lifting = False
-    three.is_up = True
-    three.is_straightening = True
-    three.is_straight = False
-
-    four = LegStatus(model_entity, leg)
-    four.phase_id = 4
-    four.is_moving = False
-    four.is_standing_on_the_ground = True
-    four.is_leading = True
-    four.is_lifting = False
-    four.is_up = False
-    four.is_straightening = False
-    four.is_straight = True
-
-    five = LegStatus(model_entity, leg)
-    five.phase_id = 5
-    five.is_moving = True
-    five.is_standing_on_the_ground = True
-    five.is_leading = True
-    five.is_lifting = False
-    five.is_up = False
-    five.is_straightening = False
-    five.is_straight = True
-
-    six = LegStatus(model_entity, leg)
-    six.phase_id = 6
-    six.is_moving = True
-    six.is_standing_on_the_ground = True
-    six.is_leading = False
-    six.is_lifting = False
-    six.is_up = False
-    six.is_straightening = False
-    six.is_straight = True
-
-    walk_phases = [zero, one, two, three, four, five, six]
-
-    return walk_phases
-
-
-def fill_walk_phases_leg_right(model_entity: Model, leg: Leg):
-    zero = LegStatus(model_entity, leg)
-    zero.phase_id = 0
-    zero.is_moving = False
-    zero.is_standing_on_the_ground = True
-    zero.is_leading = False
-    zero.is_lifting = True
-    zero.is_up = False
-    zero.is_straightening = False
-    zero.is_straight = True
-
-    one = LegStatus(model_entity, leg)
-    one.phase_id = 1
-    one.is_moving = True
-    one.is_standing_on_the_ground = True
-    one.is_leading = False
-    one.is_lifting = False
-    one.is_up = False
-    one.is_straightening = False
-    one.is_straight = True
-
-    two = LegStatus(model_entity, leg)
-    two.phase_id = 2
-    two.is_moving = False
-    two.is_standing_on_the_ground = False
-    two.is_leading = True
-    two.is_lifting = False
-    two.is_up = True
-    two.is_straightening = False
-    two.is_straight = False
-
-    three = LegStatus(model_entity, leg)
-    three.phase_id = 3
-    three.is_moving = True
-    three.is_standing_on_the_ground = False
-    three.is_leading = True
-    three.is_lifting = False
-    three.is_up = True
-    three.is_straightening = True
-    three.is_straight = False
-
-    four = LegStatus(model_entity, leg)
-    four.phase_id = 4
-    four.is_moving = False
-    four.is_standing_on_the_ground = True
-    four.is_leading = True
-    four.is_lifting = False
-    four.is_up = False
-    four.is_straightening = False
-    four.is_straight = True
-
-    five = LegStatus(model_entity, leg)
-    five.phase_id = 5
-    five.is_moving = True
-    five.is_standing_on_the_ground = True
-    five.is_leading = True
-    five.is_lifting = False
-    five.is_up = False
-    five.is_straightening = False
-    five.is_straight = True
-
-    six = LegStatus(model_entity, leg)
-    six.phase_id = 6
-    six.is_moving = True
-    six.is_standing_on_the_ground = True
-    six.is_leading = False
-    six.is_lifting = False
-    six.is_up = False
-    six.is_straightening = False
-    six.is_straight = True
-
-    walk_phases = [zero, one, two, three, four, five, six]
-
-    return walk_phases

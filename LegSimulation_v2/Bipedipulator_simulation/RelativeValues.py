@@ -3,59 +3,9 @@ from enum import Enum
 from numpy import pi, matrix
 from pymunk import Vec2d, Body
 
-from LegSimulation_v2.simulation_v2.constants import THIGH_HEIGHT, CALE_HEIGHT, CORPS_POSITION, CORPS_HEIGHT, FOOT_WIDTH
-
-start_velocity_value = 0.5
-
-class ChangeVelocitySignal(Enum):
-    INCREASE_MAX = 0.1
-    INCREASE = 0.05
-    REDUCE = -0.05
-    REDUCE_MAX = -0.1
-
-class Velocity(float):
-    thigh_velocity: list
-    cale_velocity: list
-
-    current_thigh_velocity_value: float
-    current_cale_velocity_value: float
-
-    def __init__(self, start_velocity: float):
-        self.thigh_velocity = []
-        self.cale_velocity = []
-        self.current_thigh_velocity_value = 0.0
-        self.current_cale_velocity_value = 0.0
-
-        if start_velocity:
-            self.fill_velocity(start_velocity)
-
-    def update_current_velocity(self, thigh_velocity: float, cale_velocity: float):
-        self.current_thigh_velocity_value = thigh_velocity
-        self.current_cale_velocity_value = cale_velocity
-
-    def append_thigh_velocity_record_to_the_list(self, phase: int, part: int, value: float):
-        record = [phase, [part, value]]
-        self.thigh_velocity.append(record)
-
-    def change_velocity(self, which_phase: int, which_part_phase: int, leg_part: str, value: float):
-        match leg_part:
-            case "thigh":
-                self.thigh_velocity[which_phase][which_part_phase] += value
-            case "cale":
-                self.cale_velocity[which_phase][which_part_phase] += value
-
-
-    def fill_velocity(self, velocity: float):
-        for i in range(0, 7):
-            record_part = []
-            for j in range(2):
-                record_part.append(velocity)
-            self.thigh_velocity.append(record_part)
-            self.cale_velocity.append(record_part)
-
-    def show_velocity_lists(self):
-        print("thigh velocity list= ", self.thigh_velocity)
-        print("cale velocity list= ", self.cale_velocity)
+from LegSimulation_v2.Bipedipulator_simulation.ValuesPerPhase import Velocity, start_velocity_value
+from LegSimulation_v2.Bipedipulator_simulation.constants import THIGH_HEIGHT, CALE_HEIGHT, CORPS_POSITION, CORPS_HEIGHT, \
+    FOOT_WIDTH
 
 
 class Counters:
@@ -86,6 +36,23 @@ class Counters:
     def append_phase_usage_counter(self):
         self.phase_usage_counters.append([self.phase_1_usage, self.phase_2_usage, self.phase_3_usage,
                                           self.phase_4_usage, self.phase_5_usage, self.phase_6_usage])
+
+    def get_counter(self, phase):
+        match phase:
+            case 0:
+                return self.phase_0_usage
+            case 1:
+                return self.phase_1_usage
+            case 2:
+                return self.phase_2_usage
+            case 3:
+                return self.phase_3_usage
+            case 4:
+                return self.phase_4_usage
+            case 5:
+                return self.phase_5_usage
+            case 6:
+                return self.phase_6_usage
 
     def phase_part_usage_increment(self, phase: int, not_count: bool):
         if not not_count:
@@ -273,4 +240,3 @@ class RelativeValues:
     #         return self.velocities.change_velocity(which_phase, )ChangeVelocitySignal.INCREASE_MAX
     #     elif average > 40:
     #         return ChangeVelocitySignal.INCREASE
-
