@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from enum import Enum
+from pymunk import vec2d, Vec2d
 
 start_velocity_value = 0.25
 
@@ -8,6 +11,29 @@ class ChangeVelocitySignal(Enum):
     INCREASE = 0.05
     REDUCE = -0.05
     REDUCE_MAX = -0.1
+
+
+def generate_equation(t_1: float, t_2: float, q_1: float, q_2: float):
+    A = round(((q_2 - q_1) / (t_2 - t_1)), 4)
+    B = round((q_1 - (A * t_1)), 4)
+    equation = str(A) + " * t + " + str(B)
+
+    return equation
+
+
+def calculate_need_velocity(phase, part_phase, q_for_first: list, q_for_second: list):
+    distance_1 = abs(q_for_first[0] - q_for_first[1])
+    distance_2 = abs(q_for_second[0] - q_for_second[1])
+    if distance_1 < distance_2:
+        velocity_2 = 0.20
+        velocity_1 = round(distance_1 / (distance_2 / velocity_2), 2)
+    elif distance_1 > distance_2:
+        velocity_1 = 0.20
+        velocity_2 = round(distance_2 / (distance_1 / velocity_1), 2)
+    else:
+        velocity_1 = 0.20
+        velocity_2 = 0.20
+    print("Calculating velocity velocity_1/_2", velocity_1, velocity_2)
 
 
 class Velocity(float):
@@ -85,44 +111,92 @@ class Velocity(float):
         print("cale time list= ", self.cale_time)
 
 
-class Equations:
-    right_thigh_angles_list: list[list[list[float]]]
-    right_cale_angles_list: list[list[list[float]]]
+class Equations(str):
+    leg_name: str
 
-    left_thigh_angles_list: list[list[list[float]]]
-    left_cale_angles_list: list[list[list[float]]]
+    thigh_angles_list: list[list[list[float]]]
+    cale_angles_list: list[list[list[float]]]
 
-    def __init__(self):
+    current_angle_value_due_to_the_equation: float
+
+    lifting_leg_function_equations: dict
+    move_leg_to_the_back_equation: dict
+    move_weight_to_leg: dict
+    put_thigh_down: dict
+
+    def __init__(self, leg_name: str):
+        self.leg_name = leg_name
         self.fill_angles_list()
+        self.fill_dictionaries()
 
     def fill_angles_list(self):
-        self.right_thigh_angles_list = [[[0.2, 0.15], [0.15, 0.10]], [[0.10, 0.05], [0.05, 0.00]],
-                                        [[0.00, 0.12], [0.12, 0.24]], [[0.24, 0.31], [0.31, 0.38]],
-                                        [[0.38, 0.45], [0.45, 0.35]], [[0.35, 0.25], [0.25, 0.20]]]
-
-        self.right_cale_angles_list = [[[-0.2, -0.3], [-0.3, -0.4]], [[-0.4, -0.5], [-0.5, -0.6]],
-                                       [[-0.6, -0.5], [-0.5, -0.4]], [[-0.4, -0.3], [-0.3, -0.2]],
-                                       [[-0.2, -0.1], [-0.1, -0.1]], [[-0.1, -0.3], [-0.3, -0.20]]]
-
-        self.left_thigh_angles_list = [[[0.24, 0.31], [0.31, 0.38]], [[0.38, 0.45], [0.45, 0.35]],
-                                       [[0.35, 0.25], [0.25, 0.20]], [[0.2, 0.15], [0.15, 0.10]],
-                                       [[0.10, 0.05], [0.05, 0.00]], [[0.00, 0.12], [0.12, 0.24]]]
-
-        self.left_cale_angles_list = [[[-0.4, -0.3], [-0.3, -0.2]], [[-0.2, -0.1], [-0.1, -0.1]],
-                                      [[-0.1, -0.3], [-0.3, -0.20]], [[-0.2, -0.3], [-0.3, -0.4]],
-                                      [[-0.4, -0.5], [-0.5, -0.6]], [[-0.6, -0.5], [-0.5, -0.4]]]
-
-    def get_angle(self, leg: str, leg_part: str, phase: int, phase_part: int):
-        match leg:
+        match self.leg_name:
             case "right":
-                match leg_part:
-                    case "thigh":
-                        return self.right_thigh_angles_list[phase][phase_part]
-                    case "cale":
-                        return self.right_cale_angles_list[phase][phase_part]
+                self.thigh_angles_list = [[[0.2, 0.15], [0.15, 0.10]], [[0.10, 0.05], [0.05, 0.00]],
+                                          [[0.00, 0.12], [0.12, 0.24]], [[0.24, 0.31], [0.31, 0.38]],
+                                          [[0.38, 0.45], [0.45, 0.35]], [[0.35, 0.275], [0.275, 0.20]]]
+
+                self.cale_angles_list = [[[-0.2, -0.3], [-0.3, -0.4]], [[-0.4, -0.5], [-0.5, -0.6]],
+                                         [[-0.6, -0.5], [-0.5, -0.4]], [[-0.4, -0.3], [-0.3, -0.2]],
+                                         [[-0.2, -0.1], [-0.1, -0.1]], [[-0.1, -0.3], [-0.3, -0.20]]]
             case "left":
-                match leg_part:
-                    case "thigh":
-                        return self.left_thigh_angles_list[phase][phase_part]
-                    case "cale":
-                        return self.left_cale_angles_list[phase][phase_part]
+                self.thigh_angles_list = [[[0.24, 0.31], [0.31, 0.38]], [[0.38, 0.45], [0.45, 0.35]],
+                                          [[0.35, 0.275], [0.275, 0.20]], [[0.2, 0.15], [0.15, 0.10]],
+                                          [[0.10, 0.05], [0.05, 0.00]], [[0.00, 0.12], [0.12, 0.24]]]
+
+                self.cale_angles_list = [[[-0.4, -0.3], [-0.3, -0.2]], [[-0.2, -0.1], [-0.1, -0.1]],
+                                         [[-0.1, -0.3], [-0.3, -0.20]], [[-0.2, -0.3], [-0.3, -0.4]],
+                                         [[-0.4, -0.5], [-0.5, -0.6]], [[-0.6, -0.5], [-0.5, -0.4]]]
+            case other:
+                print("Equation leg name not specified")
+
+    def get_angle(self, leg_part: str, phase: int, phase_part: int):
+        match leg_part:
+            case "thigh":
+                return self.thigh_angles_list[phase - 1][phase_part][1]
+            case "cale":
+                return self.cale_angles_list[phase - 1][phase_part][1]
+
+    def show_angles_lists(self):
+        print("thigh angles list= ", self.thigh_angles_list)
+        print("cale angles list= ", self.cale_angles_list)
+
+    def fill_equation_dictionary(self, phase_1: int, part_phase_1: int, phase_2: int, part_phase_2: int):
+        start_phase = ((phase_1 - 1) * 2) + part_phase_1
+        stop_phase = ((phase_2 - 1) * 2) + part_phase_2
+        phase_amount = 12
+
+        t = [(start_phase / phase_amount), (stop_phase / phase_amount)]
+
+        q_for_thigh = [self.thigh_angles_list[phase_1 - 1][part_phase_1][0],
+                       self.thigh_angles_list[phase_2 - 1][part_phase_2][0]]
+        q_for_cale = [self.cale_angles_list[phase_1 - 1][part_phase_1][0],
+                      self.cale_angles_list[phase_2 - 1][part_phase_2][0]]
+
+        calculate_need_velocity(0, 0, q_for_thigh, q_for_cale)
+
+        thigh_equation = generate_equation(t[0], t[1], q_for_thigh[0], q_for_thigh[1])
+        cale_equation = generate_equation(t[0], t[1], q_for_cale[0], q_for_cale[1])
+
+        dictionary = dict(thigh_equation=thigh_equation, cale_equation=cale_equation, start_time=start_phase,
+                          stop_time=stop_phase)
+
+        return dictionary
+
+    def fill_dictionaries(self):
+        match self.leg_name:
+            case "right":
+                move_leg_to_the_back = self.fill_equation_dictionary(1, 0, 3, 0)
+                lifting_leg_function_equations_part1 = self.fill_equation_dictionary(3, 0, 4, 0)
+                lifting_leg_function_equations_part2 = self.fill_equation_dictionary(4, 0, 5, 1)
+                put_thigh_down = self.fill_equation_dictionary(5, 1, 6, 0)
+                move_weight_to_leg = self.fill_equation_dictionary(6, 0, 6, 1)
+                print("move_leg_to_the_back = ", move_leg_to_the_back)
+                print("lifting_leg_function_equations_part1 = ", lifting_leg_function_equations_part1)
+                print("lifting_leg_function_equations_part2 = ", lifting_leg_function_equations_part2)
+                print("put_thigh_down = ", put_thigh_down)
+                print("move_weight_to_leg = ", move_weight_to_leg)
+            case "left":
+                pass
+
+        pass

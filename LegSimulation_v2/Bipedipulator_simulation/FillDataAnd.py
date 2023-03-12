@@ -9,6 +9,42 @@ from LegSimulation_v2.Bipedipulator_simulation.Model import Model
 def write_data_to_excel(model: Model):
     fill_date(model, 0)
     fill_date(model, 1)
+    fill_equation(model)
+
+
+def fill_equation(model: Model):
+    columns2 = ['right_thigh_angles_list', 'right_cale_angles_list', 'left_thigh_angles_list', 'left_cale_angles_list']
+    right_thigh_angles_list = []
+    right_cale_angles_list = []
+    left_thigh_angles_list = []
+    left_cale_angles_list = []
+
+    i = 0
+    for r in model.right_leg.equations.thigh_angles_list:
+        right_thigh_angles_list.append(model.right_leg.equations.thigh_angles_list[i][0][0])
+        right_thigh_angles_list.append(model.right_leg.equations.thigh_angles_list[i][1][0])
+        i += 1
+    i = 0
+    for r in model.right_leg.equations.cale_angles_list:
+        right_cale_angles_list.append(model.right_leg.equations.cale_angles_list[i][0][0])
+        right_cale_angles_list.append(model.right_leg.equations.cale_angles_list[i][1][0])
+        i += 1
+    i = 0
+    for r in model.left_leg.equations.thigh_angles_list:
+        left_thigh_angles_list.append(model.left_leg.equations.thigh_angles_list[i][0][0])
+        left_thigh_angles_list.append(model.left_leg.equations.thigh_angles_list[i][1][0])
+        i += 1
+    i = 0
+    for r in model.left_leg.equations.cale_angles_list:
+        left_cale_angles_list.append(model.left_leg.equations.cale_angles_list[i][0][0])
+        left_cale_angles_list.append(model.left_leg.equations.cale_angles_list[i][1][0])
+        i += 1
+
+    df2 = pd.DataFrame(list(zip(right_thigh_angles_list, right_cale_angles_list, left_thigh_angles_list,
+                                left_cale_angles_list)),
+                       columns=columns2)
+    with pd.ExcelWriter("equations.xlsx") as writer:
+        df2.to_excel(writer, sheet_name="equations", engine="xlsxwriter")
 
 
 def fill_date(model: Model, leg_nr: int):
@@ -128,38 +164,7 @@ def fill_date(model: Model, leg_nr: int):
             with pd.ExcelWriter("left_leg_data.xlsx") as writer:
                 df.to_excel(writer, sheet_name="left_leg", engine="xlsxwriter")
 
-    columns2 = ['right_thigh_angles_list', 'right_cale_angles_list', 'left_thigh_angles_list', 'left_cale_angles_list']
-    right_thigh_angles_list = []
-    right_cale_angles_list = []
-    left_thigh_angles_list = []
-    left_cale_angles_list = []
 
-    i = 0
-    for r in model.equations.right_thigh_angles_list:
-        right_thigh_angles_list.append(model.equations.right_thigh_angles_list[i][0][0])
-        right_thigh_angles_list.append(model.equations.right_thigh_angles_list[i][1][0])
-        i += 1
-    i = 0
-    for r in model.equations.right_cale_angles_list:
-        right_cale_angles_list.append(model.equations.right_cale_angles_list[i][0][0])
-        right_cale_angles_list.append(model.equations.right_cale_angles_list[i][1][0])
-        i += 1
-    i = 0
-    for r in model.equations.left_thigh_angles_list:
-        left_thigh_angles_list.append(model.equations.left_thigh_angles_list[i][0][0])
-        left_thigh_angles_list.append(model.equations.left_thigh_angles_list[i][1][0])
-        i += 1
-    i = 0
-    for r in model.equations.left_cale_angles_list:
-        left_cale_angles_list.append(model.equations.left_cale_angles_list[i][0][0])
-        left_cale_angles_list.append(model.equations.left_cale_angles_list[i][1][0])
-        i += 1
-
-    df2 = pd.DataFrame(list(zip(right_thigh_angles_list, right_cale_angles_list, left_thigh_angles_list,
-                                left_cale_angles_list)),
-                       columns=columns2)
-    with pd.ExcelWriter("equations.xlsx") as writer:
-        df2.to_excel(writer, sheet_name="equations", engine="xlsxwriter")
 
 
 class VisualizeDataMatplotlib:

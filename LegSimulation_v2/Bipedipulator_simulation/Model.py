@@ -51,7 +51,6 @@ class Model:
 
         self.add_pivot_joints(space)
         self.add_pin_joints_parts(space)
-        self.equations = Equations()
 
     def iterator(self):
         self.num_bodies = self.num_bodies + 1

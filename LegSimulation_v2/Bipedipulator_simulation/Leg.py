@@ -10,6 +10,7 @@ import LegPartBone
 from LegSimulation_v2.Bipedipulator_simulation import LegPartsHelper
 from LegSimulation_v2.Bipedipulator_simulation.LegPartBone import LegPartBone
 from LegSimulation_v2.Bipedipulator_simulation.RelativeValues import RelativeValues
+from LegSimulation_v2.Bipedipulator_simulation.ValuesPerPhase import Equations
 from LegSimulation_v2.Bipedipulator_simulation.constants import CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
     CALE_WIDTH, CALE_HEIGHT, FOOT_HEIGHT, FOOT_WIDTH, PATELLA_HEIGHT, \
     PATELLA_WIDTH, THIGH_WEIGHT, FOOT_WEIGHT, PATELLA_WEIGHT, CALE_WEIGHT, \
@@ -38,10 +39,12 @@ class Leg:
     mode: str
 
     relative_values: RelativeValues
+    equations: Equations
 
     def __init__(self, space: pymunk.Space(), mode: str, leg_id):
         self.relative_values = RelativeValues()
         self.name = "right" if leg_id == 0 else "left"
+        self.equations = Equations(self.name)
         self.thigh = LegPartBone(space, self.iterator(), "thigh", THIGH_WEIGHT, (THIGH_WIDTH, THIGH_HEIGHT),
                                  (CORPS_POSITION - (0, (((1 / 2) * CORPS_HEIGHT) + ((1 / 2) * THIGH_HEIGHT)))))
         self.cale = LegPartBone(space, self.iterator(), "cale", CALE_WEIGHT, (CALE_WIDTH, CALE_HEIGHT),
