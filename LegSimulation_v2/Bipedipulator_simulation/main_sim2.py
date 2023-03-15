@@ -64,44 +64,44 @@ class Simulator(object):
         shape_filter = pymunk.ShapeFilter(group=1)
         self.model_entity.corps.shape.filter = shape_filter
         self.model_entity.right_leg.thigh.shape.filter = shape_filter
-        self.model_entity.right_leg.cale.shape.filter = shape_filter
+        self.model_entity.right_leg.calf.shape.filter = shape_filter
         self.model_entity.right_leg.foot.shape.filter = shape_filter
         self.model_entity.right_leg.foot.shape.collision_type = 1
 
         self.model_entity.corps.shape.filter = shape_filter
         self.model_entity.left_leg.thigh.shape.filter = shape_filter
-        self.model_entity.left_leg.cale.shape.filter = shape_filter
+        self.model_entity.left_leg.calf.shape.filter = shape_filter
         self.model_entity.left_leg.foot.shape.filter = shape_filter
         self.model_entity.left_leg.foot.shape.collision_type = 1
 
         if self.mode == "AI mode":
             self.model_entity.right_leg.patella_thigh_part.shape.filter = shape_filter
-            self.model_entity.right_leg.patella_cale_part.shape.filter = shape_filter
+            self.model_entity.right_leg.patella_calf_part.shape.filter = shape_filter
 
     def motor_leg(self, relative_angu_vel_right_leg, relative_angu_vel_left_leg):
         corps_motor = pymunk.SimpleMotor(self.model_entity.corps.body, self.model_entity.floor, 0)
         left_thigh_motor = pymunk.SimpleMotor(self.model_entity.left_leg.thigh.body, self.model_entity.corps.body,
                                               relative_angu_vel_left_leg)
-        left_cale_motor = pymunk.SimpleMotor(self.model_entity.left_leg.cale.body,
+        left_calf_motor = pymunk.SimpleMotor(self.model_entity.left_leg.calf.body,
                                              self.model_entity.left_leg.thigh.body, relative_angu_vel_left_leg)
 
         left_foot_motor = pymunk.SimpleMotor(self.model_entity.left_leg.foot.body, self.model_entity.floor, 0)
 
         right_thigh_motor = pymunk.SimpleMotor(self.model_entity.right_leg.thigh.body, self.model_entity.corps.body,
                                                relative_angu_vel_right_leg)
-        right_cale_motor = pymunk.SimpleMotor(self.model_entity.right_leg.cale.body,
+        right_calf_motor = pymunk.SimpleMotor(self.model_entity.right_leg.calf.body,
                                               self.model_entity.right_leg.thigh.body, relative_angu_vel_right_leg)
         right_foot_motor = pymunk.SimpleMotor(self.model_entity.right_leg.foot.body, self.model_entity.floor, 0)
 
-        self.space.add(right_thigh_motor, right_cale_motor,
-                       right_foot_motor, left_thigh_motor, left_cale_motor, left_foot_motor, corps_motor)
+        self.space.add(right_thigh_motor, right_calf_motor,
+                       right_foot_motor, left_thigh_motor, left_calf_motor, left_foot_motor, corps_motor)
 
-        # self.space.add(right_thigh_motor, right_cale_motor, right_foot_motor)
+        # self.space.add(right_thigh_motor, right_calf_motor, right_foot_motor)
 
         self.filter()
-        # motors = [left_thigh_motor, left_cale_motor, left_foot_motor]
-        motors = [right_thigh_motor, right_cale_motor,
-                  right_foot_motor, left_thigh_motor, left_cale_motor, left_foot_motor, corps_motor]
+        # motors = [left_thigh_motor, left_calf_motor, left_foot_motor]
+        motors = [right_thigh_motor, right_calf_motor,
+                  right_foot_motor, left_thigh_motor, left_calf_motor, left_foot_motor, corps_motor]
 
         return motors
 
@@ -114,9 +114,6 @@ class Simulator(object):
         self.space._set_iterations(20)  ### Try another value to better experience
 
         clock = pygame.time.Clock()
-        running = True
-
-        simulate = False
         print_time = 0
         pressed_k_left = False
         pressed_k_right = False
@@ -130,6 +127,8 @@ class Simulator(object):
         relative_angu_vel_left_leg = 0
         counter = 0
 
+        simulate = False
+        running = True
         while running:
 
             line = None
@@ -142,21 +141,7 @@ class Simulator(object):
                 if event.type == pygame.KEYDOWN:
                     if event.type == pygame.QUIT or (
                             event.key in (pygame.K_q, pygame.K_ESCAPE)):
-
-                        self.model_entity.right_leg.relative_values.counters[0].show_counters()
-                        self.model_entity.left_leg.relative_values.counters[0].show_counters()
-                        if self.controller.loop_counter > 0:
-                            self.model_entity.right_leg.relative_values.counters[1].show_counters()
-                            self.model_entity.left_leg.relative_values.counters[1].show_counters()
-                        self.model_entity.right_leg.relative_values.velocities.show_velocity_lists()
-                        self.model_entity.left_leg.relative_values.velocities.show_velocity_lists()
-                        # running = False
-                        # print("initial_array : ", str(self.model_entity.left_leg.relative_values.data))
-
-                        write_data_to_excel(self.model_entity)
-                        # self.matplotlib.run("right_leg_data.xlsx")
-
-                        sys.exit(0)
+                        running = False
 
                     elif event.key == pygame.K_RIGHT:
                         pressed_k_right = not pressed_k_right
@@ -169,8 +154,8 @@ class Simulator(object):
                     # Start/stop simulation!!!!!!!!!!!!!!!!!!!!!!!!!.
                     elif event.key == pygame.K_s:
                         simulate = not simulate
-                        self.model_entity.right_leg.relative_values.velocities.show_velocity_lists()
-                        self.model_entity.left_leg.relative_values.velocities.show_velocity_lists()
+                        self.model_entity.right_leg.equations.velocities.show_velocity_lists()
+                        self.model_entity.left_leg.equations.velocities.show_velocity_lists()
 
                     elif event.key == pygame.K_a:
                         pressed_k_a = not pressed_k_a
@@ -191,9 +176,7 @@ class Simulator(object):
                 force = force - 5
 
             temp_up = False
-
             up = temp_up
-
             if pressed_k_a:
                 self.model_entity.move_running_gear()
 
@@ -202,11 +185,22 @@ class Simulator(object):
             if simulate:
                 self.space.step(dt)
                 damping = 0.99
-                temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors, simulate, counter)
+                temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors, simulate,
+                                                                        counter)
                 if temp_end:
-                    simulate = False
+                    running = False
                 limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, damping, dt)
                 limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, damping, dt)
+
+        self.model_entity.right_leg.relative_values.counters[0].show_counters()
+        self.model_entity.left_leg.relative_values.counters[0].show_counters()
+        if self.controller.loop_counter > 0:
+            self.model_entity.right_leg.relative_values.counters[1].show_counters()
+            self.model_entity.left_leg.relative_values.counters[1].show_counters()
+        self.model_entity.right_leg.equations.velocities.show_velocity_lists()
+        self.model_entity.left_leg.equations.velocities.show_velocity_lists()
+        write_data_to_excel(self.model_entity)
+        pygame.quit()
 
 
 if __name__ == "__main__":

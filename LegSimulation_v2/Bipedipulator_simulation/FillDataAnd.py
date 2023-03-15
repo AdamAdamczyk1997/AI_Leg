@@ -10,14 +10,44 @@ def write_data_to_excel(model: Model):
     fill_date(model, 0)
     fill_date(model, 1)
     fill_equation(model)
+    fill_data_for_txt(model, 0)
+    fill_data_for_txt(model, 1)
+
+
+def write_list_of_dictionaries_to_txt_file(file_name: str, list_of_dictionaries: list):
+    try:
+        with open(file_name, 'w') as file:
+            for dictionary in list_of_dictionaries:
+                for key, value in dictionary.items():
+                    file.write(f'{key}: {value}\n')
+                file.write('\n')
+
+    except FileExistsError:
+        with open(file_name, 'w') as file:
+            for dictionary in list_of_dictionaries:
+                for key, value in dictionary.items():
+                    file.write(f'{key}: {value}\n')
+                file.write('\n')
+
+
+def fill_data_for_txt(model: Model, leg_nr: int):
+    global leg
+    match leg_nr:
+        case 0:
+            leg = model.right_leg
+        case 1:
+            leg = model.left_leg
+    file_name = str(leg.name) + '_exporting_data_.txt'
+    dictionaries = leg.equations.list_of_equations_dictionaries
+    write_list_of_dictionaries_to_txt_file(file_name, dictionaries)
 
 
 def fill_equation(model: Model):
-    columns2 = ['right_thigh_angles_list', 'right_cale_angles_list', 'left_thigh_angles_list', 'left_cale_angles_list']
+    columns2 = ['right_thigh_angles_list', 'right_calf_angles_list', 'left_thigh_angles_list', 'left_calf_angles_list']
     right_thigh_angles_list = []
-    right_cale_angles_list = []
+    right_calf_angles_list = []
     left_thigh_angles_list = []
-    left_cale_angles_list = []
+    left_calf_angles_list = []
 
     i = 0
     for r in model.right_leg.equations.thigh_angles_list:
@@ -25,9 +55,9 @@ def fill_equation(model: Model):
         right_thigh_angles_list.append(model.right_leg.equations.thigh_angles_list[i][1][0])
         i += 1
     i = 0
-    for r in model.right_leg.equations.cale_angles_list:
-        right_cale_angles_list.append(model.right_leg.equations.cale_angles_list[i][0][0])
-        right_cale_angles_list.append(model.right_leg.equations.cale_angles_list[i][1][0])
+    for r in model.right_leg.equations.calf_angles_list:
+        right_calf_angles_list.append(model.right_leg.equations.calf_angles_list[i][0][0])
+        right_calf_angles_list.append(model.right_leg.equations.calf_angles_list[i][1][0])
         i += 1
     i = 0
     for r in model.left_leg.equations.thigh_angles_list:
@@ -35,13 +65,13 @@ def fill_equation(model: Model):
         left_thigh_angles_list.append(model.left_leg.equations.thigh_angles_list[i][1][0])
         i += 1
     i = 0
-    for r in model.left_leg.equations.cale_angles_list:
-        left_cale_angles_list.append(model.left_leg.equations.cale_angles_list[i][0][0])
-        left_cale_angles_list.append(model.left_leg.equations.cale_angles_list[i][1][0])
+    for r in model.left_leg.equations.calf_angles_list:
+        left_calf_angles_list.append(model.left_leg.equations.calf_angles_list[i][0][0])
+        left_calf_angles_list.append(model.left_leg.equations.calf_angles_list[i][1][0])
         i += 1
 
-    df2 = pd.DataFrame(list(zip(right_thigh_angles_list, right_cale_angles_list, left_thigh_angles_list,
-                                left_cale_angles_list)),
+    df2 = pd.DataFrame(list(zip(right_thigh_angles_list, right_calf_angles_list, left_thigh_angles_list,
+                                left_calf_angles_list)),
                        columns=columns2)
     with pd.ExcelWriter("equations.xlsx") as writer:
         df2.to_excel(writer, sheet_name="equations", engine="xlsxwriter")
@@ -54,10 +84,10 @@ def fill_date(model: Model, leg_nr: int):
             leg = model.right_leg
         case 1:
             leg = model.left_leg
-    columns = ['x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_cale', 'x_ankle',
+    columns = ['x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_calf', 'x_ankle',
                'y_ankle', 'x_foot', 'y_foot', 'angle_foot', 'real_corps_y',
                'oscillation', 'oscillation_time', 'hip_velocity', 'knee_velocity', 'ankle_velocity',
-               'current_thigh_velocity_value', 'current_cale_velocity_value']
+               'current_thigh_velocity_value', 'current_calf_velocity_value']
 
     usage_counter = []
     x_hip = []
@@ -65,7 +95,7 @@ def fill_date(model: Model, leg_nr: int):
     angle_thigh = []
     x_knee = []
     y_knee = []
-    angle_cale = []
+    angle_calf = []
     x_ankle = []
     y_ankle = []
     x_foot = []
@@ -77,7 +107,7 @@ def fill_date(model: Model, leg_nr: int):
     hip_velocity = []
     ankle_velocity = []
     current_thigh_velocity_value = []
-    current_cale_velocity_value = []
+    current_calf_velocity_value = []
     i = 0
 
     oscillation_time = []
@@ -89,7 +119,7 @@ def fill_date(model: Model, leg_nr: int):
         angle_thigh.append(leg.relative_values.histories[i][3])
         x_knee.append(leg.relative_values.histories[i][4])
         y_knee.append(leg.relative_values.histories[i][5])
-        angle_cale.append(leg.relative_values.histories[i][6])
+        angle_calf.append(leg.relative_values.histories[i][6])
         x_ankle.append(leg.relative_values.histories[i][7])
         y_ankle.append(leg.relative_values.histories[i][8])
         x_foot.append(leg.relative_values.histories[i][9])
@@ -100,8 +130,9 @@ def fill_date(model: Model, leg_nr: int):
         knee_velocity.append(leg.relative_values.histories[i][13])
         hip_velocity.append(leg.relative_values.histories[i][14])
         ankle_velocity.append(leg.relative_values.histories[i][15])
-        current_thigh_velocity_value.append(leg.relative_values.histories[i][16])
-        current_cale_velocity_value.append(leg.relative_values.histories[i][17])
+        # change to velocity history every step
+        current_thigh_velocity_value.append(leg.equations.velocities.histories[i][0])
+        current_calf_velocity_value.append(leg.equations.velocities.histories[i][1])
 
         i += 1
 
@@ -149,10 +180,10 @@ def fill_date(model: Model, leg_nr: int):
     while oscillation_time.__len__() != number_of_records:
         oscillation_time.append(0.0)
 
-    df = pd.DataFrame(list(zip(x_hip, y_hip, angle_thigh, x_knee, y_knee, angle_cale, x_ankle, y_ankle,
+    df = pd.DataFrame(list(zip(x_hip, y_hip, angle_thigh, x_knee, y_knee, angle_calf, x_ankle, y_ankle,
                                x_foot, y_foot, angle_foot, real_corps_y, oscillation,
                                oscillation_time, hip_velocity, knee_velocity, ankle_velocity,
-                               current_thigh_velocity_value, current_cale_velocity_value)),
+                               current_thigh_velocity_value, current_calf_velocity_value)),
                       index=usage_counter,
                       columns=columns)
 
@@ -163,8 +194,6 @@ def fill_date(model: Model, leg_nr: int):
         case "left":
             with pd.ExcelWriter("left_leg_data.xlsx") as writer:
                 df.to_excel(writer, sheet_name="left_leg", engine="xlsxwriter")
-
-
 
 
 class VisualizeDataMatplotlib:

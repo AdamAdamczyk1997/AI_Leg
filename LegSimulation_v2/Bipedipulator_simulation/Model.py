@@ -13,7 +13,7 @@ from LegSimulation_v2.Bipedipulator_simulation.Leg import Leg
 from LegSimulation_v2.Bipedipulator_simulation.LegPartBone import LegPartBone
 from LegSimulation_v2.Bipedipulator_simulation.ValuesPerPhase import Equations
 from LegSimulation_v2.Bipedipulator_simulation.constants import CORPS_WIDTH, CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
-    CALE_WIDTH, CALE_HEIGHT, FOOT_HEIGHT, FOOT_WIDTH, MIN_CMFJ, MIN_CMBJ, PATELLA_WIDTH, MIN_PTJ, MIN_PCJ, CORPS_WEIGHT, \
+    calf_WIDTH, calf_HEIGHT, FOOT_HEIGHT, FOOT_WIDTH, MIN_CMFJ, MIN_CMBJ, PATELLA_WIDTH, MIN_PTJ, MIN_PCJ, CORPS_WEIGHT, \
     LEG_HEIGHT, FLOOR_HEIGHT, CORPS_POSITION
 
 random.seed(1)  # make the simulation the same each time, easier to debug
