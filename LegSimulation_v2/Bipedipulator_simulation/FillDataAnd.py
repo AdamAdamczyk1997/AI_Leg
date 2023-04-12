@@ -51,23 +51,19 @@ def fill_equation(model: Model):
 
     i = 0
     for r in model.right_leg.equations.thigh_angles_list:
-        right_thigh_angles_list.append(model.right_leg.equations.thigh_angles_list[i][0][0])
-        right_thigh_angles_list.append(model.right_leg.equations.thigh_angles_list[i][1][0])
+        right_thigh_angles_list.append(model.right_leg.equations.thigh_angles_list[i])
         i += 1
     i = 0
     for r in model.right_leg.equations.calf_angles_list:
-        right_calf_angles_list.append(model.right_leg.equations.calf_angles_list[i][0][0])
-        right_calf_angles_list.append(model.right_leg.equations.calf_angles_list[i][1][0])
+        right_calf_angles_list.append(model.right_leg.equations.calf_angles_list[i])
         i += 1
     i = 0
     for r in model.left_leg.equations.thigh_angles_list:
-        left_thigh_angles_list.append(model.left_leg.equations.thigh_angles_list[i][0][0])
-        left_thigh_angles_list.append(model.left_leg.equations.thigh_angles_list[i][1][0])
+        left_thigh_angles_list.append(model.left_leg.equations.thigh_angles_list[i])
         i += 1
     i = 0
     for r in model.left_leg.equations.calf_angles_list:
-        left_calf_angles_list.append(model.left_leg.equations.calf_angles_list[i][0][0])
-        left_calf_angles_list.append(model.left_leg.equations.calf_angles_list[i][1][0])
+        left_calf_angles_list.append(model.left_leg.equations.calf_angles_list[i])
         i += 1
 
     df2 = pd.DataFrame(list(zip(right_thigh_angles_list, right_calf_angles_list, left_thigh_angles_list,

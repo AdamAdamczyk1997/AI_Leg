@@ -17,6 +17,12 @@ class Counters:
     phase_4_usage: int
     phase_5_usage: int
     phase_6_usage: int
+    phase_7_usage: int
+    phase_8_usage: int
+    phase_9_usage: int
+    phase_10_usage: int
+    phase_11_usage: int
+    phase_12_usage: int
 
     def __init__(self):
         self.phase_part_usage_counters = []
@@ -27,14 +33,22 @@ class Counters:
         self.phase_4_usage = 0
         self.phase_5_usage = 0
         self.phase_6_usage = 0
+        self.phase_7_usage = 0
+        self.phase_8_usage = 0
+        self.phase_9_usage = 0
+        self.phase_10_usage = 0
+        self.phase_11_usage = 0
+        self.phase_12_usage = 0
         self.phase_usage_counters = []
 
-    def append_phase_part_usage_counters(self, phase_part_usage: [int, int]):
+    def append_phase_part_usage_counters(self, phase_part_usage: int):
         self.phase_part_usage_counters.append(phase_part_usage)
 
     def append_phase_usage_counter(self):
         self.phase_usage_counters.append([self.phase_1_usage, self.phase_2_usage, self.phase_3_usage,
-                                          self.phase_4_usage, self.phase_5_usage, self.phase_6_usage])
+                                          self.phase_4_usage, self.phase_5_usage, self.phase_6_usage,
+                                          self.phase_7_usage, self.phase_8_usage, self.phase_9_usage,
+                                          self.phase_10_usage, self.phase_11_usage, self.phase_12_usage])
 
     def get_counter(self, phase):
         match phase:
@@ -52,6 +66,18 @@ class Counters:
                 return self.phase_5_usage
             case 6:
                 return self.phase_6_usage
+            case 7:
+                return self.phase_7_usage
+            case 8:
+                return self.phase_8_usage
+            case 9:
+                return self.phase_9_usage
+            case 10:
+                return self.phase_10_usage
+            case 11:
+                return self.phase_11_usage
+            case 12:
+                return self.phase_12_usage
 
     def phase_part_usage_increment(self, phase: int, not_count: bool):
         if not not_count:
@@ -70,6 +96,18 @@ class Counters:
                     self.phase_5_usage += 1
                 case 6:
                     self.phase_6_usage += 1
+                case 7:
+                    self.phase_7_usage += 1
+                case 8:
+                    self.phase_8_usage += 1
+                case 9:
+                    self.phase_9_usage += 1
+                case 10:
+                    self.phase_10_usage += 1
+                case 11:
+                    self.phase_11_usage += 1
+                case 12:
+                    self.phase_12_usage += 1
 
     def show_counters(self):
         print("phase_part_usage_counters=", self.phase_part_usage_counters,
@@ -80,6 +118,12 @@ class Counters:
               "\nphase_4_usage=", self.phase_4_usage,
               "\nphase_5_usage=", self.phase_5_usage,
               "\nphase_6_usage=", self.phase_6_usage,
+              "\nphase_7_usage=", self.phase_7_usage,
+              "\nphase_8_usage=", self.phase_8_usage,
+              "\nphase_9_usage=", self.phase_9_usage,
+              "\nphase_10_usage=", self.phase_10_usage,
+              "\nphase_11_usage=", self.phase_11_usage,
+              "\nphase_12_usage=", self.phase_12_usage,
               "\nphase_usage_counters=", self.phase_usage_counters)
 
 
@@ -116,7 +160,6 @@ class RelativeValues:
 
     def __init__(self):
         self.counters = [Counters()]
-        self.phase_part_usage_counter = 0
         self.phase_part_usage_counter = 0
         self.phase_usage_counter = 0
         self.oscillation = 0.0
