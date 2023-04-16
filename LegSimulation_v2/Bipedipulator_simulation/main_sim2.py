@@ -22,6 +22,7 @@ def limit_velocity(bodies: list[pymunk.Body], gravity, damping, dt):
 
 class Simulator(object):
     mode: str
+    used_scenario: int
 
     model_entity: Model
     controller: Controller
@@ -43,6 +44,7 @@ class Simulator(object):
         self.controller = Controller(self.model_entity, self.mode)
         self.matplotlib = VisualizeDataMatplotlib()
         self.filter()
+        self.used_scenario = 0
 
     def reset_bodies(self, dt: float):
         for body in self.space.bodies:
@@ -142,6 +144,7 @@ class Simulator(object):
                     if event.type == pygame.QUIT or (
                             event.key in (pygame.K_q, pygame.K_ESCAPE)):
                         running = False
+                        stop = True
 
                     elif event.key == pygame.K_RIGHT:
                         pressed_k_right = not pressed_k_right
@@ -154,8 +157,8 @@ class Simulator(object):
                     # Start/stop simulation!!!!!!!!!!!!!!!!!!!!!!!!!.
                     elif event.key == pygame.K_s:
                         simulate = not simulate
-                        self.model_entity.right_leg.equations.velocities.show_velocity_lists()
-                        self.model_entity.left_leg.equations.velocities.show_velocity_lists()
+                        self.model_entity.right_leg.equations.velocities[self.used_scenario].show_velocity_lists()
+                        self.model_entity.left_leg.equations.velocities[self.used_scenario].show_velocity_lists()
 
                     elif event.key == pygame.K_a:
                         pressed_k_a = not pressed_k_a
@@ -176,7 +179,6 @@ class Simulator(object):
                 force = force - 5
 
             temp_up = False
-            up = temp_up
             if pressed_k_a:
                 self.model_entity.move_running_gear()
 
@@ -186,19 +188,28 @@ class Simulator(object):
                 self.space.step(dt)
                 damping = 0.99
                 temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors, simulate,
-                                                                        counter)
+                                                                        self.used_scenario)
                 if temp_end:
-                    running = False
+                    match self.used_scenario:
+                        case 0:
+                            self.used_scenario += 1
+                            temp_end = False
+                        case 1:
+                            self.used_scenario += 1
+                            temp_end = False
+                        case 2:
+                            running = False
+
                 limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, damping, dt)
                 limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, damping, dt)
 
-        self.model_entity.right_leg.relative_values.counters[0].show_counters()
-        self.model_entity.left_leg.relative_values.counters[0].show_counters()
+        self.model_entity.right_leg.relative_values[self.used_scenario].counters[0].show_counters()
+        self.model_entity.left_leg.relative_values[self.used_scenario].counters[0].show_counters()
         if self.controller.loop_counter > 0:
-            self.model_entity.right_leg.relative_values.counters[1].show_counters()
-            self.model_entity.left_leg.relative_values.counters[1].show_counters()
-        self.model_entity.right_leg.equations.velocities.show_velocity_lists()
-        self.model_entity.left_leg.equations.velocities.show_velocity_lists()
+            self.model_entity.right_leg.relative_values[self.used_scenario].counters[1].show_counters()
+            self.model_entity.left_leg.relative_values[self.used_scenario].counters[1].show_counters()
+        self.model_entity.right_leg.equations.velocities[self.used_scenario].show_velocity_lists()
+        self.model_entity.left_leg.equations.velocities[self.used_scenario].show_velocity_lists()
         write_data_to_excel(self.model_entity)
         pygame.quit()
 

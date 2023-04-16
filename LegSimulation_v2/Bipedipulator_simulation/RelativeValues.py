@@ -3,7 +3,7 @@ from math import sin, sqrt
 from numpy import pi
 from pymunk import Vec2d, Body
 
-from LegSimulation_v2.Bipedipulator_simulation.constants import THIGH_HEIGHT, calf_HEIGHT, CORPS_POSITION, CORPS_HEIGHT, \
+from LegSimulation_v2.Bipedipulator_simulation.constants import THIGH_HEIGHT, CALF_HEIGHT, CORPS_POSITION, CORPS_HEIGHT, \
     FOOT_WIDTH
 
 
@@ -186,8 +186,7 @@ class RelativeValues:
                                self.ankle_velocity]
         self.histories = [self.history_record]
 
-    def calculate_angles(self, real_hips_position: Vec2d, real_knee_position: Vec2d, real_ankle_position: Vec2d,
-                         real_center_foot_position: Vec2d):
+    def calculate_angles(self, real_hips_position: Vec2d, real_knee_position: Vec2d, real_ankle_position: Vec2d):
         # calculate angles for right leg
         self.x_hip = 0.0
         self.y_hip = 0.0
@@ -200,19 +199,19 @@ class RelativeValues:
         # knee position relative to the hip
         self.x_knee = real_knee_position.x - real_hips_position.x
         # angle between corps and thigh
-        sin_ankle_thigh = self.x_knee / THIGH_HEIGHT
-        self.angle_thigh = sin(sin_ankle_thigh)
+        sin_angle_thigh = self.x_knee / THIGH_HEIGHT
+        self.angle_thigh = sin(sin_angle_thigh)
         self.y_knee = real_knee_position.y - real_hips_position.y
 
         # ankle position relative to the hip
         self.x_ankle = real_ankle_position.x - real_hips_position.x
         # angle between corps and calf
-        sin_angle_calf = (self.x_ankle - self.x_knee) / calf_HEIGHT
+        sin_angle_calf = (self.x_ankle - self.x_knee) / CALF_HEIGHT
         self.angle_calf = sin(sin_angle_calf)
         self.y_ankle = real_ankle_position.y - real_hips_position.y
 
-        self.x_foot = real_center_foot_position.x - real_hips_position.x
-        self.y_foot = real_center_foot_position.y - real_hips_position.y
+        self.x_foot = 2 # TODO: do zmiany!
+        self.y_foot = 2
         sin_angle_foot = self.y_foot / (0.75 * FOOT_WIDTH)
         self.angle_foot = sin(sin_angle_foot)
 
