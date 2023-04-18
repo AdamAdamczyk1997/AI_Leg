@@ -7,8 +7,8 @@ from LegSimulation_v2.Bipedipulator_simulation.Model import Model
 
 
 def write_data_to_excel(model: Model):
-    fill_date(model, 0, 1)
-    fill_date(model, 1, 1)
+    fill_date(model, 0, 2)
+    fill_date(model, 1, 2)
     fill_equation(model)
     fill_data_for_txt(model, 0)
     fill_data_for_txt(model, 1)
@@ -73,7 +73,7 @@ def fill_equation(model: Model):
         df2.to_excel(writer, sheet_name="equations", engine="xlsxwriter")
 
 
-def fill_date(model: Model, leg_nr: int, used_scenario: int):
+def fill_date(model: Model, leg_nr: int, scenario: int):
     global leg
     match leg_nr:
         case 0:
@@ -83,7 +83,7 @@ def fill_date(model: Model, leg_nr: int, used_scenario: int):
     columns = ['x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_calf', 'x_ankle',
                'y_ankle', 'x_foot', 'y_foot', 'angle_foot', 'real_corps_y',
                'oscillation', 'oscillation_time', 'hip_velocity', 'knee_velocity', 'ankle_velocity',
-               'current_thigh_velocity_value', 'current_calf_velocity_value']
+               'current_thigh_velocity_value', 'current_calf_velocity_value', 'mirror_angle_thigh', 'mirror_angle_calf']
 
     usage_counter = []
     x_hip = []
@@ -104,33 +104,43 @@ def fill_date(model: Model, leg_nr: int, used_scenario: int):
     ankle_velocity = []
     current_thigh_velocity_value = []
     current_calf_velocity_value = []
-    i = 0
+    mirror_angle_thigh = []
+    mirror_angle_calf = []
+    i = 1
 
     oscillation_time = []
+    used_scenario = scenario
 
-    for r in leg.relative_values[used_scenario].histories:
-        usage_counter.append(leg.relative_values[used_scenario].histories[i][0])
-        x_hip.append(leg.relative_values[used_scenario].histories[i][1])
-        y_hip.append(leg.relative_values[used_scenario].histories[i][2])
-        angle_thigh.append(leg.relative_values[used_scenario].histories[i][3])
-        x_knee.append(leg.relative_values[used_scenario].histories[i][4])
-        y_knee.append(leg.relative_values[used_scenario].histories[i][5])
-        angle_calf.append(leg.relative_values[used_scenario].histories[i][6])
-        x_ankle.append(leg.relative_values[used_scenario].histories[i][7])
-        y_ankle.append(leg.relative_values[used_scenario].histories[i][8])
-        x_foot.append(leg.relative_values[used_scenario].histories[i][9])
-        y_foot.append(leg.relative_values[used_scenario].histories[i][10])
-        angle_foot.append(leg.relative_values[used_scenario].histories[i][11])
-        real_corps_y.append(model.corps.body.position.y)
-        oscillation.append(leg.relative_values[used_scenario].histories[i][12])
-        knee_velocity.append(leg.relative_values[used_scenario].histories[i][13])
-        hip_velocity.append(leg.relative_values[used_scenario].histories[i][14])
-        ankle_velocity.append(leg.relative_values[used_scenario].histories[i][15])
-        # change to velocity history every step
-        current_thigh_velocity_value.append(leg.equations.velocities[used_scenario].histories[i][0])
-        current_calf_velocity_value.append(leg.equations.velocities[used_scenario].histories[i][1])
+    while used_scenario <= 4:
+        length = len(leg.relative_values[used_scenario].histories)
+        for r in range(length - 2):
+            usage_counter.append(leg.relative_values[used_scenario].histories[i][0])
+            x_hip.append(leg.relative_values[used_scenario].histories[i][1])
+            y_hip.append(leg.relative_values[used_scenario].histories[i][2])
+            angle_thigh.append(leg.relative_values[used_scenario].histories[i][3])
+            x_knee.append(leg.relative_values[used_scenario].histories[i][4])
+            y_knee.append(leg.relative_values[used_scenario].histories[i][5])
+            angle_calf.append(leg.relative_values[used_scenario].histories[i][6])
+            x_ankle.append(leg.relative_values[used_scenario].histories[i][7])
+            y_ankle.append(leg.relative_values[used_scenario].histories[i][8])
+            x_foot.append(leg.relative_values[used_scenario].histories[i][9])
+            y_foot.append(leg.relative_values[used_scenario].histories[i][10])
+            angle_foot.append(leg.relative_values[used_scenario].histories[i][11])
+            real_corps_y.append(model.corps.body.position.y)
+            oscillation.append(leg.relative_values[used_scenario].histories[i][12])
+            knee_velocity.append(leg.relative_values[used_scenario].histories[i][13])
+            hip_velocity.append(leg.relative_values[used_scenario].histories[i][14])
+            ankle_velocity.append(leg.relative_values[used_scenario].histories[i][15])
+            # change to velocity history every step
+            current_thigh_velocity_value.append(leg.equations.velocities[used_scenario].histories[i][0])
+            current_calf_velocity_value.append(leg.equations.velocities[used_scenario].histories[i][1])
+            mirror_angle_thigh.append(-1 * (leg.relative_values[used_scenario].histories[i][3]))
+            mirror_angle_calf.append(-1 * (leg.relative_values[used_scenario].histories[i][6]))
 
-        i += 1
+            i += 1
+        used_scenario += 1
+        i = 1
+        length = 0
 
     moves_counter_for_phase = 1
     phase_number = 0
@@ -179,7 +189,7 @@ def fill_date(model: Model, leg_nr: int, used_scenario: int):
     df = pd.DataFrame(list(zip(x_hip, y_hip, angle_thigh, x_knee, y_knee, angle_calf, x_ankle, y_ankle,
                                x_foot, y_foot, angle_foot, real_corps_y, oscillation,
                                oscillation_time, hip_velocity, knee_velocity, ankle_velocity,
-                               current_thigh_velocity_value, current_calf_velocity_value)),
+                               current_thigh_velocity_value, current_calf_velocity_value,mirror_angle_thigh, mirror_angle_calf)),
                       index=usage_counter,
                       columns=columns)
 

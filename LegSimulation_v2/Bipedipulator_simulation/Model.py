@@ -56,7 +56,7 @@ class Model:
         return self.num_bodies
 
     def move_running_gear(self):
-        self.floor.velocity = (-30, 0)
+        self.floor.velocity = (-80, 0)
 
     def add_pivot_joints(self, space):
         LegPartsHelper.add_body_pivot_joint(space, self.corps.body, self.right_leg.thigh.body,
@@ -77,9 +77,6 @@ class Model:
 
     def add_pin_joints_parts(self, space):
         LegPartsHelper.add_body_rotation_center(space, self.corps.body.position)
-        # corps_temp_pin_joint = LegPartsHelper.add_body_pin_joint(space, self.corps.body, corps_rotation_center, (0, 0),
-        #                                                          (0, 0))
-
         LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.right_leg.thigh.body,
                                           (0, (-(1 / 2) * CORPS_HEIGHT)),
                                           (0, (1 / 2) * THIGH_HEIGHT))

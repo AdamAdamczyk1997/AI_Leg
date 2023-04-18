@@ -180,11 +180,8 @@ class RelativeValues:
         self.ankle_velocity = 0.0
 
         self.usage_counter = 1
-        self.history_record = [self.usage_counter, self.x_hip, self.y_hip, self.angle_thigh,
-                               self.x_knee, self.y_knee, self.angle_calf, self.x_ankle, self.y_ankle, self.x_foot,
-                               self.y_foot, self.angle_foot, self.oscillation, self.hip_velocity, self.knee_velocity,
-                               self.ankle_velocity]
-        self.histories = [self.history_record]
+        self.history_record = []
+        self.histories = []
 
     def calculate_angles(self, real_hips_position: Vec2d, real_knee_position: Vec2d, real_ankle_position: Vec2d):
         # calculate angles for right leg
@@ -207,7 +204,7 @@ class RelativeValues:
         self.x_ankle = real_ankle_position.x - real_hips_position.x
         # angle between corps and calf
         sin_angle_calf = (self.x_ankle - self.x_knee) / CALF_HEIGHT
-        self.angle_calf = sin(sin_angle_calf)
+        self.angle_calf = sin_angle_calf
         self.y_ankle = real_ankle_position.y - real_hips_position.y
 
         self.x_foot = 2 # TODO: do zmiany!

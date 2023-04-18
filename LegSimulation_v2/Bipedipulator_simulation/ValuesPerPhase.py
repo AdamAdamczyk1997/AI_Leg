@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from pymunk import vec2d, Vec2d
 
-start_velocity_value = 0.25
+start_velocity_value = 0.1
 
 
 class ChangeVelocitySignal(Enum):
@@ -138,31 +138,57 @@ class Equations(str):
         self.calf_velocity = [[start_velocity_value], [], [], []]
         self.leg_name = leg_name
         self.fill_velocity_list(start_velocity_value)
-        self.fill_angles_list()
+        # self.fill_angles_list_v1()
+        self.fill_angles_list_v2()
         self.fill_dictionaries()
         self.velocities = [Velocity(self.thigh_velocity[0], self.calf_velocity[0]),
                            Velocity(self.thigh_velocity[1], self.calf_velocity[1]),
+                           Velocity(self.thigh_velocity[2], self.calf_velocity[2]),
+                           Velocity(self.thigh_velocity[2], self.calf_velocity[2]),
+                           Velocity(self.thigh_velocity[2], self.calf_velocity[2]),
+                           Velocity(self.thigh_velocity[2], self.calf_velocity[2]),
                            Velocity(self.thigh_velocity[2], self.calf_velocity[2])]
         # self.velocities.append(Velocity(self.thigh_velocity, self.calf_velocity))
 
-    def fill_angles_list(self):
+    def fill_angles_list_v1(self):
         match self.leg_name:
             case "right":
-                self.thigh_angles_list = [0.20, 0.15, 0.10, 0.05, 0.00,
-                                          0.12, 0.24, 0.31, 0.38,
-                                          0.45, 0.35, 0.275, 0.20]
+                self.thigh_angles_list = [0.30, 0.25, 0.20, 0.15, 0.1,
+                                          0.22, 0.34, 0.41, 0.48,
+                                          0.55, 0.45, 0.375, 0.30]
 
-                self.calf_angles_list = [-0.20, -0.3, -0.4, -0.5, -0.6,
-                                         -0.5, -0.4, -0.3, -0.2,
-                                         -0.1, -0.1, -0.3, -0.20]
+                self.calf_angles_list = [-0.30, -0.35, -0.4, -0.5, -0.6,
+                                         -0.55, -0.5, -0.4, -0.3,
+                                         -0.2, -0.2, -0.4, -0.30]
             case "left":
-                self.thigh_angles_list = [0.24, 0.31, 0.38, 0.45, 0.35,
-                                          0.275, 0.20, 0.15, 0.10,
-                                          0.05, 0.00, 0.12, 0.24]
+                self.thigh_angles_list = [0.34, 0.41, 0.48, 0.55, 0.45,
+                                          0.375, 0.30, 0.25, 0.20,
+                                          0.15, 0.10, 0.22, 0.34]
 
-                self.calf_angles_list = [-0.4, -0.3, -0.2, -0.1, -0.1,
-                                         -0.3, -0.20, -0.3, -0.4,
-                                         -0.5, -0.6, -0.5, -0.4]
+                self.calf_angles_list = [-0.5, -0.4, -0.3, -0.2, -0.2,
+                                         -0.4, -0.30, -0.35, -0.4,
+                                         -0.5, -0.6, -0.55, -0.5]
+            case other:
+                print("Equation leg name not specified")
+
+    def fill_angles_list_v2(self):
+        match self.leg_name:
+            case "right":
+                self.thigh_angles_list = [0.5, 0.48, 0.47, 0.37, 0.27,
+                                          0.07, 0.25, 0.4, 0.68,
+                                          0.75, 0.63, 0.53, 0.5]
+
+                self.calf_angles_list = [-0.89, -0.93, -0.96, -0.93, -0.85,
+                                         -0.75, -0.81, -1, -1.27,
+                                         -1.17, -0.87, -0.72, -0.89]
+            case "left":
+                self.thigh_angles_list = [0.4, 0.68, 0.75, 0.63, 0.53,
+                                          0.5, 0.48, 0.47, 0.37,
+                                          0.27, 0.07, 0.25, 0.4]
+
+                self.calf_angles_list = [-1, 1.7, -1.17, -0.87, -0.72,
+                                         -0.89, -0.93, -0.96, -0.93,
+                                         -0.85, -0.75, -0.81, -1]
             case other:
                 print("Equation leg name not specified")
 

@@ -42,7 +42,7 @@ class Leg:
     equations: Equations
 
     def __init__(self, space: pymunk.Space(), mode: str, leg_id):
-        self.relative_values = [RelativeValues(), RelativeValues(), RelativeValues()]
+        self.relative_values = [RelativeValues(), RelativeValues(), RelativeValues(), RelativeValues(), RelativeValues(), RelativeValues(), RelativeValues()]
         self.name = "right" if leg_id == 0 else "left"
         self.equations = Equations(self.name)
         self.thigh = LegPartBone(space, self.iterator(), "thigh", THIGH_WEIGHT, (THIGH_WIDTH, THIGH_HEIGHT),

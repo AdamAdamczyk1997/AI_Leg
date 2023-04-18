@@ -157,8 +157,8 @@ class Simulator(object):
                     # Start/stop simulation!!!!!!!!!!!!!!!!!!!!!!!!!.
                     elif event.key == pygame.K_s:
                         simulate = not simulate
-                        self.model_entity.right_leg.equations.velocities[self.used_scenario].show_velocity_lists()
-                        self.model_entity.left_leg.equations.velocities[self.used_scenario].show_velocity_lists()
+                        # self.model_entity.right_leg.equations.velocities[self.used_scenario].show_velocity_lists()
+                        # self.model_entity.left_leg.equations.velocities[self.used_scenario].show_velocity_lists()
 
                     elif event.key == pygame.K_a:
                         pressed_k_a = not pressed_k_a
@@ -197,8 +197,11 @@ class Simulator(object):
                         case 1:
                             self.used_scenario += 1
                             temp_end = False
-                        case 2:
+                        case 4:
                             running = False
+                        case _:
+                            self.used_scenario += 1
+                            temp_end = False
 
                 limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, damping, dt)
                 limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, damping, dt)
