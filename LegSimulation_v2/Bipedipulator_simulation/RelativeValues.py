@@ -204,7 +204,7 @@ class RelativeValues:
         self.x_ankle = real_ankle_position.x - real_hips_position.x
         # angle between corps and calf
         sin_angle_calf = (self.x_ankle - self.x_knee) / CALF_HEIGHT
-        self.angle_calf = sin_angle_calf
+        self.angle_calf = sin(sin_angle_calf)
         self.y_ankle = real_ankle_position.y - real_hips_position.y
 
         self.x_foot = 2 # TODO: do zmiany!

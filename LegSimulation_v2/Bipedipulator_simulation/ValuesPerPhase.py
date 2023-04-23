@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from pymunk import vec2d, Vec2d
 
-start_velocity_value = 0.1
+start_velocity_value = 0.25
 
 
 class ChangeVelocitySignal(Enum):
@@ -138,8 +138,8 @@ class Equations(str):
         self.calf_velocity = [[start_velocity_value], [], [], []]
         self.leg_name = leg_name
         self.fill_velocity_list(start_velocity_value)
-        # self.fill_angles_list_v1()
-        self.fill_angles_list_v2()
+        self.fill_angles_list_v1()
+        # self.fill_angles_list_v2()
         self.fill_dictionaries()
         self.velocities = [Velocity(self.thigh_velocity[0], self.calf_velocity[0]),
                            Velocity(self.thigh_velocity[1], self.calf_velocity[1]),
@@ -159,14 +159,14 @@ class Equations(str):
 
                 self.calf_angles_list = [-0.30, -0.35, -0.4, -0.5, -0.6,
                                          -0.55, -0.5, -0.4, -0.3,
-                                         -0.2, -0.2, -0.4, -0.30]
+                                         -0.2, -0.2, -0.25, -0.30]
             case "left":
                 self.thigh_angles_list = [0.34, 0.41, 0.48, 0.55, 0.45,
                                           0.375, 0.30, 0.25, 0.20,
                                           0.15, 0.10, 0.22, 0.34]
 
                 self.calf_angles_list = [-0.5, -0.4, -0.3, -0.2, -0.2,
-                                         -0.4, -0.30, -0.35, -0.4,
+                                         -0.25, -0.30, -0.35, -0.4,
                                          -0.5, -0.6, -0.55, -0.5]
             case other:
                 print("Equation leg name not specified")
@@ -174,21 +174,50 @@ class Equations(str):
     def fill_angles_list_v2(self):
         match self.leg_name:
             case "right":
-                self.thigh_angles_list = [0.5, 0.48, 0.47, 0.37, 0.27,
-                                          0.07, 0.25, 0.4, 0.68,
-                                          0.75, 0.63, 0.53, 0.5]
+                self.thigh_angles_list = [0.479, 0.461, 0.452, 0.361,
+                                          0.266, 0.069, 0.247,
+                                          0.389, 0.628, 0.681,
+                                          0.589, 0.505, 0.479]
 
-                self.calf_angles_list = [-0.89, -0.93, -0.96, -0.93, -0.85,
-                                         -0.75, -0.81, -1, -1.27,
-                                         -1.17, -0.87, -0.72, -0.89]
+                self.calf_angles_list = [-0.777, -0.801, -0.819, -0.801,
+                                         -0.751, -0.724, -0.789,
+                                         -0.8, -0.83, -0.82,
+                                         -0.764, -0.659, -0.777]
             case "left":
-                self.thigh_angles_list = [0.4, 0.68, 0.75, 0.63, 0.53,
-                                          0.5, 0.48, 0.47, 0.37,
-                                          0.27, 0.07, 0.25, 0.4]
+                self.thigh_angles_list = [0.247, 0.389, 0.628, 0.681,
+                                          0.589, 0.505, 0.479,
+                                          0.461, 0.452, 0.361,
+                                          0.266, 0.069, 0.247]
 
-                self.calf_angles_list = [-1, 1.7, -1.17, -0.87, -0.72,
-                                         -0.89, -0.93, -0.96, -0.93,
-                                         -0.85, -0.75, -0.81, -1]
+                self.calf_angles_list = [-0.8, -0.83, -0.82, -0.764,
+                                         -0.659, -0.777, -0.801,
+                                         -0.819, -0.801, -0.751,
+                                         -0.724, -0.789, -0.8]
+            case other:
+                print("Equation leg name not specified")
+
+    def fill_angles_list_v3(self):
+        match self.leg_name:
+            case "right":
+                self.thigh_angles_list = [0.496880138, 0.333487092, 0.149438132, -0.079914694,
+                                          0.019998667, 0.479425539, 0.767543502,
+                                          0.717356091, 0.605186406, 0.581035161,
+                                          0.522687229, 0.522687229, 0.496880138]
+
+                self.calf_angles_list = [-0.841, -0.78332691, -0.703279419, -0.605186406,
+                                         -0.78332691, -0.98544973, -0.948984619,
+                                         -0.644217687, -0.496880138, -0.703279419,
+                                         -0.78332691, -0.813415505, -0.841]
+            case "left":
+                self.thigh_angles_list = [0.767543502, 0.717356091, 0.605186406, 0.581035161,
+                                          0.522687229, 0.522687229, 0.496880138,
+                                          0.333487092, 0.149438132, -0.079914694,
+                                          0.019998667, 0.479425539, 0.767543502]
+
+                self.calf_angles_list = [-0.948984619, -0.644217687, -0.496880138, -0.703279419,
+                                         -0.78332691, -0.813415505, -0.841,
+                                         -0.78332691, -0.703279419, -0.605186406,
+                                         -0.78332691, -0.98544973, -0.948984619]
             case other:
                 print("Equation leg name not specified")
 

@@ -1,3 +1,5 @@
+from math import asin
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -7,8 +9,8 @@ from LegSimulation_v2.Bipedipulator_simulation.Model import Model
 
 
 def write_data_to_excel(model: Model):
-    fill_date(model, 0, 2)
-    fill_date(model, 1, 2)
+    fill_date(model, 0, 1)
+    fill_date(model, 1, 1)
     fill_equation(model)
     fill_data_for_txt(model, 0)
     fill_data_for_txt(model, 1)
@@ -83,7 +85,8 @@ def fill_date(model: Model, leg_nr: int, scenario: int):
     columns = ['x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_calf', 'x_ankle',
                'y_ankle', 'x_foot', 'y_foot', 'angle_foot', 'real_corps_y',
                'oscillation', 'oscillation_time', 'hip_velocity', 'knee_velocity', 'ankle_velocity',
-               'current_thigh_velocity_value', 'current_calf_velocity_value', 'mirror_angle_thigh', 'mirror_angle_calf']
+               'current_thigh_velocity_value', 'current_calf_velocity_value', 'mirror_angle_thigh', 'mirror_angle_calf',
+               'mirror_angle_thigh_radians', 'mirror_angle_calf_radians']
 
     usage_counter = []
     x_hip = []
@@ -106,6 +109,9 @@ def fill_date(model: Model, leg_nr: int, scenario: int):
     current_calf_velocity_value = []
     mirror_angle_thigh = []
     mirror_angle_calf = []
+
+    mirror_angle_thigh_radians = []
+    mirror_angle_calf_radians = []
     i = 1
 
     oscillation_time = []
@@ -136,6 +142,9 @@ def fill_date(model: Model, leg_nr: int, scenario: int):
             current_calf_velocity_value.append(leg.equations.velocities[used_scenario].histories[i][1])
             mirror_angle_thigh.append(-1 * (leg.relative_values[used_scenario].histories[i][3]))
             mirror_angle_calf.append(-1 * (leg.relative_values[used_scenario].histories[i][6]))
+
+            mirror_angle_thigh_radians.append(asin(-1 * (leg.relative_values[used_scenario].histories[i][3])))
+            mirror_angle_calf_radians.append(asin(-1 * (leg.relative_values[used_scenario].histories[i][6])))
 
             i += 1
         used_scenario += 1
@@ -189,7 +198,8 @@ def fill_date(model: Model, leg_nr: int, scenario: int):
     df = pd.DataFrame(list(zip(x_hip, y_hip, angle_thigh, x_knee, y_knee, angle_calf, x_ankle, y_ankle,
                                x_foot, y_foot, angle_foot, real_corps_y, oscillation,
                                oscillation_time, hip_velocity, knee_velocity, ankle_velocity,
-                               current_thigh_velocity_value, current_calf_velocity_value,mirror_angle_thigh, mirror_angle_calf)),
+                               current_thigh_velocity_value, current_calf_velocity_value,mirror_angle_thigh,
+                               mirror_angle_calf, mirror_angle_thigh_radians, mirror_angle_calf_radians)),
                       index=usage_counter,
                       columns=columns)
 
