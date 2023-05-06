@@ -98,8 +98,7 @@ class Controller:
     def run_phase_async(self, model_entity: Model, motors, phase_nr: int):
         temp_end = False
         end_right = False
-        end_left = False
-        end_right = phase_function(model_entity.right_leg, motors, self.right_thigh_speed,
+        end_right = move_leg_phase(model_entity.right_leg, motors, self.right_thigh_speed,
                                    self.right_calf_speed, self.current_phase, self.used_scenario)
         model_entity.right_leg.relative_values[self.used_scenario].counters[self.loop_counter]. \
             phase_part_usage_increment(self.current_phase, end_right)
@@ -110,7 +109,8 @@ class Controller:
         else:
             self.temp_right_phase_usage_counter += 1
 
-        end_left = phase_function(model_entity.left_leg, motors, self.left_thigh_speed,
+        end_left = False
+        end_left = move_leg_phase(model_entity.left_leg, motors, self.left_thigh_speed,
                                   self.left_calf_speed, self.current_phase, self.used_scenario)
         model_entity.left_leg.relative_values[self.used_scenario].counters[self.loop_counter]. \
             phase_part_usage_increment(self.current_phase, end_left)
@@ -137,190 +137,6 @@ class Controller:
             temp_end = self.change_current_phase(model_entity)
 
         return temp_end
-
-
-def phase_function(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf_speed: float, phase: int,
-                   used_scenario: int):
-    if leg.name == "right":
-        match phase:
-            case 0:
-                end_thigh = set_thigh_start_position(leg, motors, thigh_speed, used_scenario)
-                end_calf = set_calf_start_position(leg, motors, calf_speed, used_scenario)
-                if end_thigh and end_calf:
-                    return True
-
-                return False
-            case 1:
-                return move_leg_to_the_back(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_weight_to_leg_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 2:
-                return move_leg_to_the_back(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_weight_to_leg_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 3:
-                return move_leg_to_the_back(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_leg_to_the_back_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 4:
-                return move_leg_to_the_back(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_leg_to_the_back_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 5:
-                return lifting_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_leg_to_the_back_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 6:
-                return lifting_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return lifting_leg_2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 7:
-                return lifting_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return lifting_leg_2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 8:
-                return lifting_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return lifting_leg_2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 9:
-                return lifting_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return lifting_leg_2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 10:
-                return put_thigh_down(leg, motors, thigh_speed, phase, used_scenario)
-                # return put_thigh_down_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 11:
-                return move_weight_to_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return put_thigh_down_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 12:
-                return move_weight_to_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_weight_to_leg_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-
-    if leg.name == "left":
-        match phase:
-            case 0:
-                end_thigh = set_thigh_start_position(leg, motors, thigh_speed, used_scenario)
-                end_calf = set_calf_start_position(leg, motors, calf_speed, used_scenario)
-                if end_thigh and end_calf:
-                    return True
-
-                return False
-            case 1:
-                return lifting_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return lifting_leg_2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 2:
-                return lifting_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return lifting_leg_2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 3:
-                return lifting_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return put_thigh_down_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 4:
-                return put_thigh_down(leg, motors, calf_speed, phase, used_scenario)
-                # return put_thigh_down_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 5:
-                return move_weight_to_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_weight_to_leg_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 6:
-                return move_weight_to_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_weight_to_leg_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 7:
-                return move_leg_to_the_back(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_weight_to_leg_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 8:
-                return move_leg_to_the_back(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_leg_to_the_back_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 9:
-                return move_leg_to_the_back(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_leg_to_the_back_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 10:
-                return move_leg_to_the_back(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return move_leg_to_the_back_v2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 11:
-                return lifting_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return lifting_leg_2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-            case 12:
-                return lifting_leg(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-                # return lifting_leg_2(leg, motors, thigh_speed, calf_speed, phase, used_scenario)
-
-
-def lifting_leg(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf_speed: float,
-                phase: int, used_scenario: int):
-    end_thigh = False
-    end_calf = False
-    move_leg_function = choose_leg_functions(leg, True)
-    stop_leg_function = choose_leg_functions(leg, False)
-    thigh_value = leg.equations.get_angle("thigh", phase)
-    calf_value = leg.equations.get_angle("calf", phase)
-
-    if leg.relative_values[used_scenario].angle_thigh <= thigh_value:
-        move_leg_function(motors, "thigh", "forward", thigh_speed)
-    else:
-        stop_leg_function(motors, "thigh")
-        end_thigh = True
-    if leg.relative_values[used_scenario].angle_calf <= calf_value:
-        move_leg_function(motors, "calf", "forward", calf_speed)
-    else:
-        stop_leg_function(motors, "calf")
-        end_calf = True
-    if end_thigh and end_calf:
-        return True
-
-    return False
-
-
-def move_leg_to_the_back(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf_speed: float,
-                         phase: int, used_scenario: int):
-    end_thigh = False
-    end_calf = False
-    move_leg_function = choose_leg_functions(leg, True)
-    stop_leg_function = choose_leg_functions(leg, False)
-    thigh_value = leg.equations.get_angle("thigh", phase)
-    calf_value = leg.equations.get_angle("calf", phase)
-
-    if leg.relative_values[used_scenario].angle_thigh >= thigh_value:
-        move_leg_function(motors, "thigh", "backward", thigh_speed)
-    else:
-        stop_leg_function(motors, "thigh")
-        end_thigh = True
-    if leg.relative_values[used_scenario].angle_calf >= calf_value:
-        move_leg_function(motors, "calf", "backward", calf_speed)
-    else:
-        stop_leg_function(motors, "calf")
-        end_calf = True
-    if end_thigh and end_calf:
-        return True
-
-    return False
-
-
-def move_weight_to_leg(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf_speed: float, phase: int,
-                       used_scenario: int):
-    end_thigh = False
-    end_calf = False
-    move_leg_function = choose_leg_functions(leg, True)
-    stop_leg_function = choose_leg_functions(leg, False)
-    thigh_value = leg.equations.get_angle("thigh", phase)
-    calf_value = leg.equations.get_angle("calf", phase)
-
-    if leg.relative_values[used_scenario].angle_thigh >= thigh_value:
-        move_leg_function(motors, "thigh", "backward", thigh_speed)
-    else:
-        stop_leg_function(motors, "thigh")
-        end_thigh = True
-    if leg.relative_values[used_scenario].angle_calf <= calf_value:
-        move_leg_function(motors, "calf", "forward", calf_speed)
-    else:
-        stop_leg_function(motors, "calf")
-        end_calf = True
-    if end_thigh and end_calf:
-        return True
-
-    return False
-
-
-def put_thigh_down(leg: Leg, motors: list[SimpleMotor], multiplication: float, phase: int, used_scenario: int):
-    move_leg_function = choose_leg_functions(leg, True)
-    stop_leg_function = choose_leg_functions(leg, False)
-    angle_thigh = leg.equations.get_angle("thigh", phase)
-    if leg.relative_values[used_scenario].angle_thigh >= angle_thigh:
-        move_leg_function(motors, "thigh", "backward", multiplication)
-        stop_leg_function(motors, "calf")
-    else:
-        stop_leg_function(motors, "thigh")
-        return True
-
-    return False
 
 
 def choose_leg_functions(leg: Leg, move: bool):
@@ -459,150 +275,60 @@ def set_calf_start_position(leg: Leg, motors: list[SimpleMotor], calf_speed: flo
     return False
 
 
-def lifting_leg_2(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf_speed: float,
-                  phase: int, used_scenario: int):
-    end_thigh = False
-    end_calf = False
-    move_leg_function = choose_leg_functions(leg, True)
-    stop_leg_function = choose_leg_functions(leg, False)
-    thigh_value = leg.equations.get_angle("thigh", phase)
-    calf_value = leg.equations.get_angle("calf", phase)
-    match leg.name:
-        case "right":
-            match phase:
-                case 6:
-                    if leg.relative_values[used_scenario].angle_calf >= calf_value:
-                        move_leg_function(motors, "calf", "backward", calf_speed)
-                    else:
-                        stop_leg_function(motors, "calf")
-                        end_calf = True
-                case 7:
-                    if leg.relative_values[used_scenario].angle_calf >= calf_value:
-                        move_leg_function(motors, "calf", "backward", calf_speed)
-                    else:
-                        stop_leg_function(motors, "calf")
-                        end_calf = True
-                case 8:
-                    if leg.relative_values[used_scenario].angle_calf >= calf_value:
-                        move_leg_function(motors, "calf", "backward", calf_speed)
-                    else:
-                        stop_leg_function(motors, "calf")
-                        end_calf = True
-                case 9:
-                    if leg.relative_values[used_scenario].angle_calf <= calf_value:
-                        move_leg_function(motors, "calf", "forward", calf_speed)
-                    else:
-                        stop_leg_function(motors, "calf")
-                        end_calf = True
-        case "left":
-            match phase:
-                case 11:
-                    if leg.relative_values[used_scenario].angle_calf >= calf_value:
-                        move_leg_function(motors, "calf", "backward", calf_speed)
-                    else:
-                        stop_leg_function(motors, "calf")
-                        end_calf = True
-                case 12:
-                    if leg.relative_values[used_scenario].angle_calf >= calf_value:
-                        move_leg_function(motors, "calf", "backward", calf_speed)
-                    else:
-                        stop_leg_function(motors, "calf")
-                        end_calf = True
-                case 1:
-                    if leg.relative_values[used_scenario].angle_calf >= calf_value:
-                        move_leg_function(motors, "calf", "backward", calf_speed)
-                    else:
-                        stop_leg_function(motors, "calf")
-                        end_calf = True
-                case 2:
-                    if leg.relative_values[used_scenario].angle_calf <= calf_value:
-                        move_leg_function(motors, "calf", "forward", calf_speed)
-                    else:
-                        stop_leg_function(motors, "calf")
-                        end_calf = True
+def move_leg_phase(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf_speed: float,
+                   phase: int, used_scenario: int):
+    if phase == 0:
+        end_thigh = set_thigh_start_position(leg, motors, thigh_speed, used_scenario)
+        end_calf = set_calf_start_position(leg, motors, calf_speed, used_scenario)
+        if end_thigh and end_calf:
+            return True
 
-    if leg.relative_values[used_scenario].angle_thigh <= thigh_value:
-        move_leg_function(motors, "thigh", "forward", thigh_speed)
+        return False
     else:
-        stop_leg_function(motors, "thigh")
-        end_thigh = True
+        end_thigh = False
+        end_calf = False
+        previous_phase = phase - 1
+        move_leg_function = choose_leg_functions(leg, True)
+        stop_leg_function = choose_leg_functions(leg, False)
+        thigh_value = leg.equations.get_angle("thigh", phase)
+        calf_value = leg.equations.get_angle("calf", phase)
 
-    if end_thigh and end_calf:
-        return True
+        previous_thigh_value = leg.equations.get_angle("thigh", previous_phase)
+        previous_calf_value = leg.equations.get_angle("calf", previous_phase)
 
-    return False
+        if previous_thigh_value > thigh_value:
+            if leg.relative_values[used_scenario].angle_thigh >= thigh_value:
+                move_leg_function(motors, "thigh", "backward", thigh_speed)
+            else:
+                stop_leg_function(motors, "thigh")
+                end_thigh = True
+        elif previous_thigh_value < thigh_value:
+            if leg.relative_values[used_scenario].angle_thigh <= thigh_value:
+                move_leg_function(motors, "thigh", "forward", thigh_speed)
+            else:
+                stop_leg_function(motors, "thigh")
+                end_thigh = True
+        else:
+            stop_leg_function(motors, "thigh")
+            end_thigh = True
 
+        if calf_value < previous_calf_value:
+            if leg.relative_values[used_scenario].angle_calf >= calf_value:
+                move_leg_function(motors, "calf", "backward", calf_speed)
+            else:
+                stop_leg_function(motors, "calf")
+                end_calf = True
+        elif calf_value > previous_calf_value:
+            if leg.relative_values[used_scenario].angle_calf <= calf_value:
+                move_leg_function(motors, "calf", "forward", calf_speed)
+            else:
+                stop_leg_function(motors, "calf")
+                end_calf = True
+        else:
+            stop_leg_function(motors, "calf")
+            end_calf = True
 
-def move_leg_to_the_back_v2(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf_speed: float,
-                            phase: int, used_scenario: int):
-    end_thigh = False
-    end_calf = False
-    move_leg_function = choose_leg_functions(leg, True)
-    stop_leg_function = choose_leg_functions(leg, False)
-    thigh_value = leg.equations.get_angle("thigh", phase)
-    calf_value = leg.equations.get_angle("calf", phase)
+        if end_thigh and end_calf:
+            return True
 
-    if leg.relative_values[used_scenario].angle_thigh >= thigh_value:
-        move_leg_function(motors, "thigh", "backward", thigh_speed)
-    else:
-        stop_leg_function(motors, "thigh")
-        end_thigh = True
-    if leg.relative_values[used_scenario].angle_calf <= calf_value:
-        move_leg_function(motors, "calf", "forward", calf_speed)
-    else:
-        stop_leg_function(motors, "calf")
-        end_calf = True
-    if end_thigh and end_calf:
-        return True
-
-    return False
-
-
-def move_weight_to_leg_v2(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf_speed: float, phase: int,
-                          used_scenario: int):
-    end_thigh = False
-    end_calf = False
-    move_leg_function = choose_leg_functions(leg, True)
-    stop_leg_function = choose_leg_functions(leg, False)
-    thigh_value = leg.equations.get_angle("thigh", phase)
-    calf_value = leg.equations.get_angle("calf", phase)
-
-    if leg.relative_values[used_scenario].angle_thigh >= thigh_value:
-        move_leg_function(motors, "thigh", "backward", thigh_speed)
-    else:
-        stop_leg_function(motors, "thigh")
-        end_thigh = True
-    if leg.relative_values[used_scenario].angle_calf >= calf_value:
-        move_leg_function(motors, "calf", "backward", calf_speed)
-    else:
-        stop_leg_function(motors, "calf")
-        end_calf = True
-    if end_thigh and end_calf:
-        return True
-
-    return False
-
-
-def put_thigh_down_v2(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf_speed: float,
-                      phase: int, used_scenario: int):
-    end_thigh = False
-    end_calf = False
-    move_leg_function = choose_leg_functions(leg, True)
-    stop_leg_function = choose_leg_functions(leg, False)
-    thigh_value = leg.equations.get_angle("thigh", phase)
-    calf_value = leg.equations.get_angle("calf", phase)
-
-    if leg.relative_values[used_scenario].angle_thigh >= thigh_value:
-        move_leg_function(motors, "thigh", "backward", thigh_speed)
-    else:
-        stop_leg_function(motors, "thigh")
-        end_thigh = True
-    if leg.relative_values[used_scenario].angle_calf <= calf_value:
-        move_leg_function(motors, "calf", "forward", calf_speed)
-    else:
-        stop_leg_function(motors, "calf")
-        end_calf = True
-    if end_thigh and end_calf:
-        return True
-
-    return False
+        return False

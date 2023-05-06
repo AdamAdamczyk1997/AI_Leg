@@ -20,8 +20,8 @@ def calculate_velocity_change_angle(time: float, velocity: float):
 
 
 def generate_equation(t_1: float, t_2: float, q_1: float, q_2: float):
-    A = round(((q_2 - q_1) / (t_2 - t_1)), 8)
-    B = round((q_1 - (A * t_1)), 8)
+    A = round(((q_2 - q_1) / (t_2 - t_1)), 3)
+    B = round((q_1 - (A * t_1)), 3)
     equation = str(A) + " * t + " + str(B)
 
     return [equation, A, B]
@@ -120,13 +120,7 @@ class Equations(str):
 
     current_angle_value_due_to_the_equation: float
 
-    lifting_leg_function_equations_part1: dict
-    lifting_leg_function_equations_part2: dict
-    move_leg_to_the_back_equations: dict
-    move_weight_to_leg_equations: dict
-    put_thigh_down_equations: dict
-
-    list_of_equations_dictionaries: list
+    list_of_equations_dictionaries: list[dict]
 
     thigh_velocity: list[list]
     calf_velocity: list[list]
@@ -137,62 +131,61 @@ class Equations(str):
         self.thigh_velocity = [[start_velocity_value], [], [], []]
         self.calf_velocity = [[start_velocity_value], [], [], []]
         self.leg_name = leg_name
+        self.list_of_equations_dictionaries = []
         self.fill_velocity_list(start_velocity_value)
-        self.fill_angles_list_v1()
-        # self.fill_angles_list_v2()
+        # self.fill_angles_list_v1()
+        self.fill_angles_list_v2()
+        # self.fill_angles_list_v3()
         self.fill_dictionaries()
         self.velocities = [Velocity(self.thigh_velocity[0], self.calf_velocity[0]),
                            Velocity(self.thigh_velocity[1], self.calf_velocity[1]),
                            Velocity(self.thigh_velocity[2], self.calf_velocity[2]),
-                           Velocity(self.thigh_velocity[2], self.calf_velocity[2]),
-                           Velocity(self.thigh_velocity[2], self.calf_velocity[2]),
-                           Velocity(self.thigh_velocity[2], self.calf_velocity[2]),
-                           Velocity(self.thigh_velocity[2], self.calf_velocity[2])]
+                           Velocity(self.thigh_velocity[3], self.calf_velocity[3])]
         # self.velocities.append(Velocity(self.thigh_velocity, self.calf_velocity))
 
     def fill_angles_list_v1(self):
         match self.leg_name:
             case "right":
                 self.thigh_angles_list = [0.30, 0.25, 0.20, 0.15, 0.1,
-                                          0.22, 0.34, 0.41, 0.48,
+                                          0.3, 0.38, 0.41, 0.48,
                                           0.55, 0.45, 0.375, 0.30]
 
-                self.calf_angles_list = [-0.30, -0.35, -0.4, -0.5, -0.6,
-                                         -0.55, -0.5, -0.4, -0.3,
-                                         -0.2, -0.2, -0.25, -0.30]
+                self.calf_angles_list = [-0.32, -0.35, -0.4, -0.45, -0.5,
+                                         -0.55, -0.6, -0.55, -0.35,
+                                         -0.25, -0.28, -0.3, -0.32]
             case "left":
-                self.thigh_angles_list = [0.34, 0.41, 0.48, 0.55, 0.45,
+                self.thigh_angles_list = [0.38, 0.41, 0.48, 0.55, 0.45,
                                           0.375, 0.30, 0.25, 0.20,
-                                          0.15, 0.10, 0.22, 0.34]
+                                          0.15, 0.1, 0.3, 0.38]
 
-                self.calf_angles_list = [-0.5, -0.4, -0.3, -0.2, -0.2,
-                                         -0.25, -0.30, -0.35, -0.4,
-                                         -0.5, -0.6, -0.55, -0.5]
+                self.calf_angles_list = [-0.6, -0.55, -0.35, -0.25, -0.28,
+                                         -0.3, -0.32, -0.35, -0.4,
+                                         -0.45, -0.5, -0.55, -0.6]
             case other:
                 print("Equation leg name not specified")
 
     def fill_angles_list_v2(self):
         match self.leg_name:
             case "right":
-                self.thigh_angles_list = [0.479, 0.461, 0.452, 0.361,
-                                          0.266, 0.069, 0.247,
-                                          0.389, 0.628, 0.681,
-                                          0.589, 0.505, 0.479]
+                self.thigh_angles_list = [0.452, 0.389, 0.276, 0.119, 0.049,
+                                          0.361, 0.628, 0.696,
+                                          0.605, 0.556, 0.488,
+                                          0.470, 0.452]
 
-                self.calf_angles_list = [-0.777, -0.801, -0.819, -0.801,
-                                         -0.751, -0.724, -0.789,
-                                         -0.8, -0.83, -0.82,
-                                         -0.764, -0.659, -0.777]
+                self.calf_angles_list = [-0.488, -0.531, -0.572, -0.589, -0.681,
+                                         -0.724, -0.514, -0.159,
+                                         -0.129, -0.285, -0.389,
+                                         -0.443, -0.488]
             case "left":
-                self.thigh_angles_list = [0.247, 0.389, 0.628, 0.681,
-                                          0.589, 0.505, 0.479,
-                                          0.461, 0.452, 0.361,
-                                          0.266, 0.069, 0.247]
+                self.thigh_angles_list = [0.628, 0.696, 0.605, 0.556, 0.488,
+                                          0.470, 0.452, 0.389,
+                                          0.276, 0.119, 0.049,
+                                          0.361, 0.628]
 
-                self.calf_angles_list = [-0.8, -0.83, -0.82, -0.764,
-                                         -0.659, -0.777, -0.801,
-                                         -0.819, -0.801, -0.751,
-                                         -0.724, -0.789, -0.8]
+                self.calf_angles_list = [-0.514, -0.159, -0.129, -0.285, -0.389,
+                                         -0.443, -0.488, -0.531,
+                                         -0.572, -0.589, -0.681,
+                                         -0.724, -0.514]
             case other:
                 print("Equation leg name not specified")
 
@@ -232,84 +225,50 @@ class Equations(str):
         print("thigh angles list= ", self.thigh_angles_list)
         print("calf angles list= ", self.calf_angles_list)
 
-    def fill_equation_dictionary(self, dict_name: str, phase_1: int, phase_2: int):
-        t = [phase_1 - 1, phase_2]
+    def fill_equation_dictionary(self, dict_name: str, phase: int):
+        t = [phase - 1, phase]
 
-        q_for_thigh = [self.thigh_angles_list[phase_1 - 1],
-                       self.thigh_angles_list[phase_2]]
-        q_for_calf = [self.calf_angles_list[phase_1 - 1],
-                      self.calf_angles_list[phase_2]]
+        q_for_thigh = [self.thigh_angles_list[phase - 1],
+                       self.thigh_angles_list[phase]]
+        q_for_calf = [self.calf_angles_list[phase - 1],
+                      self.calf_angles_list[phase]]
 
         initial_velocity = calculate_initial_velocity(q_for_thigh, q_for_calf)
-        self.fill_initial_velocity(phase_1, phase_2, initial_velocity, 2)
+        self.fill_initial_velocity(phase, initial_velocity, 2)
 
         thigh_equation = generate_equation(t[0], t[1], q_for_thigh[0], q_for_thigh[1])
         calf_equation = generate_equation(t[0], t[1], q_for_calf[0], q_for_calf[1])
-        t_q_for_phase_1 = thigh_equation[1] * (phase_1 - 1) + thigh_equation[2]
-        t_q_for_phase_2 = thigh_equation[1] * phase_2 + thigh_equation[2]
-        c_q_for_phase_1 = calf_equation[1] * (phase_1 - 1) + calf_equation[2]
-        c_q_for_phase_2 = calf_equation[1] * phase_2 + calf_equation[2]
+        t_q_for_phase_1 = round(thigh_equation[1] * ((phase - 1) - 1) + thigh_equation[2], 3)
+        t_q_for_phase_2 = round(thigh_equation[1] * phase + thigh_equation[2], 3)
+        c_q_for_phase_1 = round(calf_equation[1] * ((phase - 1) - 1) + calf_equation[2], 3)
+        c_q_for_phase_2 = round(calf_equation[1] * phase + calf_equation[2], 3)
+
+        velocity = [thigh_equation[1], calf_equation[1]]
+        self.fill_initial_velocity(phase, velocity, 3)
 
         dictionary = dict(name=dict_name, thigh_equation=thigh_equation[0], calf_equation=calf_equation[0],
-                          start_time=phase_1, thigh_q_start=t_q_for_phase_1, calf_q_start=c_q_for_phase_1,
-                          stop_time=phase_2, thigh_q_stop=t_q_for_phase_2, calf_q_stop=c_q_for_phase_2,
+                          time=phase, thigh_q_start=t_q_for_phase_1, calf_q_start=c_q_for_phase_1,
+                          thigh_q_stop=t_q_for_phase_2, calf_q_stop=c_q_for_phase_2,
                           thigh_initial_velocity=initial_velocity[0], calf_initial_velocity=initial_velocity[1])
 
         return dictionary
 
-    def fill_initial_velocity(self, phase_1: int, phase_2: int, initial_velocity: list, used_scenario: int):
-        phase = int(phase_1)
-        for i in range(phase_1, phase_2):
-            self.thigh_velocity[used_scenario][phase] = initial_velocity[0]
-            self.calf_velocity[used_scenario][phase] = initial_velocity[1]
-            phase += 1
+    def fill_initial_velocity(self, phase: int, initial_velocity: list, used_scenario: int):
+        self.thigh_velocity[used_scenario][phase] = initial_velocity[0]
+        self.calf_velocity[used_scenario][phase] = initial_velocity[1]
 
     def fill_dictionaries(self):
-        match self.leg_name:
-            case "right":
-                self.move_leg_to_the_back_equations = \
-                    self.fill_equation_dictionary("move_leg_to_the_back_equations", 1, 4)
-                self.lifting_leg_function_equations_part1 = \
-                    self.fill_equation_dictionary("lifting_leg_function_equations_part1", 5, 6)
-                self.lifting_leg_function_equations_part2 = \
-                    self.fill_equation_dictionary("lifting_leg_function_equations_part2", 7, 9)
-                self.put_thigh_down_equations = \
-                    self.fill_equation_dictionary("put_thigh_down_equations", 10, 10)
-                self.move_weight_to_leg_equations = \
-                    self.fill_equation_dictionary("move_weight_to_leg_equations", 11, 12)
-                self.list_of_equations_dictionaries = [
-                    self.move_leg_to_the_back_equations, self.lifting_leg_function_equations_part1,
-                    self.lifting_leg_function_equations_part2, self.put_thigh_down_equations,
-                    self.move_weight_to_leg_equations
-                ]
-            case "left":
-                self.lifting_leg_function_equations_part2 = \
-                    self.fill_equation_dictionary("lifting_leg_function_equations_part2", 1, 3)
-                self.put_thigh_down_equations = \
-                    self.fill_equation_dictionary("put_thigh_down_equations", 4, 4)
-                self.move_weight_to_leg_equations = \
-                    self.fill_equation_dictionary("move_weight_to_leg_equations", 5, 6)
-                self.move_leg_to_the_back_equations = \
-                    self.fill_equation_dictionary("move_leg_to_the_back_equations", 7, 10)
-                self.lifting_leg_function_equations_part1 = \
-                    self.fill_equation_dictionary("lifting_leg_function_equations_part1", 11, 12)
-                self.list_of_equations_dictionaries = [
-                    self.lifting_leg_function_equations_part2, self.put_thigh_down_equations,
-                    self.move_weight_to_leg_equations, self.move_leg_to_the_back_equations,
-                    self.lifting_leg_function_equations_part1
-                ]
-                print("lifting_leg_function_equations_part2 = ", self.lifting_leg_function_equations_part2)
-                print("put_thigh_down = ", self.put_thigh_down_equations)
-                print("move_weight_to_leg = ", self.move_weight_to_leg_equations)
-                print("move_leg_to_the_back = ", self.move_leg_to_the_back_equations)
-                print("lifting_leg_function_equations_part1 = ", self.lifting_leg_function_equations_part1)
+        i = 1
+        for i in range(1, 12):
+            self.list_of_equations_dictionaries.append(self.fill_equation_dictionary("phase_equation_" + str(i), i))
+            i += 1
 
         print("thigh velocity list= ", self.thigh_velocity)
         print("calf velocity list= ", self.calf_velocity)
         pass
 
     def fill_velocity_list(self, velocity: float):
-        for j in range(1, 3):
+        for j in range(1, 4):
             for i in range(0, 14):
                 self.thigh_velocity[j].append(velocity)
                 self.calf_velocity[j].append(velocity)
