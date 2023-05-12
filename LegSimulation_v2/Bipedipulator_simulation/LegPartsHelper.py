@@ -60,17 +60,3 @@ def add_joint_body(position: Union[Vec2d, tuple[float, float]]):
     pivot_joint_body.position = position
     return pivot_joint_body
 
-
-class LegPartsHelper:
-
-    def __init__(self):
-        self.position = None
-        self.body = None
-
-    def get_current_location(self):
-        self.position.change_location(self.body.part_vector_position)
-        self.position.get_current_location()
-        pass
-
-    def update(self, position):
-        self.position = position

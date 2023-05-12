@@ -8,7 +8,6 @@ ROTATION_RATE: float = 1
 
 CORPS_WEIGHT: int = 50
 THIGH_WEIGHT: int = 10
-PATELLA_WEIGHT: int = 1
 calf_WEIGHT: int = 10
 FOOT_WEIGHT: int = 5
 
@@ -34,9 +33,6 @@ THIGH_WIDTH: float = 20
 CALF_HEIGHT: float = 430
 CALF_WIDTH: float = 20
 
-PATELLA_HEIGHT: float = 10 * CONVERTER
-PATELLA_WIDTH: float = 40 * CONVERTER
-
 FOOT_HEIGHT: float = 20
 FOOT_WIDTH: float = 280 * CONVERTER
 FLOOR_HEIGHT: float = 6
@@ -47,17 +43,84 @@ CORPS_POSITION = Vec2d(1000, LEG_HEIGHT + 10)
 
 JOINT_RADIUS: float = 20 * CONVERTER
 
-MIN_CORPS_THIGH: float = sqrt(pow(((1 / 2) * CORPS_WIDTH - (2 * JOINT_RADIUS)), 2) + pow((2 * JOINT_RADIUS), 2))
-MIN_TCFJ: float = sqrt(pow(THIGH_HEIGHT, 2) + pow(10, 2))
-MIN_CFFJ: float = sqrt(pow(CALF_HEIGHT, 2) + pow(10, 2))
 
-MIN_CMFJ: float = (sqrt(pow(((1 / 2) * CORPS_WIDTH), 2) + pow((0.25 * THIGH_HEIGHT), 2)))
-MIN_CMBJ: float = (sqrt(pow(((1 / 2) * CORPS_WIDTH), 2) + pow((0.25 * THIGH_HEIGHT), 2)))
+def fill_angles_list_v1(leg_name):
+    match leg_name:
+        case "right":
+            thigh_angles_list = [0.30, 0.25, 0.20, 0.15, 0.1,
+                                      0.3, 0.38, 0.41, 0.48,
+                                      0.55, 0.45, 0.375, 0.30]
 
-MIN_PTJ: float = (sqrt(pow(PATELLA_WIDTH, 2) + pow((0.25 * THIGH_HEIGHT) - ((1 / 8) * THIGH_HEIGHT), 2)))
-MIN_PCJ: float = (sqrt(pow(PATELLA_WIDTH, 2) + pow((0.25 * CALF_HEIGHT) - ((1 / 8) * CALF_HEIGHT), 2)))
+            calf_angles_list = [-0.32, -0.35, -0.4, -0.45, -0.5,
+                                     -0.55, -0.6, -0.55, -0.35,
+                                     -0.25, -0.28, -0.3, -0.32]
+            return [thigh_angles_list, calf_angles_list]
+        case "left":
+            thigh_angles_list = [0.38, 0.41, 0.48, 0.55, 0.45,
+                                      0.375, 0.30, 0.25, 0.20,
+                                      0.15, 0.1, 0.3, 0.38]
 
-CELL_RADIUS: float = 15
-CELL_COUNT: float = 100
-CELL_SPEED: float = 5.0
+            calf_angles_list = [-0.6, -0.55, -0.35, -0.25, -0.28,
+                                     -0.3, -0.32, -0.35, -0.4,
+                                     -0.45, -0.5, -0.55, -0.6]
+            return [thigh_angles_list, calf_angles_list]
+        case other:
+            print("Equation leg name not specified")
+
+
+def fill_angles_list_v2(leg_name: str):
+    match leg_name:
+        case "right":
+            thigh_angles_list = [0.452, 0.389, 0.276, 0.119, 0.049,
+                                      0.361, 0.628, 0.696,
+                                      0.605, 0.556, 0.488,
+                                      0.470, 0.452]
+
+            calf_angles_list = [-0.488, -0.531, -0.572, -0.589, -0.681,
+                                     -0.724, -0.514, -0.159,
+                                     -0.129, -0.285, -0.389,
+                                     -0.443, -0.488]
+            return [thigh_angles_list, calf_angles_list]
+        case "left":
+            thigh_angles_list = [0.628, 0.696, 0.605, 0.556, 0.488,
+                                      0.470, 0.452, 0.389,
+                                      0.276, 0.119, 0.049,
+                                      0.361, 0.628]
+
+            calf_angles_list = [-0.514, -0.159, -0.129, -0.285, -0.389,
+                                     -0.443, -0.488, -0.531,
+                                     -0.572, -0.589, -0.681,
+                                     -0.724, -0.514]
+            return [thigh_angles_list, calf_angles_list]
+        case other:
+            print("Equation leg name not specified")
+
+
+def fill_angles_list_v3(leg_name: str):
+    match leg_name:
+        case "right":
+            thigh_angles_list = [0.496880138, 0.333487092, 0.149438132, -0.079914694,
+                                      0.019998667, 0.479425539, 0.767543502,
+                                      0.717356091, 0.605186406, 0.581035161,
+                                      0.522687229, 0.522687229, 0.496880138]
+
+            calf_angles_list = [-0.841, -0.78332691, -0.703279419, -0.605186406,
+                                     -0.78332691, -0.98544973, -0.948984619,
+                                     -0.644217687, -0.496880138, -0.703279419,
+                                     -0.78332691, -0.813415505, -0.841]
+            return [thigh_angles_list, calf_angles_list]
+        case "left":
+            thigh_angles_list = [0.767543502, 0.717356091, 0.605186406, 0.581035161,
+                                      0.522687229, 0.522687229, 0.496880138,
+                                      0.333487092, 0.149438132, -0.079914694,
+                                      0.019998667, 0.479425539, 0.767543502]
+
+            calf_angles_list = [-0.948984619, -0.644217687, -0.496880138, -0.703279419,
+                                     -0.78332691, -0.813415505, -0.841,
+                                     -0.78332691, -0.703279419, -0.605186406,
+                                     -0.78332691, -0.98544973, -0.948984619]
+            return [thigh_angles_list, calf_angles_list]
+        case other:
+            print("Equation leg name not specified")
+
 

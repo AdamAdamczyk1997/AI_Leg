@@ -17,20 +17,15 @@ class Controller:
     left_thigh_speed: float
     left_calf_speed: float
 
-    temp_right_phase_usage_counter: int
-    temp_left_phase_usage_counter: int
-
     used_scenario: int
 
-    def __init__(self, model_entity: Model, mode: str):
+    def __init__(self, model_entity: Model):
         self.current_phase = 0
         self.loop_counter = 0
-        self.mode = mode
         self.right_thigh_speed = 0
         self.right_calf_speed = 0
         self.left_thigh_speed = 0
         self.left_calf_speed = 0
-        self.reset_counters()
         self.used_scenario = 0
 
     def set_multiplication_of_motor_velocity(self, right_thigh_speed: float, right_calf_speed: float,
@@ -40,10 +35,6 @@ class Controller:
         self.left_thigh_speed = left_thigh_speed
         self.left_calf_speed = left_calf_speed
         pass
-
-    def reset_counters(self):
-        self.temp_right_phase_usage_counter = 0
-        self.temp_left_phase_usage_counter = 0
 
     def movement_scenario_controller(self, model_entity: Model, motors: list[SimpleMotor], simulate,
                                      used_scenario: int):
@@ -68,6 +59,7 @@ class Controller:
                 motors.__getitem__(3).rate,
                 motors.__getitem__(4).rate,
                 self.current_phase)
+
             self.set_multiplication_of_motor_velocity(right_thigh_speed, right_calf_speed, left_thigh_speed,
                                                       left_calf_speed)
             temp_end = self.run_phase_async(model_entity, motors, self.current_phase)
@@ -81,13 +73,7 @@ class Controller:
         elif 0 < self.current_phase < 12:
             self.current_phase += 1
         elif self.current_phase == 12:
-            model_entity.right_leg.relative_values[self.used_scenario].counters[
-                self.loop_counter].append_phase_usage_counter()
-            model_entity.left_leg.relative_values[self.used_scenario].counters[
-                self.loop_counter].append_phase_usage_counter()
             self.loop_counter += 1
-            model_entity.right_leg.relative_values[self.used_scenario].counters.append(Counters())
-            model_entity.left_leg.relative_values[self.used_scenario].counters.append(Counters())
             if self.loop_counter == 2:
                 self.loop_counter = 0
                 return True
@@ -97,40 +83,26 @@ class Controller:
 
     def run_phase_async(self, model_entity: Model, motors, phase_nr: int):
         temp_end = False
-        end_right = False
         end_right = move_leg_phase(model_entity.right_leg, motors, self.right_thigh_speed,
                                    self.right_calf_speed, self.current_phase, self.used_scenario)
-        model_entity.right_leg.relative_values[self.used_scenario].counters[self.loop_counter]. \
+        model_entity.right_leg.relative_values[self.used_scenario].counters. \
             phase_part_usage_increment(self.current_phase, end_right)
         if end_right:
             stop_moving_right_leg(motors, "thigh")
             stop_moving_right_leg(motors, "calf")
-            print("End R:", self.current_phase)
-        else:
-            self.temp_right_phase_usage_counter += 1
+            print("End Right:", self.current_phase)
 
-        end_left = False
         end_left = move_leg_phase(model_entity.left_leg, motors, self.left_thigh_speed,
                                   self.left_calf_speed, self.current_phase, self.used_scenario)
-        model_entity.left_leg.relative_values[self.used_scenario].counters[self.loop_counter]. \
+        model_entity.left_leg.relative_values[self.used_scenario].counters. \
             phase_part_usage_increment(self.current_phase, end_left)
         if end_left:
             stop_moving_left_leg(motors, "thigh")
             stop_moving_left_leg(motors, "calf")
-            print("End L:", self.current_phase)
-        else:
-            self.temp_left_phase_usage_counter += 1
+            print("End Left:", self.current_phase)
 
         if end_right and end_left:
-            print("End current phase")
-
-            model_entity.right_leg.relative_values[self.used_scenario].counters[
-                self.loop_counter].append_phase_part_usage_counters(
-                self.temp_right_phase_usage_counter)
-            model_entity.left_leg.relative_values[self.used_scenario].counters[
-                self.loop_counter].append_phase_part_usage_counters(
-                self.temp_left_phase_usage_counter)
-            self.reset_counters()
+            print("End current phase ", self.current_phase)
 
             model_entity.right_leg.relative_values[self.used_scenario].change_oscillation(self.current_phase)
             model_entity.left_leg.relative_values[self.used_scenario].change_oscillation(self.current_phase)
@@ -154,20 +126,19 @@ def choose_leg_functions(leg: Leg, move: bool):
 
 
 def calculate_data(model_entity: Model, used_scenario: int):
-    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.right_leg.pivots.__getitem__(0),
-                                                                        "hip")
+    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.hip_body, "hip")
     model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.right_leg.knee_body, "knee")
     model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.right_leg.ankle_body, "ankle")
-    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.left_leg.pivots.__getitem__(0),
-                                                                       "hip")
+    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.hip_body, "hip")
     model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.left_leg.knee_body, "knee")
     model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.left_leg.ankle_body, "ankle")
+
     model_entity.right_leg.relative_values[used_scenario].calculate_angles(
-        model_entity.pivots.__getitem__(0).position,
+        model_entity.hip_body.position,
         model_entity.right_leg.knee_body.position,
         model_entity.right_leg.ankle_body.position)
     model_entity.left_leg.relative_values[used_scenario].calculate_angles(
-        model_entity.pivots.__getitem__(0).position,
+        model_entity.hip_body.position,
         model_entity.left_leg.knee_body.position,
         model_entity.left_leg.ankle_body.position)
     pass

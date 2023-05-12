@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import random
-
 import pymunk
 import pymunk.pygame_util
 
@@ -10,12 +8,7 @@ from LegSimulation_v2.Bipedipulator_simulation import LegPartsHelper
 from LegSimulation_v2.Bipedipulator_simulation.Leg import Leg
 from LegSimulation_v2.Bipedipulator_simulation.LegPartBone import LegPartBone
 from LegSimulation_v2.Bipedipulator_simulation.constants import CORPS_WIDTH, CORPS_HEIGHT, THIGH_HEIGHT, \
-    CORPS_WEIGHT, \
-    FLOOR_HEIGHT, CORPS_POSITION
-
-# from kivy.graphics import Quad, Triangle
-
-random.seed(1)  # make the simulation the same each time, easier to debug
+    CORPS_WEIGHT, FLOOR_HEIGHT, CORPS_POSITION
 
 
 def running_gear(space):
@@ -23,14 +16,12 @@ def running_gear(space):
     floor.body_type = pymunk.Body.KINEMATIC
     floor.shape = pymunk.Segment(floor, (0, 0), (100000, 0), FLOOR_HEIGHT)
     floor.shape.friction = 1.0
-    floor.shape.collision_type = 1
     space.add(floor, floor.shape)
 
     return floor
 
 
 class Model:
-    mode: str
     num_bodies: int = 0
 
     corps: LegPartBone
@@ -38,22 +29,17 @@ class Model:
     left_leg: Leg
     floor: pymunk.Body
 
-    pivots: list[pymunk.Body]
+    hip_body: pymunk.Body
 
-    def __init__(self, space: pymunk.Space(), mode: str):
-        self.mode = mode
+    def __init__(self, space: pymunk.Space()):
         self.floor = running_gear(space)
-        self.corps = LegPartBone(space, self.iterator(), "corps", CORPS_WEIGHT, (CORPS_WIDTH, CORPS_HEIGHT),
-                                 CORPS_POSITION)
-        self.right_leg = Leg(space, mode, 0)
-        self.left_leg = Leg(space, mode, 1)
+
+        self.corps = LegPartBone(space, "corps", CORPS_WEIGHT, (CORPS_WIDTH, CORPS_HEIGHT), CORPS_POSITION)
+        self.right_leg = Leg(space, "right")
+        self.left_leg = Leg(space, "left")
 
         self.add_pivot_joints(space)
         self.add_pin_joints_parts(space)
-
-    def iterator(self):
-        self.num_bodies = self.num_bodies + 1
-        return self.num_bodies
 
     def move_running_gear(self):
         self.floor.velocity = (-80, 0)
@@ -68,12 +54,10 @@ class Model:
                                              self.corps.body.position.y -
                                              ((1 / 2) * CORPS_HEIGHT)))
 
-        hip_pivot_joint_body = LegPartsHelper.add_joint_body((self.corps.body.position.x,
-                                                              self.corps.body.position.y -
-                                                              ((1 / 2) * CORPS_HEIGHT)))
-        space.add(hip_pivot_joint_body)
-        self.pivots = [hip_pivot_joint_body]
-        pass
+        self.hip_body = LegPartsHelper.add_joint_body((self.corps.body.position.x,
+                                                       self.corps.body.position.y -
+                                                       ((1 / 2) * CORPS_HEIGHT)))
+        space.add(self.hip_body)
 
     def add_pin_joints_parts(self, space):
         LegPartsHelper.add_body_rotation_center(space, self.corps.body.position)
@@ -83,6 +67,6 @@ class Model:
         LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.left_leg.thigh.body,
                                           (0, (-(1 / 2) * CORPS_HEIGHT)),
                                           (0, (1 / 2) * THIGH_HEIGHT))
-        LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.pivots.__getitem__(0),
+        LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.hip_body,
                                           (0, (-(1 / 2) * CORPS_HEIGHT)),
                                           (0, 0))

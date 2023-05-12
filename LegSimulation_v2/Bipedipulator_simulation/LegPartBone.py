@@ -8,18 +8,15 @@ class LegPartBone:
     time: int = 0
 
     """An individual subject in the simulation."""
-    id: int
     name: str
     mass: float
     size: tuple[int, int]
     moment: float
     shape: Poly
     shape_friction: float
-    shape_color: shape.color = "black"
     body: Body
 
-    def __init__(self, space: pymunk.Space(), body_id, name, mass, size, vector: Vec2d):
-        self.id = body_id
+    def __init__(self, space: pymunk.Space(), name, mass, size, vector: Vec2d):
         self.name = name
         self.mass = mass
         self.size = size
@@ -28,15 +25,10 @@ class LegPartBone:
         self.body.body_type = pymunk.Body.DYNAMIC
         self.body.position = vector
         self.shape = pymunk.Poly.create_box(self.body, size)
-        self.body_rotation_limit = None
-        self.body_rotation_center = None
-        self.shape.collision_type = 0
         self.shape.friction = 0.61
         self.shape.collision_type = 0
+        # ---prevent collisions with ShapeFilter
+        self.shape.filter = pymunk.ShapeFilter(group=1)
 
         space.add(self.body, self.shape)
 
-    def add_bone_part(self: LegPartBone, place, height, width):
-        static = pymunk.Segment(self.body, (width, place), (-width, place), height)
-        static.collision_type = 0
-        return static
