@@ -5,8 +5,6 @@ from pymunk import Poly, Vec2d, Body
 
 
 class LegPartBone:
-    time: int = 0
-
     """An individual subject in the simulation."""
     name: str
     mass: float

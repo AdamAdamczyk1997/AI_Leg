@@ -3,6 +3,7 @@ from math import asin
 import matplotlib.pyplot as plt
 import pandas as pd
 
+from LegSimulation_v2.Bipedipulator_simulation.Leg import Leg
 from LegSimulation_v2.Bipedipulator_simulation.Model import Model
 
 
@@ -10,8 +11,8 @@ def write_data_to_excel(model: Model):
     fill_date(model, 0, 0)
     fill_date(model, 1, 0)
     fill_equation(model)
-    fill_data_for_txt(model, 0)
-    fill_data_for_txt(model, 1)
+    fill_data_for_txt(model.right_leg)
+    fill_data_for_txt(model.left_leg)
 
 
 def write_list_of_dictionaries_to_txt_file(file_name: str, list_of_dictionaries: list):
@@ -30,15 +31,9 @@ def write_list_of_dictionaries_to_txt_file(file_name: str, list_of_dictionaries:
                 file.write('\n')
 
 
-def fill_data_for_txt(model: Model, leg_nr: int):
-    global leg
-    match leg_nr:
-        case 0:
-            leg = model.right_leg
-        case 1:
-            leg = model.left_leg
-    file_name = str(leg.name) + '_exporting_data_.txt'
-    dictionaries = leg.equations.list_of_equations_dictionaries
+def fill_data_for_txt(leg_entity: Leg):
+    file_name = str(leg_entity.name) + '_exporting_data_.txt'
+    dictionaries = leg_entity.equations.list_of_equations_dictionaries
     write_list_of_dictionaries_to_txt_file(file_name, dictionaries)
 
 

@@ -3,8 +3,7 @@ from math import sin, sqrt
 from numpy import pi
 from pymunk import Vec2d, Body
 
-from LegSimulation_v2.Bipedipulator_simulation.constants import THIGH_HEIGHT, CALF_HEIGHT, CORPS_POSITION, CORPS_HEIGHT, \
-    FOOT_WIDTH
+from LegSimulation_v2.Bipedipulator_simulation.constants import THIGH_HEIGHT, CALF_HEIGHT, CORPS_POSITION, CORPS_HEIGHT
 
 
 class Counters:
@@ -25,15 +24,9 @@ class Counters:
 
 class RelativeValues:
     counters: Counters
-
-    x_hip: float
-    y_hip: float
-    x_knee: float
-    y_knee: float
-    angle_thigh: float
-    x_ankle: float
-    y_ankle: float
-    angle_calf: float
+    hip: dict[str, float]
+    knee: dict[str, float]
+    ankle: dict[str, float]
 
     usage_counter: int
     histories: list
@@ -45,21 +38,12 @@ class RelativeValues:
 
     def __init__(self):
         self.counters = Counters()
+        self.hip = dict(x_hip=0.0, y_hip=0.0, angle_thigh=0.0, hip_velocity=0.0)
+        self.knee = dict(x_knee=0.0, y_knee=0.0, angle_calf=0.0, knee_velocity=0.0)
+        self.ankle = dict(x_ankle=0.0, y_ankle=0.0, ankle_velocity=0.0)
         self.phase_part_usage_counter = 0
         self.phase_usage_counter = 0
         self.oscillation = 0.0
-        self.x_hip = 0.0
-        self.y_hip = 0.0
-        self.angle_thigh = 0.0
-        self.x_knee = 0.0
-        self.y_knee = 0.0
-        self.angle_calf = 0.0
-        self.x_ankle = 0.0
-        self.y_ankle = 0.0
-
-        self.knee_velocity = 0.0
-        self.hip_velocity = 0.0
-        self.ankle_velocity = 0.0
 
         self.usage_counter = 1
         self.history_record = []
@@ -67,31 +51,28 @@ class RelativeValues:
 
     def calculate_angles(self, real_hips_position: Vec2d, real_knee_position: Vec2d, real_ankle_position: Vec2d):
         # calculate angles for leg
-        self.x_hip = 0.0
-        self.y_hip = 0.0
-        self.angle_thigh = 0.0
-        self.x_knee = 0.0
-        self.y_knee = 0.0
-        self.angle_calf = 0.0
-        self.y_hip = real_hips_position.y - (CORPS_POSITION.y - ((1 / 2) * CORPS_HEIGHT))
+        self.hip['x_hip'] = 0.0
+        self.hip['y_hip'] = real_hips_position.y - (CORPS_POSITION.y - ((1 / 2) * CORPS_HEIGHT))
 
         # knee position relative to the hip
-        self.x_knee = real_knee_position.x - real_hips_position.x
+        self.knee['x_knee'] = real_knee_position.x - real_hips_position.x
         # angle between corps and thigh
-        sin_angle_thigh = self.x_knee / THIGH_HEIGHT
-        self.angle_thigh = sin(sin_angle_thigh)
-        self.y_knee = real_knee_position.y - real_hips_position.y
+        sin_angle_thigh = self.knee['x_knee'] / THIGH_HEIGHT
+        self.hip['angle_thigh'] = sin(sin_angle_thigh)
+        self.knee['y_knee'] = real_knee_position.y - real_hips_position.y
 
         # ankle position relative to the hip
-        self.x_ankle = real_ankle_position.x - real_hips_position.x
+        self.ankle['x_ankle'] = real_ankle_position.x - real_hips_position.x
         # angle between corps and calf
-        sin_angle_calf = (self.x_ankle - self.x_knee) / CALF_HEIGHT
-        self.angle_calf = sin(sin_angle_calf)
-        self.y_ankle = real_ankle_position.y - real_hips_position.y
+        sin_angle_calf = (self.ankle['x_ankle'] - self.knee['x_knee']) / CALF_HEIGHT
+        self.knee['angle_calf'] = sin(sin_angle_calf)
+        self.ankle['y_ankle'] = real_ankle_position.y - real_hips_position.y
 
-        self.history_record = [self.usage_counter, int(self.x_hip), int(self.y_hip), round(self.angle_thigh, 2),
-                               int(self.x_knee), int(self.y_knee), round(self.angle_calf, 2), int(self.x_ankle),
-                               int(self.y_ankle), self.oscillation, self.hip_velocity,
+        self.history_record = [self.usage_counter, int(self.hip['x_hip']), int(self.hip['y_hip']),
+                               round(self.hip['angle_thigh'], 2),
+                               int(self.knee['x_knee']), int(self.knee['y_knee']), round(self.knee['angle_calf'], 2),
+                               int(self.ankle['x_ankle']),
+                               int(self.ankle['y_ankle']), self.oscillation, self.hip_velocity,
                                self.knee_velocity, self.ankle_velocity]
 
         self.histories.append(self.history_record)
@@ -117,4 +98,3 @@ class RelativeValues:
         value = phase_nr * (2 * pi_value / 6)
         self.oscillation = value
         pass
-

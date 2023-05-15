@@ -4,35 +4,22 @@ import pymunk
 import pymunk.pygame_util
 
 import LegPartBone
-from LegSimulation_v2.Bipedipulator_simulation import LegPartsHelper
+from LegSimulation_v2.Bipedipulator_simulation import LegMethodsHelper
 from LegSimulation_v2.Bipedipulator_simulation.Leg import Leg
 from LegSimulation_v2.Bipedipulator_simulation.LegPartBone import LegPartBone
 from LegSimulation_v2.Bipedipulator_simulation.constants import CORPS_WIDTH, CORPS_HEIGHT, THIGH_HEIGHT, \
     CORPS_WEIGHT, FLOOR_HEIGHT, CORPS_POSITION
 
 
-def running_gear(space):
-    floor = pymunk.Body()
-    floor.body_type = pymunk.Body.KINEMATIC
-    floor.shape = pymunk.Segment(floor, (0, 0), (100000, 0), FLOOR_HEIGHT)
-    floor.shape.friction = 1.0
-    space.add(floor, floor.shape)
-
-    return floor
-
-
 class Model:
-    num_bodies: int = 0
-
     corps: LegPartBone
+    hip_body: pymunk.Body
     right_leg: Leg
     left_leg: Leg
     floor: pymunk.Body
 
-    hip_body: pymunk.Body
-
     def __init__(self, space: pymunk.Space()):
-        self.floor = running_gear(space)
+        self.floor = LegMethodsHelper.running_gear(space)
 
         self.corps = LegPartBone(space, "corps", CORPS_WEIGHT, (CORPS_WIDTH, CORPS_HEIGHT), CORPS_POSITION)
         self.right_leg = Leg(space, "right")
@@ -45,28 +32,28 @@ class Model:
         self.floor.velocity = (-80, 0)
 
     def add_pivot_joints(self, space):
-        LegPartsHelper.add_body_pivot_joint(space, self.corps.body, self.right_leg.thigh.body,
-                                            (self.corps.body.position.x,
-                                             self.corps.body.position.y -
-                                             ((1 / 2) * CORPS_HEIGHT)))
-        LegPartsHelper.add_body_pivot_joint(space, self.corps.body, self.left_leg.thigh.body,
-                                            (self.corps.body.position.x,
-                                             self.corps.body.position.y -
-                                             ((1 / 2) * CORPS_HEIGHT)))
+        LegMethodsHelper.add_body_pivot_joint(space, self.corps.body, self.right_leg.thigh.body,
+                                              (self.corps.body.position.x,
+                                               self.corps.body.position.y -
+                                               ((1 / 2) * CORPS_HEIGHT)))
+        LegMethodsHelper.add_body_pivot_joint(space, self.corps.body, self.left_leg.thigh.body,
+                                              (self.corps.body.position.x,
+                                               self.corps.body.position.y -
+                                               ((1 / 2) * CORPS_HEIGHT)))
 
-        self.hip_body = LegPartsHelper.add_joint_body((self.corps.body.position.x,
-                                                       self.corps.body.position.y -
-                                                       ((1 / 2) * CORPS_HEIGHT)))
+        self.hip_body = LegMethodsHelper.add_joint_body((self.corps.body.position.x,
+                                                         self.corps.body.position.y -
+                                                         ((1 / 2) * CORPS_HEIGHT)))
         space.add(self.hip_body)
 
     def add_pin_joints_parts(self, space):
-        LegPartsHelper.add_body_rotation_center(space, self.corps.body.position)
-        LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.right_leg.thigh.body,
-                                          (0, (-(1 / 2) * CORPS_HEIGHT)),
-                                          (0, (1 / 2) * THIGH_HEIGHT))
-        LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.left_leg.thigh.body,
-                                          (0, (-(1 / 2) * CORPS_HEIGHT)),
-                                          (0, (1 / 2) * THIGH_HEIGHT))
-        LegPartsHelper.add_body_pin_joint(space, self.corps.body, self.hip_body,
-                                          (0, (-(1 / 2) * CORPS_HEIGHT)),
-                                          (0, 0))
+        LegMethodsHelper.add_body_rotation_center(space, self.corps.body.position)
+        LegMethodsHelper.add_body_pin_joint(space, self.corps.body, self.right_leg.thigh.body,
+                                            (0, (-(1 / 2) * CORPS_HEIGHT)),
+                                            (0, (1 / 2) * THIGH_HEIGHT))
+        LegMethodsHelper.add_body_pin_joint(space, self.corps.body, self.left_leg.thigh.body,
+                                            (0, (-(1 / 2) * CORPS_HEIGHT)),
+                                            (0, (1 / 2) * THIGH_HEIGHT))
+        LegMethodsHelper.add_body_pin_joint(space, self.corps.body, self.hip_body,
+                                            (0, (-(1 / 2) * CORPS_HEIGHT)),
+                                            (0, 0))

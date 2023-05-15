@@ -8,25 +8,22 @@ from LegSimulation_v2.Bipedipulator_simulation.RelativeValues import Counters
 
 class Controller:
     loop_counter: int
+    used_scenario: int
     current_phase: int
-    before_start: bool
-    mode: str
 
     right_thigh_speed: float
     right_calf_speed: float
     left_thigh_speed: float
     left_calf_speed: float
 
-    used_scenario: int
-
-    def __init__(self, model_entity: Model):
+    def __init__(self):
         self.current_phase = 0
         self.loop_counter = 0
+        self.used_scenario = 0
         self.right_thigh_speed = 0
         self.right_calf_speed = 0
         self.left_thigh_speed = 0
         self.left_calf_speed = 0
-        self.used_scenario = 0
 
     def set_multiplication_of_motor_velocity(self, right_thigh_speed: float, right_calf_speed: float,
                                              left_thigh_speed: float, left_calf_speed: float):
@@ -36,35 +33,34 @@ class Controller:
         self.left_calf_speed = left_calf_speed
         pass
 
-    def movement_scenario_controller(self, model_entity: Model, motors: list[SimpleMotor], simulate,
+    def movement_scenario_controller(self, model_entity: Model, motors: list[SimpleMotor],
                                      used_scenario: int):
-        if simulate:
-            self.used_scenario = used_scenario
-            calculate_data(model_entity, used_scenario)
+        self.used_scenario = used_scenario
+        calculate_data(model_entity, used_scenario)
 
-            right_thigh_speed = model_entity.right_leg.equations.velocities[used_scenario].thigh_velocity. \
-                __getitem__(self.current_phase)
-            right_calf_speed = model_entity.right_leg.equations.velocities[used_scenario].calf_velocity. \
-                __getitem__(self.current_phase)
-            left_thigh_speed = model_entity.left_leg.equations.velocities[used_scenario].thigh_velocity. \
-                __getitem__(self.current_phase)
-            left_calf_speed = model_entity.left_leg.equations.velocities[used_scenario].calf_velocity. \
-                __getitem__(self.current_phase)
+        right_thigh_speed = model_entity.right_leg.equations.velocities[used_scenario].thigh_velocity. \
+            __getitem__(self.current_phase)
+        right_calf_speed = model_entity.right_leg.equations.velocities[used_scenario].calf_velocity. \
+            __getitem__(self.current_phase)
+        left_thigh_speed = model_entity.left_leg.equations.velocities[used_scenario].thigh_velocity. \
+            __getitem__(self.current_phase)
+        left_calf_speed = model_entity.left_leg.equations.velocities[used_scenario].calf_velocity. \
+            __getitem__(self.current_phase)
 
-            model_entity.right_leg.equations.velocities[used_scenario].update_current_velocity(
-                motors.__getitem__(0).rate,
-                motors.__getitem__(1).rate,
-                self.current_phase)
-            model_entity.left_leg.equations.velocities[used_scenario].update_current_velocity(
-                motors.__getitem__(3).rate,
-                motors.__getitem__(4).rate,
-                self.current_phase)
+        model_entity.right_leg.equations.velocities[used_scenario].update_current_velocity(
+            motors.__getitem__(0).rate,
+            motors.__getitem__(1).rate,
+            self.current_phase)
+        model_entity.left_leg.equations.velocities[used_scenario].update_current_velocity(
+            motors.__getitem__(3).rate,
+            motors.__getitem__(4).rate,
+            self.current_phase)
 
-            self.set_multiplication_of_motor_velocity(right_thigh_speed, right_calf_speed, left_thigh_speed,
-                                                      left_calf_speed)
-            temp_end = self.run_phase_async(model_entity, motors, self.current_phase)
+        self.set_multiplication_of_motor_velocity(right_thigh_speed, right_calf_speed, left_thigh_speed,
+                                                  left_calf_speed)
+        temp_end = self.run_phase_async(model_entity, motors, self.current_phase)
 
-            return temp_end
+        return temp_end
 
     def change_current_phase(self, model_entity: Model):
         if self.current_phase == 0 and self.used_scenario == 0:
@@ -126,12 +122,7 @@ def choose_leg_functions(leg: Leg, move: bool):
 
 
 def calculate_data(model_entity: Model, used_scenario: int):
-    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.hip_body, "hip")
-    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.right_leg.knee_body, "knee")
-    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.right_leg.ankle_body, "ankle")
-    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.hip_body, "hip")
-    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.left_leg.knee_body, "knee")
-    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.left_leg.ankle_body, "ankle")
+    save_body_velocities(model_entity, used_scenario)
 
     model_entity.right_leg.relative_values[used_scenario].calculate_angles(
         model_entity.hip_body.position,
@@ -142,6 +133,15 @@ def calculate_data(model_entity: Model, used_scenario: int):
         model_entity.left_leg.knee_body.position,
         model_entity.left_leg.ankle_body.position)
     pass
+
+
+def save_body_velocities(model_entity: Model, used_scenario: int):
+    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.hip_body, "hip")
+    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.right_leg.knee_body, "knee")
+    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.right_leg.ankle_body, "ankle")
+    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.hip_body, "hip")
+    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.left_leg.knee_body, "knee")
+    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.left_leg.ankle_body, "ankle")
 
 
 def move_right_leg(motors: list[SimpleMotor], leg_part: str, direction: str, multiplication: float):
@@ -224,7 +224,7 @@ def set_thigh_start_position(leg: Leg, motors: list[SimpleMotor], thigh_speed: f
     move_leg_function = choose_leg_functions(leg, True)
     stop_leg_function = choose_leg_functions(leg, False)
     thigh_value = leg.equations.get_angle("thigh", 0)
-    if leg.relative_values[used_scenario].angle_thigh <= thigh_value:
+    if leg.relative_values[used_scenario].hip['angle_thigh'] <= thigh_value:
         move_leg_function(motors, "thigh", "forward", thigh_speed)
     else:
         stop_leg_function(motors, "thigh")
@@ -237,7 +237,7 @@ def set_calf_start_position(leg: Leg, motors: list[SimpleMotor], calf_speed: flo
     move_leg_function = choose_leg_functions(leg, True)
     stop_leg_function = choose_leg_functions(leg, False)
     calf_value = leg.equations.get_angle("calf", 0)
-    if leg.relative_values[used_scenario].angle_calf >= calf_value:
+    if leg.relative_values[used_scenario].knee['angle_calf'] >= calf_value:
         move_leg_function(motors, "calf", "backward", calf_speed)
     else:
         stop_leg_function(motors, "calf")
@@ -268,13 +268,13 @@ def move_leg_phase(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf
         previous_calf_value = leg.equations.get_angle("calf", previous_phase)
 
         if previous_thigh_value > thigh_value:
-            if leg.relative_values[used_scenario].angle_thigh >= thigh_value:
+            if leg.relative_values[used_scenario].hip['angle_thigh'] >= thigh_value:
                 move_leg_function(motors, "thigh", "backward", thigh_speed)
             else:
                 stop_leg_function(motors, "thigh")
                 end_thigh = True
         elif previous_thigh_value < thigh_value:
-            if leg.relative_values[used_scenario].angle_thigh <= thigh_value:
+            if leg.relative_values[used_scenario].hip['angle_thigh'] <= thigh_value:
                 move_leg_function(motors, "thigh", "forward", thigh_speed)
             else:
                 stop_leg_function(motors, "thigh")
@@ -284,13 +284,13 @@ def move_leg_phase(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, calf
             end_thigh = True
 
         if calf_value < previous_calf_value:
-            if leg.relative_values[used_scenario].angle_calf >= calf_value:
+            if leg.relative_values[used_scenario].knee['angle_calf'] >= calf_value:
                 move_leg_function(motors, "calf", "backward", calf_speed)
             else:
                 stop_leg_function(motors, "calf")
                 end_calf = True
         elif calf_value > previous_calf_value:
-            if leg.relative_values[used_scenario].angle_calf <= calf_value:
+            if leg.relative_values[used_scenario].knee['angle_calf'] <= calf_value:
                 move_leg_function(motors, "calf", "forward", calf_speed)
             else:
                 stop_leg_function(motors, "calf")
