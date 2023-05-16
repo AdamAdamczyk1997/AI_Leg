@@ -1,5 +1,4 @@
 """Constants used through the simulation."""
-from math import sqrt, pow
 
 from pymunk import Vec2d
 
@@ -12,38 +11,43 @@ calf_WEIGHT: int = 10
 FOOT_WEIGHT: int = 5
 
 BOUNDS_WIDTH: int = 1800
-MAX_X: float = BOUNDS_WIDTH / 2
-MIN_X: float = -MAX_X
-VIEW_WIDTH: int = BOUNDS_WIDTH + 20
-
 BOUNDS_HEIGHT: int = 1300
-MAX_Y: float = BOUNDS_HEIGHT / 2
-MIN_Y: float = -MAX_Y
-VIEW_HEIGHT: int = BOUNDS_HEIGHT + 20
-
-CONVERTER: float = 0.5
-HANDLER_LENGTH: float = 300
 
 CORPS_HEIGHT: float = 150
 CORPS_WIDTH: float = 150
-
 THIGH_HEIGHT: float = 440
 THIGH_WIDTH: float = 20
-
 CALF_HEIGHT: float = 430
 CALF_WIDTH: float = 20
-
 FOOT_HEIGHT: float = 20
-FOOT_WIDTH: float = 280 * CONVERTER
+FOOT_WIDTH: float = 140
 FLOOR_HEIGHT: float = 6
 
 LEG_HEIGHT: float = (0.5 * CORPS_HEIGHT) + THIGH_HEIGHT + CALF_HEIGHT + FOOT_HEIGHT + FLOOR_HEIGHT
-
 CORPS_POSITION = Vec2d(1000, LEG_HEIGHT + 10)
+THIGH_ANGLES_LIST: dict = {
+    "right": [0.452, 0.389, 0.276, 0.119, 0.049,
+              0.361, 0.628, 0.696,
+              0.605, 0.556, 0.488,
+              0.470, 0.452],
+    "left": [0.628, 0.696, 0.605, 0.556, 0.488,
+             0.470, 0.452, 0.389,
+             0.276, 0.119, 0.049,
+             0.361, 0.628]
+}
+CALF_ANGLES_LIST: dict = {
+    "right": [-0.488, -0.531, -0.572, -0.589, -0.681,
+              -0.724, -0.514, -0.159,
+              -0.129, -0.285, -0.389,
+              -0.443, -0.488],
+    "left": [-0.514, -0.159, -0.129, -0.285, -0.389,
+             -0.443, -0.488, -0.531,
+             -0.572, -0.589, -0.681,
+             -0.724, -0.514]
+}
 
-JOINT_RADIUS: float = 20 * CONVERTER
 
-
+#  TODO: Decision how much scenarios we need
 def fill_angles_list_v1(leg_name):
     match leg_name:
         case "right":
@@ -64,36 +68,6 @@ def fill_angles_list_v1(leg_name):
                                 -0.3, -0.32, -0.35, -0.4,
                                 -0.45, -0.5, -0.55, -0.6]
             return [thigh_angles_list, calf_angles_list]
-        case other:
-            print("Equation leg name not specified")
-
-
-def fill_angles_list_v2(leg_name: str):
-    match leg_name:
-        case "right":
-            thigh_angles_list = [0.452, 0.389, 0.276, 0.119, 0.049,
-                                 0.361, 0.628, 0.696,
-                                 0.605, 0.556, 0.488,
-                                 0.470, 0.452]
-
-            calf_angles_list = [-0.488, -0.531, -0.572, -0.589, -0.681,
-                                -0.724, -0.514, -0.159,
-                                -0.129, -0.285, -0.389,
-                                -0.443, -0.488]
-            return [thigh_angles_list, calf_angles_list]
-        case "left":
-            thigh_angles_list = [0.628, 0.696, 0.605, 0.556, 0.488,
-                                 0.470, 0.452, 0.389,
-                                 0.276, 0.119, 0.049,
-                                 0.361, 0.628]
-
-            calf_angles_list = [-0.514, -0.159, -0.129, -0.285, -0.389,
-                                -0.443, -0.488, -0.531,
-                                -0.572, -0.589, -0.681,
-                                -0.724, -0.514]
-            return [thigh_angles_list, calf_angles_list]
-        case other:
-            print("Equation leg name not specified")
 
 
 def fill_angles_list_v3(leg_name: str):
@@ -120,5 +94,3 @@ def fill_angles_list_v3(leg_name: str):
                                 -0.78332691, -0.703279419, -0.605186406,
                                 -0.78332691, -0.98544973, -0.948984619]
             return [thigh_angles_list, calf_angles_list]
-        case other:
-            print("Equation leg name not specified")

@@ -106,6 +106,7 @@ def add_body_pivot_joint(space, body1: Body, body2: Body, position_arg):
 
 
 def add_joint_body(position: Union[Vec2d, tuple[float, float]]):
+    # TODO: add space to this method like on methods above
     mass = 1
     size = (1, 1)
     moment = pymunk.moment_for_box(mass, size)

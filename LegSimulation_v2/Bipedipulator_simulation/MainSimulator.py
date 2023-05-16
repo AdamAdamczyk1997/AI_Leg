@@ -12,15 +12,13 @@ from LegSimulation_v2.Bipedipulator_simulation.LegMotorController import Control
 
 
 class Simulator(object):
-    used_scenario: int
-
     model_entity: Model
     controller: Controller
     space: pymunk.Space
     motors: list[pymunk.SimpleMotor]
 
     def __init__(self):
-        self.display_flags = 0
+        self.display_flags = 0  # TODO: move to constants
         self.screen = pygame.display.set_mode((constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT), self.display_flags)
         self.draw_options = pymunk.pygame_util.DrawOptions(self.screen)
         self.space = pymunk.Space()
@@ -30,24 +28,25 @@ class Simulator(object):
         self.model_entity = Model.Model(self.space)
         self.motors = LegMethodsHelper.motor_leg(self.model_entity, self.space)
         self.controller = Controller()
-        self.used_scenario = 0
 
         # for validate gravity
         self.ball_body_shape = LegMethodsHelper.add_test_ball()
         self.space.add(self.ball_body_shape[0], self.ball_body_shape[1])
 
     def draw(self):
-        self.screen.fill(THECOLORS["white"])  ### Clear the screen
-        self.space.debug_draw(self.draw_options)  ### Draw space
-        pygame.display.flip()  ### All done, lets flip the display
+        self.screen.fill(THECOLORS["white"])  # Clear the screen
+        self.space.debug_draw(self.draw_options)  # Draw space
+        pygame.display.flip()  # All done, lets flip the display
 
     def main(self):
         pygame.init()
-        self.space.iterations = 100  ### Try another value to better experience
+        self.space.iterations = 100  # Try another value to better experience
         clock = pygame.time.Clock()
 
         simulate = False
         running = True
+
+        used_scenario = 0
 
         while running:
             fps = 60
@@ -74,15 +73,17 @@ class Simulator(object):
 
             if simulate:
                 temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors,
-                                                                        self.used_scenario)
+                                                                        used_scenario)
 
                 # TODO: for validate gravity
                 # print(self.ball_body_shape[0].position)
                 # print(self.ball_body_shape[0].velocity)
                 if temp_end:
-                    match self.used_scenario:
+                    match used_scenario:
                         case 0:
-                            self.used_scenario += 1
+                            used_scenario += 1
+                        # case 1:
+                        #     used_scenario += 1
                         case 1:
                             simulate = False
                             running = False

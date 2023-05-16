@@ -1,14 +1,12 @@
-from pymunk import SimpleMotor, Vec2d
+from pymunk import SimpleMotor
 
 from LegSimulation_v2.Bipedipulator_simulation import constants
 from LegSimulation_v2.Bipedipulator_simulation.Leg import Leg
 from LegSimulation_v2.Bipedipulator_simulation.Model import Model
-from LegSimulation_v2.Bipedipulator_simulation.RelativeValues import Counters
 
 
 class Controller:
     loop_counter: int
-    used_scenario: int
     current_phase: int
 
     right_thigh_speed: float
@@ -19,7 +17,6 @@ class Controller:
     def __init__(self):
         self.current_phase = 0
         self.loop_counter = 0
-        self.used_scenario = 0
         self.right_thigh_speed = 0
         self.right_calf_speed = 0
         self.left_thigh_speed = 0
@@ -35,7 +32,6 @@ class Controller:
 
     def movement_scenario_controller(self, model_entity: Model, motors: list[SimpleMotor],
                                      used_scenario: int):
-        self.used_scenario = used_scenario
         calculate_data(model_entity, used_scenario)
 
         right_thigh_speed = model_entity.right_leg.equations.velocities[used_scenario].thigh_velocity. \
@@ -48,22 +44,19 @@ class Controller:
             __getitem__(self.current_phase)
 
         model_entity.right_leg.equations.velocities[used_scenario].update_current_velocity(
-            motors.__getitem__(0).rate,
-            motors.__getitem__(1).rate,
-            self.current_phase)
+            motors.__getitem__(0).rate, motors.__getitem__(1).rate, self.current_phase)
         model_entity.left_leg.equations.velocities[used_scenario].update_current_velocity(
-            motors.__getitem__(3).rate,
-            motors.__getitem__(4).rate,
-            self.current_phase)
+            motors.__getitem__(3).rate, motors.__getitem__(4).rate, self.current_phase)
 
         self.set_multiplication_of_motor_velocity(right_thigh_speed, right_calf_speed, left_thigh_speed,
                                                   left_calf_speed)
-        temp_end = self.run_phase_async(model_entity, motors, self.current_phase)
+        temp_end = self.run_phase_async(model_entity, motors, used_scenario)
 
         return temp_end
 
-    def change_current_phase(self, model_entity: Model):
-        if self.current_phase == 0 and self.used_scenario == 0:
+    def change_current_phase(self, used_scenario: int):
+        # TODO: change this to range()
+        if self.current_phase == 0 and used_scenario == 0:
             self.current_phase += 1
             return True
         elif 0 < self.current_phase < 12:
@@ -77,21 +70,21 @@ class Controller:
 
         return False
 
-    def run_phase_async(self, model_entity: Model, motors, phase_nr: int):
+    def run_phase_async(self, model_entity: Model, motors, used_scenario: int):
         temp_end = False
         end_right = move_leg_phase(model_entity.right_leg, motors, self.right_thigh_speed,
-                                   self.right_calf_speed, self.current_phase, self.used_scenario)
-        model_entity.right_leg.relative_values[self.used_scenario].counters. \
-            phase_part_usage_increment(self.current_phase, end_right)
+                                   self.right_calf_speed, self.current_phase, used_scenario)
+        model_entity.right_leg.relative_values[used_scenario].counters. \
+            phases_usage_increment(self.current_phase, end_right)
         if end_right:
             stop_moving_right_leg(motors, "thigh")
             stop_moving_right_leg(motors, "calf")
             print("End Right:", self.current_phase)
 
         end_left = move_leg_phase(model_entity.left_leg, motors, self.left_thigh_speed,
-                                  self.left_calf_speed, self.current_phase, self.used_scenario)
-        model_entity.left_leg.relative_values[self.used_scenario].counters. \
-            phase_part_usage_increment(self.current_phase, end_left)
+                                  self.left_calf_speed, self.current_phase, used_scenario)
+        model_entity.left_leg.relative_values[used_scenario].counters. \
+            phases_usage_increment(self.current_phase, end_left)
         if end_left:
             stop_moving_left_leg(motors, "thigh")
             stop_moving_left_leg(motors, "calf")
@@ -100,9 +93,9 @@ class Controller:
         if end_right and end_left:
             print("End current phase ", self.current_phase)
 
-            model_entity.right_leg.relative_values[self.used_scenario].change_oscillation(self.current_phase)
-            model_entity.left_leg.relative_values[self.used_scenario].change_oscillation(self.current_phase)
-            temp_end = self.change_current_phase(model_entity)
+            model_entity.right_leg.relative_values[used_scenario].change_oscillation(self.current_phase)
+            model_entity.left_leg.relative_values[used_scenario].change_oscillation(self.current_phase)
+            temp_end = self.change_current_phase(used_scenario)
 
         return temp_end
 
@@ -123,7 +116,6 @@ def choose_leg_functions(leg: Leg, move: bool):
 
 def calculate_data(model_entity: Model, used_scenario: int):
     save_body_velocities(model_entity, used_scenario)
-
     model_entity.right_leg.relative_values[used_scenario].calculate_angles(
         model_entity.hip_body.position,
         model_entity.right_leg.knee_body.position,

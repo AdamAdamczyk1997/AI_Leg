@@ -3,12 +3,10 @@ from __future__ import annotations
 import pymunk
 import pymunk.pygame_util
 
-import LegPartBone
 from LegSimulation_v2.Bipedipulator_simulation import LegMethodsHelper
-from LegSimulation_v2.Bipedipulator_simulation.Leg import Leg
-from LegSimulation_v2.Bipedipulator_simulation.LegPartBone import LegPartBone
+from LegSimulation_v2.Bipedipulator_simulation.Leg import Leg, LegPartBone
 from LegSimulation_v2.Bipedipulator_simulation.constants import CORPS_WIDTH, CORPS_HEIGHT, THIGH_HEIGHT, \
-    CORPS_WEIGHT, FLOOR_HEIGHT, CORPS_POSITION
+    CORPS_WEIGHT, CORPS_POSITION
 
 
 class Model:
@@ -31,19 +29,16 @@ class Model:
     def move_running_gear(self):
         self.floor.velocity = (-80, 0)
 
-    def add_pivot_joints(self, space):
+    def add_pivot_joints(self, space: pymunk.Space()):
         LegMethodsHelper.add_body_pivot_joint(space, self.corps.body, self.right_leg.thigh.body,
                                               (self.corps.body.position.x,
-                                               self.corps.body.position.y -
-                                               ((1 / 2) * CORPS_HEIGHT)))
+                                               self.corps.body.position.y - ((1 / 2) * CORPS_HEIGHT)))
         LegMethodsHelper.add_body_pivot_joint(space, self.corps.body, self.left_leg.thigh.body,
                                               (self.corps.body.position.x,
-                                               self.corps.body.position.y -
-                                               ((1 / 2) * CORPS_HEIGHT)))
+                                               self.corps.body.position.y - ((1 / 2) * CORPS_HEIGHT)))
 
         self.hip_body = LegMethodsHelper.add_joint_body((self.corps.body.position.x,
-                                                         self.corps.body.position.y -
-                                                         ((1 / 2) * CORPS_HEIGHT)))
+                                                         self.corps.body.position.y - ((1 / 2) * CORPS_HEIGHT)))
         space.add(self.hip_body)
 
     def add_pin_joints_parts(self, space):

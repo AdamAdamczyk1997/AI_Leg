@@ -4,11 +4,9 @@ import random
 
 import pymunk
 import pymunk.pygame_util
-from pymunk import SlideJoint, DampedSpring
+from pymunk import Vec2d
 
-import LegPartBone
 from LegSimulation_v2.Bipedipulator_simulation import LegMethodsHelper
-from LegSimulation_v2.Bipedipulator_simulation.LegPartBone import LegPartBone
 from LegSimulation_v2.Bipedipulator_simulation.RelativeValues import RelativeValues
 from LegSimulation_v2.Bipedipulator_simulation.ValuesPerPhase import Equations
 from LegSimulation_v2.Bipedipulator_simulation.constants import CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
@@ -28,8 +26,6 @@ class Leg:
     foot: LegPartBone
 
     bodies: list[pymunk.Body]
-    time: int = 0
-    mode: str
 
     relative_values: list[RelativeValues]
     equations: Equations
@@ -78,3 +74,30 @@ class Leg:
                                             ((-1 / 4) * FOOT_WIDTH, (1 / 2) * FOOT_HEIGHT))
         LegMethodsHelper.add_body_pin_joint(space, self.calf.body, self.ankle_body,
                                             (0, (-(1 / 2) * CALF_HEIGHT)), (0, 0))
+
+
+class LegPartBone:
+    """An individual subject in the simulation."""
+    name: str
+    mass: float
+    size: tuple[int, int]
+    moment: float
+    shape: pymunk.Poly
+    shape_friction: float
+    body: pymunk.Body
+
+    def __init__(self, space: pymunk.Space(), name, mass, size, vector: Vec2d):
+        self.name = name
+        self.mass = mass
+        self.size = size
+        self.moment = pymunk.moment_for_box(mass, size)
+        self.body = pymunk.Body(mass, self.moment)
+        self.body.body_type = pymunk.Body.DYNAMIC
+        self.body.position = vector
+        self.shape = pymunk.Poly.create_box(self.body, size)
+        self.shape.friction = 0.61
+        self.shape.collision_type = 0
+        # ---prevent collisions with ShapeFilter
+        self.shape.filter = pymunk.ShapeFilter(group=1)
+
+        space.add(self.body, self.shape)

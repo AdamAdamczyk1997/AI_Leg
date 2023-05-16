@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from LegSimulation_v2.Bipedipulator_simulation.constants import fill_angles_list_v2
+from LegSimulation_v2.Bipedipulator_simulation.constants import THIGH_ANGLES_LIST, CALF_ANGLES_LIST
 
 start_velocity_value = 0.25
 
@@ -11,6 +11,12 @@ def generate_equation(q_1: float, q_2: float):
     equation = str(A) + " * t + " + str(B)
 
     return [equation, A, B]
+
+
+def fill_angles_list(leg_name: str):
+    thigh_angles_list = THIGH_ANGLES_LIST[leg_name]
+    calf_angles_list = CALF_ANGLES_LIST[leg_name]
+    return [thigh_angles_list, calf_angles_list]
 
 
 class Velocity:
@@ -33,7 +39,6 @@ class Velocity:
         self.thigh_time = []
         self.calf_time = []
 
-        # self.fill_velocity(thigh_velocity, calf_velocity)
         self.thigh_velocity = thigh_velocity
         self.calf_velocity = calf_velocity
         self.fill_time_list()
@@ -97,11 +102,9 @@ class Equations(str):
         self.leg_name = leg_name
         self.list_of_equations_dictionaries = []
 
-        # self.fill_angles_list_v1()
-        angles = fill_angles_list_v2(leg_name)
+        angles = fill_angles_list(leg_name)
         self.thigh_angles_list = angles[0]
         self.calf_angles_list = angles[1]
-        # self.fill_angles_list_v3()
 
         constant_velocities = fill_velocity_lists(start_velocity_value, start_velocity_value, 13)
         different_velocities = self.fill_dictionaries()
@@ -154,5 +157,3 @@ class Equations(str):
             i += 1
 
         return [thigh_velocity, calf_velocity]
-
-
