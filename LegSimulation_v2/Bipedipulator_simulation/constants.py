@@ -2,6 +2,7 @@
 
 from pymunk import Vec2d
 
+DISPLAY_FLAGS: int = 0
 GRAVITY: float = -981.0
 ROTATION_RATE: float = 1
 

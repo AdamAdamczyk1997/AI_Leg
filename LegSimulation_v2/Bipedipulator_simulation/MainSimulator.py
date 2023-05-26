@@ -11,6 +11,25 @@ from LegSimulation_v2.Bipedipulator_simulation.FillDataAnd import write_data_to_
 from LegSimulation_v2.Bipedipulator_simulation.LegMotorController import Controller
 
 
+def event_method(model_entity: Model, simulate: bool):
+    running = True
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:
+            if event.type == pygame.QUIT or (
+                    event.key in (pygame.K_q, pygame.K_ESCAPE)):
+                running = False
+            # Start/stop simulation
+            elif event.key == pygame.K_s:
+                simulate = not simulate
+            elif event.key == pygame.K_a:
+                model_entity.move_running_gear()
+            # Start new simulation
+            elif event.key == pygame.K_n:
+                sim1 = Simulator()
+                sim1.main()
+    return [running, simulate]
+
+
 class Simulator(object):
     model_entity: Model
     controller: Controller
@@ -18,8 +37,8 @@ class Simulator(object):
     motors: list[pymunk.SimpleMotor]
 
     def __init__(self):
-        self.display_flags = 0  # TODO: move to constants
-        self.screen = pygame.display.set_mode((constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT), self.display_flags)
+        self.screen = pygame.display.set_mode((constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT),
+                                              constants.DISPLAY_FLAGS)
         self.draw_options = pymunk.pygame_util.DrawOptions(self.screen)
         self.space = pymunk.Space()
         self.space.gravity = (0, constants.GRAVITY)
@@ -45,31 +64,19 @@ class Simulator(object):
 
         simulate = False
         running = True
-
         used_scenario = 0
+        fps = 60
 
         while running:
-            fps = 60
             clock.tick(fps)
             dt = 1.0 / float(fps)
             self.draw()
             pygame.display.set_caption(f"fps: {clock.get_fps()}")
             self.space.step(dt)
 
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.type == pygame.QUIT or (
-                            event.key in (pygame.K_q, pygame.K_ESCAPE)):
-                        running = False
-                    # Start/stop simulation
-                    elif event.key == pygame.K_s:
-                        simulate = not simulate
-                    elif event.key == pygame.K_a:
-                        self.model_entity.move_running_gear()
-                    # Start new simulation
-                    elif event.key == pygame.K_n:
-                        sim1 = Simulator()
-                        sim1.main()
+            ret = event_method(self.model_entity, simulate)
+            simulate = ret[1]
+            running = ret[0]
 
             if simulate:
                 temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors,
@@ -79,12 +86,9 @@ class Simulator(object):
                 # print(self.ball_body_shape[0].position)
                 # print(self.ball_body_shape[0].velocity)
                 if temp_end:
+                    used_scenario += 1
                     match used_scenario:
-                        case 0:
-                            used_scenario += 1
-                        # case 1:
-                        #     used_scenario += 1
-                        case 1:
+                        case 2:
                             simulate = False
                             running = False
 

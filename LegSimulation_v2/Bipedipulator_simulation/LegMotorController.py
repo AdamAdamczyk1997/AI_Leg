@@ -114,102 +114,66 @@ def choose_leg_functions(leg: Leg, move: bool):
                 return stop_moving_left_leg
 
 
+# def calculate_data(model_entity: Model, used_scenario: int):
+#     save_body_velocities(model_entity, used_scenario)
+#     model_entity.right_leg.relative_values[used_scenario].calculate_angles(
+#         model_entity.hip_body.position,
+#         model_entity.right_leg.knee_body.position,
+#         model_entity.right_leg.ankle_body.position)
+#     model_entity.left_leg.relative_values[used_scenario].calculate_angles(
+#         model_entity.hip_body.position,
+#         model_entity.left_leg.knee_body.position,
+#         model_entity.left_leg.ankle_body.position)
+#     pass
+
+
 def calculate_data(model_entity: Model, used_scenario: int):
     save_body_velocities(model_entity, used_scenario)
-    model_entity.right_leg.relative_values[used_scenario].calculate_angles(
-        model_entity.hip_body.position,
-        model_entity.right_leg.knee_body.position,
-        model_entity.right_leg.ankle_body.position)
-    model_entity.left_leg.relative_values[used_scenario].calculate_angles(
-        model_entity.hip_body.position,
-        model_entity.left_leg.knee_body.position,
-        model_entity.left_leg.ankle_body.position)
-    pass
 
+    for leg in (model_entity.right_leg, model_entity.left_leg):
+        relative_values = leg.relative_values[used_scenario]
+        relative_values.calculate_angles(
+            model_entity.hip_body.position,
+            leg.knee_body.position,
+            leg.ankle_body.position
+        )
 
 def save_body_velocities(model_entity: Model, used_scenario: int):
-    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.hip_body, "hip")
-    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.right_leg.knee_body, "knee")
-    model_entity.right_leg.relative_values[used_scenario].body_velocity(model_entity.right_leg.ankle_body, "ankle")
-    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.hip_body, "hip")
-    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.left_leg.knee_body, "knee")
-    model_entity.left_leg.relative_values[used_scenario].body_velocity(model_entity.left_leg.ankle_body, "ankle")
+    for leg in (model_entity.right_leg, model_entity.left_leg):
+        relative_values = leg.relative_values[used_scenario]
+        for joint_name, joint_body in zip(('hip', 'knee', 'ankle'),
+                                          (model_entity.hip_body, leg.knee_body, leg.ankle_body)):
+            relative_values.body_velocity(joint_body, joint_name)
 
 
 def move_right_leg(motors: list[SimpleMotor], leg_part: str, direction: str, multiplication: float):
+    part_dict = {"thigh": 0, "calf": 1, "foot": 2}
     velocity = constants.ROTATION_RATE * multiplication
-    if direction == "forward":
-        match leg_part:
-            case "thigh":
-                if motors.__getitem__(0).rate != velocity:
-                    motors.__getitem__(0).rate = velocity
-            case "calf":
-                if motors.__getitem__(1).rate != velocity:
-                    motors.__getitem__(1).rate = velocity
-            case "foot":
-                if motors.__getitem__(2).rate != velocity:
-                    motors.__getitem__(2).rate = velocity
-    elif direction == "backward":
-        match leg_part:
-            case "thigh":
-                if motors.__getitem__(0).rate != -velocity:
-                    motors.__getitem__(0).rate = -velocity
-            case "calf":
-                if motors.__getitem__(1).rate != -velocity:
-                    motors.__getitem__(1).rate = -velocity
-            case "foot":
-                if motors.__getitem__(2).rate != -velocity:
-                    motors.__getitem__(2).rate = -velocity
-    pass
+    velocity = velocity if direction == "forward" else -velocity
+
+    if leg_part in part_dict and motors[part_dict[leg_part]].rate != velocity:
+        motors[part_dict[leg_part]].rate = velocity
 
 
 def move_left_leg(motors: list[SimpleMotor], leg_part: str, direction: str, multiplication: float):
+    part_dict = {"thigh": 3, "calf": 4, "foot": 5}
     velocity = constants.ROTATION_RATE * multiplication
-    if direction == "forward":
-        match leg_part:
-            case "thigh":
-                if motors.__getitem__(3).rate != velocity:
-                    motors.__getitem__(3).rate = velocity
-            case "calf":
-                if motors.__getitem__(4).rate != velocity:
-                    motors.__getitem__(4).rate = velocity
-            case "foot":
-                if motors.__getitem__(5).rate != velocity:
-                    motors.__getitem__(5).rate = velocity
-    elif direction == "backward":
-        match leg_part:
-            case "thigh":
-                if motors.__getitem__(3).rate != -velocity:
-                    motors.__getitem__(3).rate = -velocity
-            case "calf":
-                if motors.__getitem__(4).rate != -velocity:
-                    motors.__getitem__(4).rate = -velocity
-            case "foot":
-                if motors.__getitem__(5).rate != -velocity:
-                    motors.__getitem__(5).rate = -velocity
-    pass
+    velocity = velocity if direction == "forward" else -velocity
+
+    if leg_part in part_dict and motors[part_dict[leg_part]].rate != velocity:
+        motors[part_dict[leg_part]].rate = velocity
 
 
 def stop_moving_right_leg(motors: list[SimpleMotor], leg_part: str):
-    match leg_part:
-        case "thigh":
-            motors.__getitem__(0).rate = 0
-        case "calf":
-            motors.__getitem__(1).rate = 0
-        case "foot":
-            motors.__getitem__(2).rate = 0
-    pass
+    part_dict = {"thigh": 0, "calf": 1, "foot": 2}
+    if leg_part in part_dict:
+        motors[part_dict[leg_part]].rate = 0
 
 
 def stop_moving_left_leg(motors: list[SimpleMotor], leg_part: str):
-    match leg_part:
-        case "thigh":
-            motors.__getitem__(3).rate = 0
-        case "calf":
-            motors.__getitem__(4).rate = 0
-        case "foot":
-            motors.__getitem__(5).rate = 0
-    pass
+    part_dict = {"thigh": 3, "calf": 4, "foot": 5}
+    if leg_part in part_dict:
+        motors[part_dict[leg_part]].rate = 0
 
 
 def set_thigh_start_position(leg: Leg, motors: list[SimpleMotor], thigh_speed: float, used_scenario: int):

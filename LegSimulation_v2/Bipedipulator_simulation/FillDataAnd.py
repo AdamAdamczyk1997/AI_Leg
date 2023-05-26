@@ -9,8 +9,8 @@ from LegSimulation_v2.Bipedipulator_simulation.Model import Model
 def write_data_to_excel(model: Model):
     fill_data_for_txt(model.right_leg)
     fill_data_for_txt(model.left_leg)
-    fill_date(model.right_leg, 1)
-    fill_date(model.right_leg, 1)
+    fill_date(model.left_leg, 2)
+    fill_date(model.right_leg, 2)
     fill_equation(model)
 
 
