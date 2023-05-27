@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from LegSimulation_v2.Bipedipulator_simulation.constants import THIGH_ANGLES_LIST, CALF_ANGLES_LIST
+from Bipedipulator_simulation.constants import THIGH_ANGLES_LIST, CALF_ANGLES_LIST, \
+    START_VELOCITY_VALUE, AMOUNT_SCENARIOS, AMOUNT_PHASES
 
-start_velocity_value = 0.25
 
-
+# TODO: need to reconsider this
 def generate_equation(q_1: float, q_2: float):
     B = round(q_1, 3)
     A = round((q_2 - B), 3)
@@ -14,8 +14,8 @@ def generate_equation(q_1: float, q_2: float):
 
 
 def fill_angles_list(leg_name: str):
-    thigh_angles_list = THIGH_ANGLES_LIST[leg_name]
-    calf_angles_list = CALF_ANGLES_LIST[leg_name]
+    thigh_angles_list = THIGH_ANGLES_LIST[1][leg_name]
+    calf_angles_list = CALF_ANGLES_LIST[1][leg_name]
     return [thigh_angles_list, calf_angles_list]
 
 
@@ -61,7 +61,7 @@ class Velocity:
         self.calf_velocity = calf_velocity
 
     def fill_time_list(self):
-        for i in range(0, 13):
+        for i in range(0, AMOUNT_PHASES + 1):
             self.thigh_time.append(0)
             self.calf_time.append(0)
 
@@ -106,11 +106,16 @@ class Equations(str):
         self.thigh_angles_list = angles[0]
         self.calf_angles_list = angles[1]
 
-        constant_velocities = fill_velocity_lists(start_velocity_value, start_velocity_value, 13)
+        constant_velocities = fill_velocity_lists(START_VELOCITY_VALUE, START_VELOCITY_VALUE, 13)
         different_velocities = self.fill_dictionaries()
-        self.velocities = [Velocity([start_velocity_value], [start_velocity_value]),
-                           Velocity(constant_velocities[0], constant_velocities[1]),
-                           Velocity(different_velocities[0], different_velocities[1])]
+        self.velocities = [Velocity([START_VELOCITY_VALUE], [START_VELOCITY_VALUE])]
+
+        velocities = [constant_velocities, different_velocities]
+        for i in range(0, AMOUNT_SCENARIOS):
+            # TODO: fix the different_velocities because it doesn't work good with it and replace with const or add
+            #  another option
+            # self.velocities.append(Velocity(velocities[i][0], velocities[i][1]))
+            self.velocities.append(Velocity(constant_velocities[0], constant_velocities[1]))
 
     def get_angle(self, leg_part: str, phase: int):
         match leg_part:
@@ -135,7 +140,7 @@ class Equations(str):
         t_q_for_phase_1 = round(thigh_equation[1] + thigh_equation[2], 3)
         c_q_for_phase_1 = round(calf_equation[1] + calf_equation[2], 3)
 
-        initial_velocity = [(thigh_equation[1] * 100), (calf_equation[1] * 100)]
+        initial_velocity = [(thigh_equation[1]), (calf_equation[1])]
 
         dictionary = dict(name=dict_name, thigh_equation=thigh_equation[0], calf_equation=calf_equation[0],
                           time=phase, thigh_q_stop=t_q_for_phase_1, calf_q_stop=c_q_for_phase_1,
@@ -145,9 +150,9 @@ class Equations(str):
         return dictionary
 
     def fill_dictionaries(self):
-        thigh_velocity = [start_velocity_value]
-        calf_velocity = [start_velocity_value]
-        for i in range(1, 13):
+        thigh_velocity = [START_VELOCITY_VALUE]
+        calf_velocity = [START_VELOCITY_VALUE]
+        for i in range(1, AMOUNT_PHASES + 1):
             dictionary_per_phase = self.fill_equation_dictionary("phase_equation_" + str(i), i)
             self.list_of_equations_dictionaries.append(dictionary_per_phase)
             different_velocities = fill_velocity_lists(dictionary_per_phase['thigh_initial_velocity'],

@@ -6,12 +6,12 @@ import pymunk
 import pymunk.pygame_util
 from pymunk import Vec2d
 
-from LegSimulation_v2.Bipedipulator_simulation import LegMethodsHelper
-from LegSimulation_v2.Bipedipulator_simulation.RelativeValues import RelativeValues
-from LegSimulation_v2.Bipedipulator_simulation.ValuesPerPhase import Equations
-from LegSimulation_v2.Bipedipulator_simulation.constants import CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
+from Bipedipulator_simulation import LegMethodsHelper
+from Bipedipulator_simulation.RelativeValues import RelativeValues
+from Bipedipulator_simulation.ValuesPerPhase import Equations
+from Bipedipulator_simulation.constants import CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
     CALF_HEIGHT, FOOT_HEIGHT, FOOT_WIDTH, THIGH_WEIGHT, FOOT_WEIGHT, CALF_WIDTH, \
-    CORPS_POSITION
+    CORPS_POSITION, AMOUNT_SCENARIOS
 
 random.seed(1)  # make the simulation the same each time, easier to debug
 
@@ -32,7 +32,10 @@ class Leg:
 
     def __init__(self, space: pymunk.Space(), name: str):
         # TODO: do something with this
-        self.relative_values = [RelativeValues(), RelativeValues(), RelativeValues()]
+        self.relative_values = []
+        for i in range(0, AMOUNT_SCENARIOS + 1):
+            print("Setting ", len(self.relative_values))
+            self.relative_values.append(RelativeValues())
         self.name = name
         self.equations = Equations(self.name)
 

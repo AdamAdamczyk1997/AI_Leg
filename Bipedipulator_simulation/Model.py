@@ -3,9 +3,9 @@ from __future__ import annotations
 import pymunk
 import pymunk.pygame_util
 
-from LegSimulation_v2.Bipedipulator_simulation import LegMethodsHelper
-from LegSimulation_v2.Bipedipulator_simulation.Leg import Leg, LegPartBone
-from LegSimulation_v2.Bipedipulator_simulation.constants import CORPS_WIDTH, CORPS_HEIGHT, THIGH_HEIGHT, \
+from Bipedipulator_simulation import LegMethodsHelper
+from Bipedipulator_simulation.Leg import Leg, LegPartBone
+from Bipedipulator_simulation.constants import CORPS_WIDTH, CORPS_HEIGHT, THIGH_HEIGHT, \
     CORPS_WEIGHT, CORPS_POSITION
 
 

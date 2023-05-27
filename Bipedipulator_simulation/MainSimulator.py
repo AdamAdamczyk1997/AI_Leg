@@ -6,9 +6,9 @@ from pygame.color import THECOLORS
 
 import Model
 import constants
-from LegSimulation_v2.Bipedipulator_simulation import LegMethodsHelper
-from LegSimulation_v2.Bipedipulator_simulation.FillDataAnd import write_data_to_excel
-from LegSimulation_v2.Bipedipulator_simulation.LegMotorController import Controller
+from Bipedipulator_simulation import LegMethodsHelper
+from Bipedipulator_simulation.FillDataAnd import write_data_to_excel
+from Bipedipulator_simulation.LegMotorController import Controller
 
 
 def event_method(model_entity: Model, simulate: bool):
@@ -27,6 +27,7 @@ def event_method(model_entity: Model, simulate: bool):
             elif event.key == pygame.K_n:
                 sim1 = Simulator()
                 sim1.main()
+
     return [running, simulate]
 
 
@@ -74,9 +75,9 @@ class Simulator(object):
             pygame.display.set_caption(f"fps: {clock.get_fps()}")
             self.space.step(dt)
 
-            ret = event_method(self.model_entity, simulate)
-            simulate = ret[1]
-            running = ret[0]
+            event_return = event_method(self.model_entity, simulate)
+            running = event_return[0]
+            simulate = event_return[1]
 
             if simulate:
                 temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors,
@@ -87,10 +88,9 @@ class Simulator(object):
                 # print(self.ball_body_shape[0].velocity)
                 if temp_end:
                     used_scenario += 1
-                    match used_scenario:
-                        case 2:
-                            simulate = False
-                            running = False
+                    if used_scenario > constants.AMOUNT_SCENARIOS:
+                        simulate = False
+                        running = False
 
                 LegMethodsHelper.limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, dt)
                 LegMethodsHelper.limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, dt)

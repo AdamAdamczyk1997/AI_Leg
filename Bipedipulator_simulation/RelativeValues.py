@@ -1,9 +1,11 @@
-from math import sin, sqrt
+import math
+from math import sqrt
 
 from numpy import pi
 from pymunk import Vec2d, Body
 
-from LegSimulation_v2.Bipedipulator_simulation.constants import THIGH_HEIGHT, CALF_HEIGHT, CORPS_POSITION, CORPS_HEIGHT
+from Bipedipulator_simulation.constants import THIGH_HEIGHT, CALF_HEIGHT, CORPS_POSITION, CORPS_HEIGHT, \
+    AMOUNT_PHASES
 
 
 class Counters:
@@ -11,7 +13,7 @@ class Counters:
 
     def __init__(self):
         self.phase_usage_list = []
-        for i in range(0, 13):
+        for i in range(0, AMOUNT_PHASES + 1):
             self.phase_usage_list.append(0)
 
     def phases_usage_increment(self, phase: int, not_count: bool):
@@ -51,14 +53,22 @@ class RelativeValues:
         # calculate angles for leg
         self.hip['x_hip'] = 0.0
         self.hip['y_hip'] = real_hips_position.y - (CORPS_POSITION.y - ((1 / 2) * CORPS_HEIGHT))
+
         self.knee['x_knee'] = real_knee_position.x - real_hips_position.x
-        sin_angle_thigh = self.knee['x_knee'] / THIGH_HEIGHT
-        self.hip['angle_thigh'] = sin(sin_angle_thigh)
         self.knee['y_knee'] = real_knee_position.y - real_hips_position.y
+
+        sin_angle_thigh = self.knee['x_knee'] / THIGH_HEIGHT
+        angle_thigh_rad = math.asin(sin_angle_thigh)
+        angle_thigh_deg = math.degrees(angle_thigh_rad)
+        self.hip['angle_thigh'] = angle_thigh_rad  # hip angle values are in radians at now
+
         self.ankle['x_ankle'] = real_ankle_position.x - real_hips_position.x
-        sin_angle_calf = (self.ankle['x_ankle'] - self.knee['x_knee']) / CALF_HEIGHT
-        self.knee['angle_calf'] = sin(sin_angle_calf)
         self.ankle['y_ankle'] = real_ankle_position.y - real_hips_position.y
+
+        sin_angle_calf = (self.ankle['x_ankle'] - self.knee['x_knee']) / CALF_HEIGHT
+        angle_calf_rad = math.asin(sin_angle_calf)
+        angle_calf_deg = math.degrees(angle_calf_rad)
+        self.knee['angle_calf'] = angle_calf_rad
 
         self.history_record = [self.usage_counter, int(self.hip['x_hip']), int(self.hip['y_hip']),
                                round(self.hip['angle_thigh'], 2),

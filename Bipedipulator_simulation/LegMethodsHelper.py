@@ -5,8 +5,8 @@ from typing import Union
 import pymunk
 from pymunk import Vec2d, Body
 
-from LegSimulation_v2.Bipedipulator_simulation.Model import Model
-from LegSimulation_v2.Bipedipulator_simulation.constants import FLOOR_HEIGHT
+from Bipedipulator_simulation.Model import Model
+from Bipedipulator_simulation.constants import FLOOR_HEIGHT
 
 
 def limit_velocity(bodies: list[pymunk.Body], gravity, dt):
