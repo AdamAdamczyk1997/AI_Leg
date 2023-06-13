@@ -66,11 +66,10 @@ class Simulator(object):
         simulate = False
         running = True
         used_scenario = 0
-        fps = 60
 
         while running:
-            clock.tick(fps)
-            dt = 1.0 / float(fps)
+            clock.tick(constants.FPS)
+            dt = 1.0 / float(constants.FPS)
             self.draw()
             pygame.display.set_caption(f"fps: {clock.get_fps()}")
             self.space.step(dt)

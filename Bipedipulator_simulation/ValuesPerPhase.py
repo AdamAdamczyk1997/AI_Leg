@@ -1,21 +1,49 @@
 from __future__ import annotations
 
 from Bipedipulator_simulation.constants import THIGH_ANGLES_LIST, CALF_ANGLES_LIST, \
-    START_VELOCITY_VALUE, AMOUNT_SCENARIOS, AMOUNT_PHASES
+    START_VELOCITY_VALUE, AMOUNT_SCENARIOS, AMOUNT_PHASES, SCENARIO
+import numpy as np
 
 
 # TODO: need to reconsider this
-def generate_equation(q_1: float, q_2: float):
-    B = round(q_1, 3)
-    A = round((q_2 - B), 3)
-    equation = str(A) + " * t + " + str(B)
+def generate_hip_equation(q_1: float, q_2: float):
+    start_angle = round(q_1, 3)
+    angular_thigh_velocity = round((q_2 - q_1), 3)
+    str_equation_for_second_angle = str(angular_thigh_velocity) + " * t + " + str(start_angle)
 
-    return [equation, A, B]
+    return [str_equation_for_second_angle, angular_thigh_velocity, start_angle]
+
+
+def generate_knee_equation(q_1: float, q_2: float, angular_thigh_velocity: float):
+    start_angle = round(q_1, 3)
+    angular_knee_velocity = round((q_2 - q_1), 3)
+    real_angular_velocity = angular_knee_velocity + angular_thigh_velocity
+    str_equation_for_second_angle = str(real_angular_velocity) + " * t + " + str(start_angle)
+
+    return [str_equation_for_second_angle, real_angular_velocity, start_angle]
+
+# def angular_velocity(t_q_1: float, t_q_2: float, c_q_1: float, c_q_2: float):
+#     # Załóżmy, że x1 to numpy array reprezentujący szybkość kątową w różnych punktach czasowych
+#     x1 = np.array([t_q_1, t_q_2])
+#     # Obliczamy pochodną x1 po czasie za pomocą funkcji np.gradient, zakładając jednostkowy krok czasowy
+#     dx1_dt = np.gradient(x1)
+#     print("pochodna po czasie uda: dx1/dt:", dx1_dt)
+#     # Teraz obliczamy dx2/dt używając danej zależności liniowej
+#     # Załóżmy, że x1 to numpy array reprezentujący szybkość kątową w różnych punktach czasowych
+#     x2 = np.array([c_q_1, c_q_2])
+#     # Obliczamy pochodną x1 po czasie za pomocą funkcji np.gradient, zakładając jednostkowy krok czasowy
+#     dx2_dt = np.gradient(x2)
+#     print("pochodna po czasie kolana: dx2/dt:", dx2_dt)
+#
+#     #  dx2_dt = a * dx1_dt
+#     a = dx2_dt / dx1_dt
+#
+#     print("a:", a)
 
 
 def fill_angles_list(leg_name: str):
-    thigh_angles_list = THIGH_ANGLES_LIST[1][leg_name]
-    calf_angles_list = CALF_ANGLES_LIST[1][leg_name]
+    thigh_angles_list = THIGH_ANGLES_LIST[SCENARIO][leg_name]
+    calf_angles_list = CALF_ANGLES_LIST[SCENARIO][leg_name]
     return [thigh_angles_list, calf_angles_list]
 
 
@@ -106,7 +134,7 @@ class Equations(str):
         self.thigh_angles_list = angles[0]
         self.calf_angles_list = angles[1]
 
-        constant_velocities = fill_velocity_lists(START_VELOCITY_VALUE, START_VELOCITY_VALUE, 13)
+        constant_velocities = fill_velocity_lists(START_VELOCITY_VALUE, START_VELOCITY_VALUE, AMOUNT_PHASES + 1)
         different_velocities = self.fill_dictionaries()
         self.velocities = [Velocity([START_VELOCITY_VALUE], [START_VELOCITY_VALUE])]
 
@@ -134,18 +162,21 @@ class Equations(str):
         q_for_calf = [self.calf_angles_list[phase - 1],
                       self.calf_angles_list[phase]]
 
-        thigh_equation = generate_equation(q_for_thigh[0], q_for_thigh[1])
-        calf_equation = generate_equation(q_for_calf[0], q_for_calf[1])
+        thigh_equation = generate_hip_equation(q_for_thigh[0], q_for_thigh[1])
+        calf_equation = generate_knee_equation(q_for_calf[0], q_for_calf[1], thigh_equation[1])
 
-        t_q_for_phase_1 = round(thigh_equation[1] + thigh_equation[2], 3)
-        c_q_for_phase_1 = round(calf_equation[1] + calf_equation[2], 3)
+        # angular_velocity(q_for_thigh[0], q_for_thigh[1], q_for_calf[0], q_for_calf[1])
 
-        initial_velocity = [(thigh_equation[1]), (calf_equation[1])]
+        assumed_thigh_angle_stop = round(thigh_equation[1] + thigh_equation[2], 3)
+        assumed_calf_angle_stop = round(calf_equation[1] + calf_equation[2], 3)
+
+        initial_velocity = [thigh_equation[1], calf_equation[1]]
 
         dictionary = dict(name=dict_name, thigh_equation=thigh_equation[0], calf_equation=calf_equation[0],
-                          time=phase, thigh_q_stop=t_q_for_phase_1, calf_q_stop=c_q_for_phase_1,
-                          thigh_initial_velocity=abs(round(initial_velocity[0], 3)),
-                          calf_initial_velocity=abs(round(initial_velocity[1], 3)))
+                          time=phase, assumed_thigh_angle_stop=assumed_thigh_angle_stop,
+                          assumed_calf_angle_stop=assumed_calf_angle_stop,
+                          thigh_initial_velocity=abs(round(initial_velocity[0], 2)),
+                          calf_initial_velocity=abs(round(initial_velocity[1], 2)))
 
         return dictionary
 
