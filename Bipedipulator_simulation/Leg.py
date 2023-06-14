@@ -31,11 +31,10 @@ class Leg:
     equations: Equations
 
     def __init__(self, space: pymunk.Space(), name: str):
-        # TODO: do something with this
         self.relative_values = []
         for i in range(0, AMOUNT_SCENARIOS + 1):
-            print("Setting ", len(self.relative_values))
             self.relative_values.append(RelativeValues())
+        print("Created relative_values =", len(self.relative_values))
         self.name = name
         self.equations = Equations(self.name)
 
@@ -80,7 +79,6 @@ class Leg:
 
 
 class LegPartBone:
-    """An individual subject in the simulation."""
     name: str
     mass: float
     size: tuple[int, int]

@@ -47,7 +47,6 @@ class RelativeValues:
         self.usage_counter = 1
         self.history_record = []
         self.histories = []
-        self.oscillation = 0.0
 
     def calculate_angles(self, real_hips_position: Vec2d, real_knee_position: Vec2d, real_ankle_position: Vec2d):
         # calculate angles for leg
@@ -74,11 +73,10 @@ class RelativeValues:
                                round(self.hip['angle_thigh'], 2),
                                int(self.knee['x_knee']), int(self.knee['y_knee']), round(self.knee['angle_calf'], 2),
                                int(self.ankle['x_ankle']),
-                               int(self.ankle['y_ankle']), self.oscillation, self.hip_velocity,
+                               int(self.ankle['y_ankle']), self.hip_velocity,
                                self.knee_velocity, self.ankle_velocity]
 
         self.histories.append(self.history_record)
-
         self.usage_counter += 1
 
         pass
@@ -93,9 +91,3 @@ class RelativeValues:
             case "ankle":
                 self.ankle_velocity = velocity
 
-    def change_oscillation(self, phase_nr: int):
-        # TODO: consider it is needed
-        pi_value = pi
-        value = phase_nr * (2 * pi_value / 6)
-        self.oscillation = value
-        pass

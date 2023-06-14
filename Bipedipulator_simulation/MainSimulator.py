@@ -13,7 +13,6 @@ from Bipedipulator_simulation.LegMotorController import Controller, stop_moving_
 
 def event_method(model_entity: Model, simulate: bool):
     running = True
-
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.type == pygame.QUIT or (

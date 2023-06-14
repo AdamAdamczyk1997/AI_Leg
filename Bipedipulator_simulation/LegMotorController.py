@@ -1,5 +1,3 @@
-import operator
-
 from pymunk import SimpleMotor
 
 from Bipedipulator_simulation import constants
@@ -72,7 +70,6 @@ class Controller:
         if end_phase:
             stop_leg_function(motors, "thigh")
             stop_leg_function(motors, "calf")
-            print("End Phase: ", self.current_phase, " for Leg: ", leg.name)
         return end_phase
 
     def run_phase_async(self, model_entity: Model, motors, used_scenario: int):
@@ -84,8 +81,6 @@ class Controller:
 
         if end_right and end_left:
             print("End current phase ", self.current_phase)
-            model_entity.right_leg.relative_values[used_scenario].change_oscillation(self.current_phase)
-            model_entity.left_leg.relative_values[used_scenario].change_oscillation(self.current_phase)
             temp_end = self.change_current_phase(used_scenario)
 
         return temp_end

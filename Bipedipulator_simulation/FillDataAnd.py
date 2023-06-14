@@ -2,6 +2,7 @@ import pandas as pd
 
 from Bipedipulator_simulation.Leg import Leg
 from Bipedipulator_simulation.Model import Model
+from Bipedipulator_simulation.constants import AMOUNT_SCENARIOS
 
 
 def write_data_to_excel(model: Model):
@@ -52,7 +53,7 @@ def fill_data(leg_entity: Leg, scenario: int):
 
     data = {col: [] for col in columns}
 
-    for used_scenario in range(scenario, 3):
+    for used_scenario in range(scenario, AMOUNT_SCENARIOS):
         histories = leg_entity.relative_values[used_scenario].histories
         velocities = leg_entity.equations.velocities[used_scenario].histories
 
@@ -65,9 +66,9 @@ def fill_data(leg_entity: Leg, scenario: int):
             data['angle_calf'].append(histories[i][6])
             data['x_ankle'].append(histories[i][7])
             data['y_ankle'].append(histories[i][8])
-            data['knee_velocity'].append(histories[i][10])
-            data['hip_velocity'].append(histories[i][11])
-            data['ankle_velocity'].append(histories[i][12])
+            data['knee_velocity'].append(histories[i][9])
+            data['hip_velocity'].append(histories[i][10])
+            data['ankle_velocity'].append(histories[i][11])
             data['current_thigh_velocity_value'].append(velocities[i][0])
             data['current_calf_velocity_value'].append(velocities[i][1])
             data['mirror_angle_thigh'].append(-1 * histories[i][3])

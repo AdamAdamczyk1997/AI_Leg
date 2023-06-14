@@ -17,34 +17,34 @@ def generate_hip_equation(q_1: float, q_2: float):
 def generate_knee_equation(q_1: float, q_2: float, angular_thigh_velocity: float):
     start_angle = round(q_1, 3)
     angular_knee_velocity = round((q_2 - q_1), 3)
-    real_angular_velocity = angular_knee_velocity + angular_thigh_velocity
+    real_angular_velocity = round(angular_knee_velocity + angular_thigh_velocity, 3)
     str_equation_for_second_angle = str(real_angular_velocity) + " * t + " + str(start_angle)
 
     return [str_equation_for_second_angle, real_angular_velocity, start_angle]
 
-# def angular_velocity(t_q_1: float, t_q_2: float, c_q_1: float, c_q_2: float):
-#     # Załóżmy, że x1 to numpy array reprezentujący szybkość kątową w różnych punktach czasowych
-#     x1 = np.array([t_q_1, t_q_2])
-#     # Obliczamy pochodną x1 po czasie za pomocą funkcji np.gradient, zakładając jednostkowy krok czasowy
-#     dx1_dt = np.gradient(x1)
-#     print("pochodna po czasie uda: dx1/dt:", dx1_dt)
-#     # Teraz obliczamy dx2/dt używając danej zależności liniowej
-#     # Załóżmy, że x1 to numpy array reprezentujący szybkość kątową w różnych punktach czasowych
-#     x2 = np.array([c_q_1, c_q_2])
-#     # Obliczamy pochodną x1 po czasie za pomocą funkcji np.gradient, zakładając jednostkowy krok czasowy
-#     dx2_dt = np.gradient(x2)
-#     print("pochodna po czasie kolana: dx2/dt:", dx2_dt)
-#
-#     #  dx2_dt = a * dx1_dt
-#     a = dx2_dt / dx1_dt
-#
-#     print("a:", a)
+
+def calculate_ang_velocity(v_t_1, v_c_1, v_t_2, v_c_2):
+    # funkcja która porówna wartosci i zdecyduje o końcowej prędkości w stosunku do 0.25
+
+    pass
 
 
 def fill_angles_list(leg_name: str):
     thigh_angles_list = THIGH_ANGLES_LIST[SCENARIO][leg_name]
     calf_angles_list = CALF_ANGLES_LIST[SCENARIO][leg_name]
     return [thigh_angles_list, calf_angles_list]
+
+
+def get_other_leg_angles(leg_name: str):
+    other_leg = switch_direction(leg_name)
+    other_thigh_angles_list = THIGH_ANGLES_LIST[SCENARIO][other_leg]
+    other_calf_angles_list = CALF_ANGLES_LIST[SCENARIO][other_leg]
+
+    return [other_thigh_angles_list, other_calf_angles_list]
+
+
+def switch_direction(direction):
+    return 'right' if direction == 'left' else 'left'
 
 
 class Velocity:
@@ -156,14 +156,20 @@ class Equations(str):
         print("thigh angles list= ", self.thigh_angles_list)
         print("calf angles list= ", self.calf_angles_list)
 
-    def fill_equation_dictionary(self, dict_name: str, phase: int):
+    def fill_equation_dictionary(self, dict_name: str, phase: int, other_thigh_angles: list):
         q_for_thigh = [self.thigh_angles_list[phase - 1],
                        self.thigh_angles_list[phase]]
         q_for_calf = [self.calf_angles_list[phase - 1],
                       self.calf_angles_list[phase]]
 
+        q_for_other_thigh = [abs(other_thigh_angles[0][phase - 1] -
+                             other_thigh_angles[0][phase])]
+        q_for_other_calf = [abs(other_thigh_angles[1][phase - 1] -
+                            other_thigh_angles[1][phase])]
+
         thigh_equation = generate_hip_equation(q_for_thigh[0], q_for_thigh[1])
         calf_equation = generate_knee_equation(q_for_calf[0], q_for_calf[1], thigh_equation[1])
+
 
         # angular_velocity(q_for_thigh[0], q_for_thigh[1], q_for_calf[0], q_for_calf[1])
 
@@ -181,10 +187,11 @@ class Equations(str):
         return dictionary
 
     def fill_dictionaries(self):
+        other_leg_angles = get_other_leg_angles(self.leg_name)
         thigh_velocity = [START_VELOCITY_VALUE]
         calf_velocity = [START_VELOCITY_VALUE]
         for i in range(1, AMOUNT_PHASES + 1):
-            dictionary_per_phase = self.fill_equation_dictionary("phase_equation_" + str(i), i)
+            dictionary_per_phase = self.fill_equation_dictionary("phase_equation_" + str(i), i, other_leg_angles)
             self.list_of_equations_dictionaries.append(dictionary_per_phase)
             different_velocities = fill_velocity_lists(dictionary_per_phase['thigh_initial_velocity'],
                                                        dictionary_per_phase['calf_initial_velocity'], 1)
