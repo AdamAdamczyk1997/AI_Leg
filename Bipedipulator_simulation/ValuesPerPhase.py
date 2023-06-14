@@ -23,10 +23,28 @@ def generate_knee_equation(q_1: float, q_2: float, angular_thigh_velocity: float
     return [str_equation_for_second_angle, real_angular_velocity, start_angle]
 
 
-def calculate_ang_velocity(v_t_1, v_c_1, v_t_2, v_c_2):
-    # funkcja która porówna wartosci i zdecyduje o końcowej prędkości w stosunku do 0.25
+def calculate_speeds(thigh_angle, calf_angle, other_thigh_ang, other_calf_ang):
+    angles = [thigh_angle, calf_angle, other_thigh_ang, other_calf_ang]
+    # TODO: need to be changed or angles values are sometimes bad
+    # thigh_angular_velocity = round(START_VELOCITY_VALUE * (thigh_angle / max_angle), 2)
+    # calf_angular_velocity = round(START_VELOCITY_VALUE * (calf_angle / max_angle), 2)
 
-    pass
+    min_velocity = 0.1
+    max_velocity = 0.3
+    min_angle = min(angles)
+    max_angle = max(angles)
+
+    velocities = []
+    for angle in angles:
+        if angle == min_angle:
+            velocities.append(min_velocity)
+        elif angle == max_angle:
+            velocities.append(max_velocity)
+        else:
+            scale = (angle - min_angle) / (max_angle - min_angle)
+            velocities.append(min_velocity + scale * (max_velocity - min_velocity))
+
+    return [velocities[0], velocities[1]]
 
 
 def fill_angles_list(leg_name: str):
@@ -103,8 +121,6 @@ class Velocity:
     def show_velocity_lists(self):
         print("thigh velocity list= ", self.thigh_velocity)
         print("calf velocity list= ", self.calf_velocity)
-        print("thigh time list= ", self.thigh_time)
-        print("calf time list= ", self.calf_time)
 
 
 def fill_velocity_lists(thigh_velocities: float, calf_velocities: float, range_phase: int):
@@ -118,6 +134,7 @@ def fill_velocity_lists(thigh_velocities: float, calf_velocities: float, range_p
 
 
 class Equations(str):
+    # TODO remember że ruch 1_1 ma dziwne wyprostowanie łydki w którymś momencie jest to spowodowane że nie mamy stopy ruchomej
     leg_name: str
 
     thigh_angles_list: list[float]
@@ -139,11 +156,10 @@ class Equations(str):
         self.velocities = [Velocity([START_VELOCITY_VALUE], [START_VELOCITY_VALUE])]
 
         velocities = [constant_velocities, different_velocities]
+
         for i in range(0, AMOUNT_SCENARIOS):
-            # TODO: fix the different_velocities because it doesn't work good with it and replace with const or add
-            #  another option
-            # self.velocities.append(Velocity(velocities[i][0], velocities[i][1]))
-            self.velocities.append(Velocity(constant_velocities[0], constant_velocities[1]))
+            self.velocities.append(Velocity(velocities[i][0], velocities[i][1]))
+            print(f"velocities: {velocities[i]}")
 
     def get_angle(self, leg_part: str, phase: int):
         match leg_part:
@@ -156,30 +172,28 @@ class Equations(str):
         print("thigh angles list= ", self.thigh_angles_list)
         print("calf angles list= ", self.calf_angles_list)
 
-    def fill_equation_dictionary(self, dict_name: str, phase: int, other_thigh_angles: list):
+    def fill_equation_dictionary(self, dict_name: str, phase: int, other_leg_angles: list):
         q_for_thigh = [self.thigh_angles_list[phase - 1],
                        self.thigh_angles_list[phase]]
         q_for_calf = [self.calf_angles_list[phase - 1],
                       self.calf_angles_list[phase]]
 
-        q_for_other_thigh = [abs(other_thigh_angles[0][phase - 1] -
-                             other_thigh_angles[0][phase])]
-        q_for_other_calf = [abs(other_thigh_angles[1][phase - 1] -
-                            other_thigh_angles[1][phase])]
+        q_for_other_thigh = abs(other_leg_angles[0][phase - 1] -
+                                other_leg_angles[0][phase])
+        q_for_other_calf = abs(other_leg_angles[1][phase - 1] -
+                               other_leg_angles[1][phase])
 
         thigh_equation = generate_hip_equation(q_for_thigh[0], q_for_thigh[1])
         calf_equation = generate_knee_equation(q_for_calf[0], q_for_calf[1], thigh_equation[1])
 
-
-        # angular_velocity(q_for_thigh[0], q_for_thigh[1], q_for_calf[0], q_for_calf[1])
+        initial_velocity = calculate_speeds(abs(q_for_thigh[0] - q_for_thigh[1]), abs(q_for_calf[0] - q_for_calf[1]),
+                                            q_for_other_thigh, q_for_other_calf)
 
         assumed_thigh_angle_stop = round(thigh_equation[1] + thigh_equation[2], 3)
         assumed_calf_angle_stop = round(calf_equation[1] + calf_equation[2], 3)
 
-        initial_velocity = [thigh_equation[1], calf_equation[1]]
-
         dictionary = dict(name=dict_name, thigh_equation=thigh_equation[0], calf_equation=calf_equation[0],
-                          time=phase, assumed_thigh_angle_stop=assumed_thigh_angle_stop,
+                          assumed_thigh_angle_stop=assumed_thigh_angle_stop,
                           assumed_calf_angle_stop=assumed_calf_angle_stop,
                           thigh_initial_velocity=abs(round(initial_velocity[0], 2)),
                           calf_initial_velocity=abs(round(initial_velocity[1], 2)))
@@ -193,10 +207,7 @@ class Equations(str):
         for i in range(1, AMOUNT_PHASES + 1):
             dictionary_per_phase = self.fill_equation_dictionary("phase_equation_" + str(i), i, other_leg_angles)
             self.list_of_equations_dictionaries.append(dictionary_per_phase)
-            different_velocities = fill_velocity_lists(dictionary_per_phase['thigh_initial_velocity'],
-                                                       dictionary_per_phase['calf_initial_velocity'], 1)
-            thigh_velocity.append(different_velocities[0][0])
-            calf_velocity.append(different_velocities[1][0])
-            i += 1
+            thigh_velocity.append(dictionary_per_phase['thigh_initial_velocity'])
+            calf_velocity.append(dictionary_per_phase['calf_initial_velocity'])
 
         return [thigh_velocity, calf_velocity]
