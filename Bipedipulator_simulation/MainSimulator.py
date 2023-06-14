@@ -8,11 +8,12 @@ import Model
 import constants
 from Bipedipulator_simulation import LegMethodsHelper
 from Bipedipulator_simulation.FillDataAnd import write_data_to_excel
-from Bipedipulator_simulation.LegMotorController import Controller
+from Bipedipulator_simulation.LegMotorController import Controller, stop_moving_right_leg, stop_moving_left_leg
 
 
 def event_method(model_entity: Model, simulate: bool):
     running = True
+
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             if event.type == pygame.QUIT or (
@@ -20,7 +21,7 @@ def event_method(model_entity: Model, simulate: bool):
                 running = False
             # Start/stop simulation
             elif event.key == pygame.K_s:
-                simulate = not simulate
+                return [running, not simulate]
             elif event.key == pygame.K_a:
                 model_entity.move_running_gear()
             # Start new simulation
@@ -93,6 +94,11 @@ class Simulator(object):
 
                 LegMethodsHelper.limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, dt)
                 LegMethodsHelper.limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, dt)
+            else:
+                stop_moving_right_leg(self.motors, "thigh")
+                stop_moving_right_leg(self.motors, "calf")
+                stop_moving_left_leg(self.motors, "thigh")
+                stop_moving_left_leg(self.motors, "calf")
 
         LegMethodsHelper.show_counters(self.model_entity)
         write_data_to_excel(self.model_entity)
