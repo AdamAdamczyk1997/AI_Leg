@@ -6,7 +6,7 @@ import pymunk
 from pymunk import Vec2d, Body
 
 from Bipedipulator_simulation.Model import Model
-from Bipedipulator_simulation.constants import FLOOR_HEIGHT
+from Bipedipulator_simulation.constants import FLOOR_HEIGHT, FLOOR_LENGTH
 
 
 def limit_velocity(bodies: list[pymunk.Body], gravity, dt):
@@ -41,26 +41,27 @@ def motor_leg(model_entity: Model, space: pymunk.Space()):
 def running_gear(space):
     floor = pymunk.Body()
     floor.body_type = pymunk.Body.KINEMATIC
-    floor.shape = pymunk.Segment(floor, (0, 0), (100000, 0), FLOOR_HEIGHT)
+    floor.shape = pymunk.Segment(floor, (0, 0), (FLOOR_LENGTH, 0), FLOOR_HEIGHT)
     floor.shape.friction = 1.0
     space.add(floor, floor.shape)
 
     return floor
 
 
-def add_test_ball():
-    """Add a ball to the given space at a random position"""
+def add_test_ball(space: pymunk.Space()):
     mass = 1
     radius = 20
     inertia = pymunk.moment_for_circle(mass, 0, radius, (0, 0))
     body = pymunk.Body(mass, inertia)
-    body.position = 200, 1000
+    body.position = 100, 1000
     shape = pymunk.Circle(body, radius, (0, 0))
     shape.friction = 1
-    return [body, shape]
+    space.add(body, shape)
+
+    return [body]
 
 
-def add_body_pin_joint(space, body1: Body, body2: Body, how_far_from_body1: tuple[float, float],
+def add_body_pin_joint(space: pymunk.Space(), body1: Body, body2: Body, how_far_from_body1: tuple[float, float],
                        how_far_from_body2: tuple[float, float]):
     body_pin_joint = pymunk.PinJoint(body1, body2, how_far_from_body1, how_far_from_body2)
     space.add(body_pin_joint)
@@ -74,27 +75,28 @@ def add_body_rotation_center(space, body_rotation_center_position):
     return body_rotation_center
 
 
-def add_body_pivot_joint(space, body1: Body, body2: Body, position_arg):
+def add_body_pivot_joint(space: pymunk.Space(), body1: Body, body2: Body, position_arg):
     pivot_joint = pymunk.PivotJoint(body1, body2, Vec2d(*position_arg))
     space.add(pivot_joint)
     return pivot_joint
 
 
-def add_joint_body(position: Union[Vec2d, tuple[float, float]]):
-    # TODO: add space to this method like on methods above
+def add_joint_body(space: pymunk.Space(), position: Union[Vec2d, tuple[float, float]]):
     mass = 1
     size = (1, 1)
     moment = pymunk.moment_for_box(mass, size)
     pivot_joint_body = pymunk.Body(mass, moment)
     pivot_joint_body.body_type = pymunk.Body.DYNAMIC
     pivot_joint_body.position = position
+    space.add(pivot_joint_body)
+
     return pivot_joint_body
 
 
 def show_counters(model_entity: Model):
-    model_entity.right_leg.relative_values[0].counters.show_counters()
-    model_entity.left_leg.relative_values[0].counters.show_counters()
-    model_entity.right_leg.relative_values[1].counters.show_counters()
-    model_entity.left_leg.relative_values[1].counters.show_counters()
-    model_entity.right_leg.relative_values[2].counters.show_counters()
-    model_entity.left_leg.relative_values[2].counters.show_counters()
+    model_entity.right_leg.relative_values[0].counters.show_counters('Right leg')
+    model_entity.left_leg.relative_values[0].counters.show_counters('Left leg')
+    model_entity.right_leg.relative_values[1].counters.show_counters('Right leg')
+    model_entity.left_leg.relative_values[1].counters.show_counters('Left leg')
+    model_entity.right_leg.relative_values[2].counters.show_counters('Right leg')
+    model_entity.left_leg.relative_values[2].counters.show_counters('Left leg')

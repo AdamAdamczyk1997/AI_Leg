@@ -1,5 +1,6 @@
+import time
+
 import pygame
-import pymunk
 import pymunk.matplotlib_util
 import pymunk.pygame_util
 from pygame.color import THECOLORS
@@ -7,7 +8,7 @@ from pygame.color import THECOLORS
 import Model
 import constants
 from Bipedipulator_simulation import LegMethodsHelper
-from Bipedipulator_simulation.FillDataAnd import write_data_to_excel
+from Bipedipulator_simulation.FillDataAnd import export_data_to_files
 from Bipedipulator_simulation.LegMotorController import Controller, stop_moving_right_leg, stop_moving_left_leg
 
 
@@ -31,7 +32,19 @@ def event_method(model_entity: Model, simulate: bool):
     return [running, simulate]
 
 
-class Simulator(object):
+def validate_gravity(initial_position, real_values: pymunk.Body, current_time):
+    real_position = real_values.position.y
+    real_ball_velocity = -real_values.velocity.y
+    initial_velocity = 0.0
+
+    expected_position = initial_position - 0.5 * (-constants.GRAVITY) * current_time ** 2
+    expected_velocity = initial_velocity + (-constants.GRAVITY) * current_time
+
+    print(f"real_ball_positions: {round(real_position, 1)}, expected_position: {round(expected_position, 1)},"
+          f"\nreal_ball_velocity: {round(real_ball_velocity, 1)}, expected_velocity: {round(expected_velocity, 1)}")
+
+
+class Simulator:
     model_entity: Model
     controller: Controller
     space: pymunk.Space
@@ -40,57 +53,65 @@ class Simulator(object):
     def __init__(self):
         self.screen = pygame.display.set_mode((constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT),
                                               constants.DISPLAY_FLAGS)
-        self.draw_options = pymunk.pygame_util.DrawOptions(self.screen)
         self.space = pymunk.Space()
-        self.space.gravity = (0, constants.GRAVITY)
-        pymunk.pygame_util.positive_y_is_up = True
+        self.set_gravity()
+        self.test_ball_body = LegMethodsHelper.add_test_ball(self.space)
 
         self.model_entity = Model.Model(self.space)
         self.motors = LegMethodsHelper.motor_leg(self.model_entity, self.space)
         self.controller = Controller()
 
-        # for validate gravity
-        self.ball_body_shape = LegMethodsHelper.add_test_ball()
-        self.space.add(self.ball_body_shape[0], self.ball_body_shape[1])
-
-    def draw(self):
+    def draw(self, clock: pygame.time.Clock()):
         self.screen.fill(THECOLORS["white"])  # Clear the screen
-        self.space.debug_draw(self.draw_options)  # Draw space
+        draw_options = pymunk.pygame_util.DrawOptions(self.screen)
+        self.space.debug_draw(draw_options)  # Draw space
         pygame.display.flip()  # All done, lets flip the display
+        pygame.display.set_caption(f"fps: {clock.get_fps()}")
+
+    def set_gravity(self):
+        self.space.gravity = (0, constants.GRAVITY)
+        pymunk.pygame_util.positive_y_is_up = True
 
     def main(self):
         pygame.init()
-        self.space.iterations = 100  # Try another value to better experience
+        self.space.iterations = 300
         clock = pygame.time.Clock()
 
         simulate = False
         running = True
-        used_scenario = 0
+        simulation_step = 0
+
+        validate_gravity_flag = True
+        start_time = time.time()
+        initial_position = self.test_ball_body[0].position.y
 
         while running:
             clock.tick(constants.FPS)
             dt = 1.0 / float(constants.FPS)
-            self.draw()
-            pygame.display.set_caption(f"fps: {clock.get_fps()}")
+            self.draw(clock)
             self.space.step(dt)
 
-            event_return = event_method(self.model_entity, simulate)
-            running = event_return[0]
-            simulate = event_return[1]
+            running, simulate = event_method(self.model_entity, simulate)
+
+            if validate_gravity_flag:
+                current_time = time.time()
+                elapsed_time = current_time - start_time
+                if self.test_ball_body[0].position.y > 100:
+                    validate_gravity(initial_position, self.test_ball_body[0], elapsed_time)
+                else:
+                    validate_gravity_flag = False
 
             if simulate:
                 temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors,
-                                                                        used_scenario)
+                                                                        simulation_step)
 
-                # TODO: for validate gravity
-                # print(self.ball_body_shape[0].position)
-                # print(self.ball_body_shape[0].velocity)
                 if temp_end:
-                    used_scenario += 1
-                    if used_scenario > constants.AMOUNT_SCENARIOS:
+                    simulation_step += 1
+                    if simulation_step == constants.NUMBER_SIMULATION_STEPS:
                         simulate = False
                         running = False
 
+                LegMethodsHelper.limit_velocity(self.test_ball_body, self.space.gravity, dt)
                 LegMethodsHelper.limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, dt)
                 LegMethodsHelper.limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, dt)
             else:
@@ -100,7 +121,7 @@ class Simulator(object):
                 stop_moving_left_leg(self.motors, "calf")
 
         LegMethodsHelper.show_counters(self.model_entity)
-        write_data_to_excel(self.model_entity)
+        export_data_to_files(self.model_entity)
         pygame.quit()
 
 

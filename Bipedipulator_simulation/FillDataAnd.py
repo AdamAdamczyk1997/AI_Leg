@@ -2,20 +2,20 @@ import pandas as pd
 
 from Bipedipulator_simulation.Leg import Leg
 from Bipedipulator_simulation.Model import Model
-from Bipedipulator_simulation.constants import AMOUNT_SCENARIOS
+from Bipedipulator_simulation.constants import NUMBER_SIMULATION_STEPS
 
 
-def write_data_to_excel(model: Model):
-    fill_data_for_txt(model.right_leg)
-    fill_data_for_txt(model.left_leg)
-    fill_data(model.left_leg, 1)
-    fill_data(model.right_leg, 1)
-    fill_equation(model)
+def export_data_to_files(model: Model):
+    export_data_to_txt(model.right_leg)
+    export_data_to_txt(model.left_leg)
+    export_data_to_excel(model.left_leg)
+    export_data_to_excel(model.right_leg)
+    export_angles_lists_to_excel(model)
 
 
-def fill_data_for_txt(leg_entity: Leg):
-    file_name = '../resources/' + str(leg_entity.name) + '_exporting_data_.txt'
-    dictionaries = leg_entity.equations.list_of_equations_dictionaries
+def export_data_to_txt(leg_entity: Leg):
+    file_name = '../resources/' + str(leg_entity.leg_name) + '_exporting_data_.txt'
+    dictionaries = leg_entity.equations.angular_velocities_dictionaries_list
     write_list_of_dictionaries_to_txt_file(file_name, dictionaries)
 
 
@@ -35,7 +35,7 @@ def write_list_of_dictionaries_to_txt_file(file_name: str, list_of_dictionaries:
                 file.write('\n')
 
 
-def fill_equation(model: Model):
+def export_angles_lists_to_excel(model: Model):
     columns = ['right_thigh_angles_list', 'right_calf_angles_list', 'left_thigh_angles_list', 'left_calf_angles_list']
     data = [model.right_leg.equations.thigh_angles_list, model.right_leg.equations.calf_angles_list,
             model.left_leg.equations.thigh_angles_list, model.left_leg.equations.calf_angles_list]
@@ -46,16 +46,17 @@ def fill_equation(model: Model):
         df2.to_excel(writer, sheet_name="equations", engine="xlsxwriter")
 
 
-def fill_data(leg_entity: Leg, scenario: int):
+def export_data_to_excel(leg_entity: Leg):
     columns = ['x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_calf', 'x_ankle',
                'y_ankle', 'hip_velocity', 'knee_velocity', 'ankle_velocity',
                'current_thigh_velocity_value', 'current_calf_velocity_value', 'mirror_angle_thigh', 'mirror_angle_calf']
 
     data = {col: [] for col in columns}
+    start_simulation_step = 1
 
-    for used_scenario in range(scenario, AMOUNT_SCENARIOS):
+    for used_scenario in range(start_simulation_step, NUMBER_SIMULATION_STEPS):
         histories = leg_entity.relative_values[used_scenario].histories
-        velocities = leg_entity.equations.velocities[used_scenario].histories
+        velocities = leg_entity.equations.angular_velocities[used_scenario].angular_velocities_histories
 
         for i in range(len(histories)):
             data['x_hip'].append(histories[i][1])
@@ -76,6 +77,6 @@ def fill_data(leg_entity: Leg, scenario: int):
 
     df = pd.DataFrame(data, index=data['x_hip'])
 
-    file_path = f"../resources/{leg_entity.name}_leg_data.xlsx"
+    file_path = f"../resources/{leg_entity.leg_name}_leg_data.xlsx"
     with pd.ExcelWriter(file_path) as writer:
-        df.to_excel(writer, sheet_name=f"{leg_entity.name}_leg", engine="xlsxwriter")
+        df.to_excel(writer, sheet_name=f"{leg_entity.leg_name}_leg", engine="xlsxwriter")
