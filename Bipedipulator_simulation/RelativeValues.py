@@ -56,15 +56,15 @@ class RelativeValues:
 
         sin_angle_thigh = self.knee['x_knee'] / THIGH_HEIGHT
         angle_thigh_rad = math.asin(sin_angle_thigh)
-        angle_thigh_deg = math.degrees(angle_thigh_rad)
-        self.hip['angle_thigh'] = angle_thigh_rad  # hip angle values are in radians at now
+        # angle_thigh_deg = math.degrees(angle_thigh_rad)
+        self.hip['angle_thigh'] = angle_thigh_rad
 
         self.ankle['x_ankle'] = real_ankle_position.x - real_hips_position.x
         self.ankle['y_ankle'] = real_ankle_position.y - real_hips_position.y
 
         sin_angle_calf = (self.ankle['x_ankle'] - self.knee['x_knee']) / CALF_HEIGHT
         angle_calf_rad = math.asin(sin_angle_calf)
-        angle_calf_deg = math.degrees(angle_calf_rad)
+        # angle_calf_deg = math.degrees(angle_calf_rad)
         self.knee['angle_calf'] = angle_calf_rad
 
         self.history_record = [self.usage_counter, int(self.hip['x_hip']), int(self.hip['y_hip']),

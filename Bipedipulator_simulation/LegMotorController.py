@@ -37,17 +37,22 @@ class Controller:
         right_leg_angular_velocity = model_entity.right_leg.equations.angular_velocities[simulation_step]
         left_leg_angular_velocity = model_entity.left_leg.equations.angular_velocities[simulation_step]
 
-        self.right_leg_angular_velocities['thigh_velocity'] = right_leg_angular_velocity.thigh_angular_velocity_list[self.current_phase]
-        self.right_leg_angular_velocities['calf_velocity'] = right_leg_angular_velocity.calf_angular_velocity_list[self.current_phase]
-        self.left_leg_angular_velocities['thigh_velocity'] = left_leg_angular_velocity.thigh_angular_velocity_list[self.current_phase]
-        self.left_leg_angular_velocities['calf_velocity'] = left_leg_angular_velocity.calf_angular_velocity_list[self.current_phase]
+        self.right_leg_angular_velocities['thigh_velocity'] = \
+            right_leg_angular_velocity.thigh_angular_velocity_list[self.current_phase]
+        self.right_leg_angular_velocities['calf_velocity'] = \
+            right_leg_angular_velocity.calf_angular_velocity_list[self.current_phase]
+        self.left_leg_angular_velocities['thigh_velocity'] = \
+            left_leg_angular_velocity.thigh_angular_velocity_list[self.current_phase]
+        self.left_leg_angular_velocities['calf_velocity'] = \
+            left_leg_angular_velocity.calf_angular_velocity_list[self.current_phase]
 
     def run_phase_async(self, model_entity: Model, motors, simulation_step: int):
         temp_end = False
         end_right = self.handle_leg_movement(model_entity.right_leg, motors,
                                              self.right_leg_angular_velocities['thigh_velocity'],
                                              self.right_leg_angular_velocities['calf_velocity'], simulation_step)
-        end_left = self.handle_leg_movement(model_entity.left_leg, motors, self.left_leg_angular_velocities['thigh_velocity'],
+        end_left = self.handle_leg_movement(model_entity.left_leg, motors,
+                                            self.left_leg_angular_velocities['thigh_velocity'],
                                             self.left_leg_angular_velocities['calf_velocity'], simulation_step)
 
         if end_right and end_left:

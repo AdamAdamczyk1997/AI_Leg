@@ -1,9 +1,7 @@
 import time
-
 import pygame
 import pymunk.matplotlib_util
 import pymunk.pygame_util
-from pygame.color import THECOLORS
 
 import Model
 import constants
@@ -49,42 +47,36 @@ class Simulator:
     controller: Controller
     space: pymunk.Space
     motors: list[pymunk.SimpleMotor]
+    screen: pygame.Surface
 
     def __init__(self):
-        self.screen = pygame.display.set_mode((constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT),
-                                              constants.DISPLAY_FLAGS)
-        self.space = pymunk.Space()
-        self.set_gravity()
-        self.test_ball_body = LegMethodsHelper.add_test_ball(self.space)
+        self.add_space_with_gravity()
 
         self.model_entity = Model.Model(self.space)
         self.motors = LegMethodsHelper.motor_leg(self.model_entity, self.space)
         self.controller = Controller()
 
-    def draw(self, clock: pygame.time.Clock()):
-        self.screen.fill(THECOLORS["white"])  # Clear the screen
-        draw_options = pymunk.pygame_util.DrawOptions(self.screen)
-        self.space.debug_draw(draw_options)  # Draw space
-        pygame.display.flip()  # All done, lets flip the display
-        pygame.display.set_caption(f"fps: {clock.get_fps()}")
-
-    def set_gravity(self):
+    def add_space_with_gravity(self):
+        self.space = pymunk.Space()
         self.space.gravity = (0, constants.GRAVITY)
         pymunk.pygame_util.positive_y_is_up = True
 
     def main(self):
         pygame.init()
-        self.space.iterations = 300
         clock = pygame.time.Clock()
+        self.screen = pygame.display.set_mode(
+            (constants.BOUNDS_WIDTH, constants.BOUNDS_HEIGHT), constants.DISPLAY_FLAGS)
 
         simulate = False
         running = True
         simulation_step = 0
 
+        test_ball_body = LegMethodsHelper.add_test_ball(self.space)
         validate_gravity_flag = True
         start_time = time.time()
-        initial_position = self.test_ball_body[0].position.y
+        initial_position = test_ball_body[0].position.y
 
+        self.space.iterations = 300
         while running:
             clock.tick(constants.FPS)
             dt = 1.0 / float(constants.FPS)
@@ -96,33 +88,44 @@ class Simulator:
             if validate_gravity_flag:
                 current_time = time.time()
                 elapsed_time = current_time - start_time
-                if self.test_ball_body[0].position.y > 100:
-                    validate_gravity(initial_position, self.test_ball_body[0], elapsed_time)
+                if test_ball_body[0].position.y > 100:
+                    validate_gravity(initial_position, test_ball_body[0], elapsed_time)
                 else:
                     validate_gravity_flag = False
 
             if simulate:
-                temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors,
-                                                                        simulation_step)
-
+                temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors, simulation_step)
                 if temp_end:
                     simulation_step += 1
                     if simulation_step == constants.NUMBER_SIMULATION_STEPS:
                         simulate = False
                         running = False
 
-                LegMethodsHelper.limit_velocity(self.test_ball_body, self.space.gravity, dt)
-                LegMethodsHelper.limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, dt)
-                LegMethodsHelper.limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, dt)
+                self.limit_bodies_velocity(test_ball_body, dt)
             else:
-                stop_moving_right_leg(self.motors, "thigh")
-                stop_moving_right_leg(self.motors, "calf")
-                stop_moving_left_leg(self.motors, "thigh")
-                stop_moving_left_leg(self.motors, "calf")
+                self.stop_moving()
 
         LegMethodsHelper.show_counters(self.model_entity)
         export_data_to_files(self.model_entity)
         pygame.quit()
+
+    def draw(self, clock: pygame.time.Clock()):
+        self.screen.fill(pygame.color.THECOLORS['white'])  # Clear the screen
+        draw_options = pymunk.pygame_util.DrawOptions(self.screen)
+        self.space.debug_draw(draw_options)  # Draw space
+        pygame.display.flip()  # All done, lets flip the display
+        pygame.display.set_caption(f"fps: {clock.get_fps()}")
+
+    def limit_bodies_velocity(self, test_ball_body, dt):
+        LegMethodsHelper.limit_velocity(test_ball_body, self.space.gravity, dt)
+        LegMethodsHelper.limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, dt)
+        LegMethodsHelper.limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, dt)
+
+    def stop_moving(self):
+        stop_moving_right_leg(self.motors, "thigh")
+        stop_moving_right_leg(self.motors, "calf")
+        stop_moving_left_leg(self.motors, "thigh")
+        stop_moving_left_leg(self.motors, "calf")
 
 
 if __name__ == "__main__":
