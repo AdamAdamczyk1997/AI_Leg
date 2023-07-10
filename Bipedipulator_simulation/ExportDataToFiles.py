@@ -14,25 +14,19 @@ def export_data_to_files(model: Model):
     save_usage_lists_to_excel(model)
 
 
-def save_to_excel(data: list, file_name="gravity_validation_results.xlsx"):
+def save_gravity_results_to_excel(data: list):
+    file_name = "../resources/gravity_validation_results.xlsx"
     df = pd.DataFrame(data)
     df.to_excel(file_name, index=False)
 
 
 def save_usage_lists_to_excel(model_entity: Model):
     file_name = "../resources/usage_lists_results.xlsx"
-    # columns = ['right_leg_usage_list_v_constant', 'right_leg_usage_list_v_mutable', 'left_leg_usage_list_v_constant',
-    #            'left_leg_usage_list_v_mutable']
 
     columns = ['right_thigh_angular_velocity_usage_constant', 'right_calf_angular_velocity_usage_constant',
                'left_thigh_angular_velocity_usage_constant', 'left_calf_angular_velocity_usage_constant',
                'right_thigh_angular_velocity_usage_mutable', 'right_calf_angular_velocity_usage_mutable',
                'left_thigh_angular_velocity_usage_constant', 'left_calf_angular_velocity_usage_mutable']
-
-
-    # data = {col: [] for col in columns}
-    # data = [model_entity.right_leg.relative_values[1].counters.phase_usage_list, model_entity.right_leg.relative_values[2].counters.phase_usage_list,
-    #         model_entity.left_leg.relative_values[1].counters.phase_usage_list, model_entity.left_leg.relative_values[2].counters.phase_usage_list]
 
     data = [model_entity.right_leg.equations.angular_velocities[1].thigh_angular_velocity_usage,
             model_entity.right_leg.equations.angular_velocities[1].calf_angular_velocity_usage,

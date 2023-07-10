@@ -5,8 +5,8 @@ import pymunk.pygame_util
 
 import Model
 import constants
-from Bipedipulator_simulation import LegMethodsHelper
-from Bipedipulator_simulation.FillDataAnd import export_data_to_files, save_to_excel
+from Bipedipulator_simulation import ModelHelper
+from Bipedipulator_simulation.ExportDataToFiles import export_data_to_files, save_gravity_results_to_excel
 from Bipedipulator_simulation.LegMotorController import Controller, stop_moving_right_leg, stop_moving_left_leg
 
 
@@ -17,7 +17,7 @@ def event_method(model_entity: Model, simulate: bool):
             if event.type == pygame.QUIT or (
                     event.key in (pygame.K_q, pygame.K_ESCAPE)):
                 running = False
-                # save_to_excel(data, "gravity_validation_results.xlsx")
+                # save_gravity_results_to_excel(data)
             # Start/stop simulation
             elif event.key == pygame.K_s:
                 return [running, not simulate]
@@ -61,7 +61,7 @@ class Simulator:
         self.add_space_with_gravity()
 
         self.model_entity = Model.Model(self.space)
-        self.motors = LegMethodsHelper.motor_leg(self.model_entity, self.space)
+        self.motors = ModelHelper.motor_leg(self.model_entity, self.space)
         self.controller = Controller()
 
     def add_space_with_gravity(self):
@@ -79,12 +79,12 @@ class Simulator:
         running = True
         simulation_step = 0
 
-        # test_ball_body = LegMethodsHelper.add_test_ball(self.space)
+        # test_ball_body = ModelHelper.add_test_ball(self.space)
         # validate_gravity_flag = True
         # start_time = time.time()
         # initial_position = test_ball_body[0].position.y
         # data = []
-        counter = 0
+        # counter = 0
 
         self.space.iterations = 300
         while running:
@@ -124,7 +124,7 @@ class Simulator:
             else:
                 self.stop_moving()
 
-        LegMethodsHelper.show_counters(self.model_entity)
+        ModelHelper.show_counters(self.model_entity)
         export_data_to_files(self.model_entity)
         pygame.quit()
 
@@ -136,9 +136,9 @@ class Simulator:
         pygame.display.set_caption(f"fps: {clock.get_fps()}")
 
     def limit_bodies_velocity(self, dt):
-        # LegMethodsHelper.limit_velocity(test_ball_body, self.space.gravity, dt)
-        LegMethodsHelper.limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, dt)
-        LegMethodsHelper.limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, dt)
+        # ModelHelper.limit_velocity(test_ball_body, self.space.gravity, dt)
+        ModelHelper.limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, dt)
+        ModelHelper.limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, dt)
 
     def stop_moving(self):
         stop_moving_right_leg(self.motors, "thigh")

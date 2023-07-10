@@ -3,9 +3,9 @@ from __future__ import annotations
 import pymunk.pygame_util
 from pymunk import Vec2d
 
-from Bipedipulator_simulation import LegMethodsHelper
+from Bipedipulator_simulation import ModelHelper
 from Bipedipulator_simulation.RelativeValues import RelativeValues
-from Bipedipulator_simulation.ValuesPerPhase import Equations
+from Bipedipulator_simulation.EquationsAndAngularVelocities import Equations
 from Bipedipulator_simulation.constants import CORPS_HEIGHT, THIGH_WIDTH, THIGH_HEIGHT, \
     CALF_HEIGHT, FOOT_HEIGHT, FOOT_WIDTH, THIGH_WEIGHT, FOOT_WEIGHT, CALF_WIDTH, \
     CORPS_POSITION, NUMBER_SIMULATION_STEPS, CALF_WEIGHT
@@ -41,9 +41,9 @@ class Leg:
         self.foot = LegPartBone(space, "foot", FOOT_WEIGHT, (FOOT_WIDTH, FOOT_HEIGHT),
                                 self.calf.body.position - (-FOOT_WIDTH / 4, CALF_HEIGHT / 2 + FOOT_HEIGHT / 2))
 
-        self.knee_body = LegMethodsHelper.add_joint_body(space, (self.thigh.body.position.x,
+        self.knee_body = ModelHelper.add_joint_body(space, (self.thigh.body.position.x,
                                                                  self.thigh.body.position.y - (THIGH_HEIGHT / 2)))
-        self.ankle_body = LegMethodsHelper.add_joint_body(space, (self.calf.body.position.x,
+        self.ankle_body = ModelHelper.add_joint_body(space, (self.calf.body.position.x,
                                                                   self.calf.body.position.y - (CALF_HEIGHT / 2)))
         self.bodies = [self.thigh.body, self.calf.body, self.foot.body, self.knee_body, self.ankle_body]
 
@@ -51,17 +51,17 @@ class Leg:
         self.add_pin_joints_parts(space)
 
     def add_pivot_joints(self, space: pymunk.Space()):
-        LegMethodsHelper.add_body_pivot_joint(space, self.thigh.body, self.calf.body, self.knee_body.position)
-        LegMethodsHelper.add_body_pivot_joint(space, self.calf.body, self.foot.body, self.ankle_body.position)
+        ModelHelper.add_body_pivot_joint(space, self.thigh.body, self.calf.body, self.knee_body.position)
+        ModelHelper.add_body_pivot_joint(space, self.calf.body, self.foot.body, self.ankle_body.position)
 
     def add_pin_joints_parts(self, space: pymunk.Space()):
-        LegMethodsHelper.add_body_pin_joint(space, self.thigh.body, self.calf.body,
+        ModelHelper.add_body_pin_joint(space, self.thigh.body, self.calf.body,
                                             (0, (-THIGH_HEIGHT / 2)), (0, CALF_HEIGHT / 2))
-        LegMethodsHelper.add_body_pin_joint(space, self.thigh.body, self.knee_body,
+        ModelHelper.add_body_pin_joint(space, self.thigh.body, self.knee_body,
                                             (0, (-THIGH_HEIGHT / 2)), (0, 0))
-        LegMethodsHelper.add_body_pin_joint(space, self.calf.body, self.foot.body,
+        ModelHelper.add_body_pin_joint(space, self.calf.body, self.foot.body,
                                             (0, (-CALF_HEIGHT / 2)), (-FOOT_WIDTH / 4, FOOT_HEIGHT / 2))
-        LegMethodsHelper.add_body_pin_joint(space, self.calf.body, self.ankle_body,
+        ModelHelper.add_body_pin_joint(space, self.calf.body, self.ankle_body,
                                             (0, (-CALF_HEIGHT / 2)), (0, 0))
 
 
