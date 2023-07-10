@@ -69,6 +69,7 @@ class Controller:
         if 0 < self.current_phase < AMOUNT_PHASES:
             self.current_phase += 1
             return False
+            # return True  # change this
 
         if self.current_phase == AMOUNT_PHASES:
             self.loop_counter += 1

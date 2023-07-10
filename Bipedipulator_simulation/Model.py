@@ -47,3 +47,6 @@ class Model:
 
     def move_running_gear(self):
         self.floor.velocity = (FLOOR_VELOCITY, 0)
+
+    def stop_running_gear(self):
+        self.floor.velocity = (0, 0)

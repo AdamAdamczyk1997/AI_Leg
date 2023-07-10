@@ -86,6 +86,7 @@ class Equations(str):
                                                           AMOUNT_PHASES + 1)
         different_angular_velocities = self.fill_dictionaries()
         angular_velocities = [constant_angular_velocities, different_angular_velocities]
+        # angular_velocities = [constant_angular_velocities, constant_angular_velocities]
 
         self.angular_velocities = [AngularVelocities([BASE_ANGULAR_VELOCITY_VALUE], [BASE_ANGULAR_VELOCITY_VALUE])]
         for i in range(0, NUMBER_SIMULATION_STEPS - 1):
@@ -150,8 +151,8 @@ def fill_velocity_lists(thigh_velocities: float, calf_velocities: float, range_p
 def calculate_angular_velocities(thigh_angle, calf_angle, other_thigh_ang, other_calf_ang):
     angles = [thigh_angle, calf_angle, other_thigh_ang, other_calf_ang]
 
-    min_angular_velocity = 0.1
-    max_angular_velocity = 0.3
+    min_angular_velocity = 0.15
+    max_angular_velocity = 0.35
     min_angle = min(angles)
     max_angle = max(angles)
 

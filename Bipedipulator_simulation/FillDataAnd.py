@@ -11,6 +11,42 @@ def export_data_to_files(model: Model):
     export_data_to_excel(model.left_leg)
     export_data_to_excel(model.right_leg)
     export_angles_lists_to_excel(model)
+    save_usage_lists_to_excel(model)
+
+
+def save_to_excel(data: list, file_name="gravity_validation_results.xlsx"):
+    df = pd.DataFrame(data)
+    df.to_excel(file_name, index=False)
+
+
+def save_usage_lists_to_excel(model_entity: Model):
+    file_name = "../resources/usage_lists_results.xlsx"
+    # columns = ['right_leg_usage_list_v_constant', 'right_leg_usage_list_v_mutable', 'left_leg_usage_list_v_constant',
+    #            'left_leg_usage_list_v_mutable']
+
+    columns = ['right_thigh_angular_velocity_usage_constant', 'right_calf_angular_velocity_usage_constant',
+               'left_thigh_angular_velocity_usage_constant', 'left_calf_angular_velocity_usage_constant',
+               'right_thigh_angular_velocity_usage_mutable', 'right_calf_angular_velocity_usage_mutable',
+               'left_thigh_angular_velocity_usage_constant', 'left_calf_angular_velocity_usage_mutable']
+
+
+    # data = {col: [] for col in columns}
+    # data = [model_entity.right_leg.relative_values[1].counters.phase_usage_list, model_entity.right_leg.relative_values[2].counters.phase_usage_list,
+    #         model_entity.left_leg.relative_values[1].counters.phase_usage_list, model_entity.left_leg.relative_values[2].counters.phase_usage_list]
+
+    data = [model_entity.right_leg.equations.angular_velocities[1].thigh_angular_velocity_usage,
+            model_entity.right_leg.equations.angular_velocities[1].calf_angular_velocity_usage,
+            model_entity.left_leg.equations.angular_velocities[1].thigh_angular_velocity_usage,
+            model_entity.left_leg.equations.angular_velocities[1].calf_angular_velocity_usage,
+            model_entity.right_leg.equations.angular_velocities[2].thigh_angular_velocity_usage,
+            model_entity.right_leg.equations.angular_velocities[2].calf_angular_velocity_usage,
+            model_entity.left_leg.equations.angular_velocities[2].thigh_angular_velocity_usage,
+            model_entity.left_leg.equations.angular_velocities[2].calf_angular_velocity_usage,
+            ]
+
+    df = pd.DataFrame(zip(*data), columns=columns)
+
+    df.to_excel(file_name, index=False)
 
 
 def export_data_to_txt(leg_entity: Leg):
@@ -47,7 +83,7 @@ def export_angles_lists_to_excel(model: Model):
 
 
 def export_data_to_excel(leg_entity: Leg):
-    columns = ['x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_calf', 'x_ankle',
+    columns = ['iteration no.', 'x_hip', 'y_hip', 'angle_thigh', 'x_knee', 'y_knee', 'angle_calf', 'x_ankle',
                'y_ankle', 'hip_velocity', 'knee_velocity', 'ankle_velocity',
                'current_thigh_velocity_value', 'current_calf_velocity_value', 'mirror_angle_thigh', 'mirror_angle_calf']
 
@@ -59,6 +95,7 @@ def export_data_to_excel(leg_entity: Leg):
         velocities = leg_entity.equations.angular_velocities[used_scenario].angular_velocities_histories
 
         for i in range(len(histories)):
+            data['iteration no.'].append(i + 1)
             data['x_hip'].append(histories[i][1])
             data['y_hip'].append(histories[i][2])
             data['angle_thigh'].append(histories[i][3])
@@ -75,8 +112,8 @@ def export_data_to_excel(leg_entity: Leg):
             data['mirror_angle_thigh'].append(-1 * histories[i][3])
             data['mirror_angle_calf'].append(-1 * histories[i][6])
 
-    df = pd.DataFrame(data, index=data['x_hip'])
+    df = pd.DataFrame(data, index=data['iteration no.'])
 
     file_path = f"../resources/{leg_entity.leg_name}_leg_data.xlsx"
     with pd.ExcelWriter(file_path) as writer:
-        df.to_excel(writer, sheet_name=f"{leg_entity.leg_name}_leg", engine="xlsxwriter")
+        df.to_excel(writer, sheet_name=f"{leg_entity.leg_name}_leg", engine="xlsxwriter", index=False)

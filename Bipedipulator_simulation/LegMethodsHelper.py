@@ -94,9 +94,15 @@ def add_joint_body(space: pymunk.Space(), position: Union[Vec2d, tuple[float, fl
 
 
 def show_counters(model_entity: Model):
-    model_entity.right_leg.relative_values[0].counters.show_counters('Right leg')
-    model_entity.left_leg.relative_values[0].counters.show_counters('Left leg')
+    # model_entity.right_leg.relative_values[0].counters.show_counters('Right leg')
+    # model_entity.left_leg.relative_values[0].counters.show_counters('Left leg')
     model_entity.right_leg.relative_values[1].counters.show_counters('Right leg')
-    model_entity.left_leg.relative_values[1].counters.show_counters('Left leg')
-    model_entity.right_leg.relative_values[2].counters.show_counters('Right leg')
-    model_entity.left_leg.relative_values[2].counters.show_counters('Left leg')
+    model_entity.left_leg.relative_values[1].counters.show_counters('Left leg_')
+    # model_entity.right_leg.relative_values[2].counters.show_counters('Right leg')
+    # model_entity.left_leg.relative_values[2].counters.show_counters('Left leg_')
+
+    # print("\nthight right leg velocity usage: ", model_entity.right_leg.equations.angular_velocities[1].thigh_angular_velocity_usage)
+    # print("calf right leg valocity usage: ", model_entity.right_leg.equations.angular_velocities[1].calf_angular_velocity_usage)
+    # print("thight right leg velocity usage: ", model_entity.right_leg.equations.angular_velocities[2].thigh_angular_velocity_usage)
+    # print("calf right leg valocity usage: ", model_entity.right_leg.equations.angular_velocities[2].calf_angular_velocity_usage)
+    # model_entity.right_leg.equations.angular_velocities[1].show_velocity_lists()

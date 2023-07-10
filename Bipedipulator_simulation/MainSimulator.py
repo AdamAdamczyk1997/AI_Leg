@@ -6,7 +6,7 @@ import pymunk.pygame_util
 import Model
 import constants
 from Bipedipulator_simulation import LegMethodsHelper
-from Bipedipulator_simulation.FillDataAnd import export_data_to_files
+from Bipedipulator_simulation.FillDataAnd import export_data_to_files, save_to_excel
 from Bipedipulator_simulation.LegMotorController import Controller, stop_moving_right_leg, stop_moving_left_leg
 
 
@@ -17,11 +17,14 @@ def event_method(model_entity: Model, simulate: bool):
             if event.type == pygame.QUIT or (
                     event.key in (pygame.K_q, pygame.K_ESCAPE)):
                 running = False
+                # save_to_excel(data, "gravity_validation_results.xlsx")
             # Start/stop simulation
             elif event.key == pygame.K_s:
                 return [running, not simulate]
             elif event.key == pygame.K_a:
                 model_entity.move_running_gear()
+            elif event.key == pygame.K_z:
+                model_entity.stop_running_gear()
             # Start new simulation
             elif event.key == pygame.K_n:
                 sim1 = Simulator()
@@ -38,8 +41,13 @@ def validate_gravity(initial_position, real_values: pymunk.Body, current_time):
     expected_position = initial_position - 0.5 * (-constants.GRAVITY) * current_time ** 2
     expected_velocity = initial_velocity + (-constants.GRAVITY) * current_time
 
-    print(f"real_ball_positions: {round(real_position, 1)}, expected_position: {round(expected_position, 1)},"
-          f"\nreal_ball_velocity: {round(real_ball_velocity, 1)}, expected_velocity: {round(expected_velocity, 1)}")
+    return {
+        "current_time": current_time,
+        "real_position": round(real_position, 1),
+        "expected_position": round(expected_position, 1),
+        "real_velocity": round(real_ball_velocity, 1),
+        "expected_velocity": round(expected_velocity, 1)
+    }
 
 
 class Simulator:
@@ -71,10 +79,12 @@ class Simulator:
         running = True
         simulation_step = 0
 
-        test_ball_body = LegMethodsHelper.add_test_ball(self.space)
-        validate_gravity_flag = True
-        start_time = time.time()
-        initial_position = test_ball_body[0].position.y
+        # test_ball_body = LegMethodsHelper.add_test_ball(self.space)
+        # validate_gravity_flag = True
+        # start_time = time.time()
+        # initial_position = test_ball_body[0].position.y
+        # data = []
+        counter = 0
 
         self.space.iterations = 300
         while running:
@@ -83,25 +93,34 @@ class Simulator:
             self.draw(clock)
             self.space.step(dt)
 
+            # running, simulate = event_method(self.model_entity, simulate, data)
             running, simulate = event_method(self.model_entity, simulate)
 
-            if validate_gravity_flag:
-                current_time = time.time()
-                elapsed_time = current_time - start_time
-                if test_ball_body[0].position.y > 100:
-                    validate_gravity(initial_position, test_ball_body[0], elapsed_time)
-                else:
-                    validate_gravity_flag = False
+            # if validate_gravity_flag:
+            #     current_time = time.time()
+            #     elapsed_time = current_time - start_time
+            #     if test_ball_body[0].position.y > 100:
+            #         result = validate_gravity(initial_position, test_ball_body[0], elapsed_time)
+            # data.append(result)
+            # else:
+            #     validate_gravity_flag = False
 
             if simulate:
                 temp_end = self.controller.movement_scenario_controller(self.model_entity, self.motors, simulation_step)
                 if temp_end:
+                    # simulate = False  # remove
+                    # counter += 1
+                    # if counter == 1:
+                    #     simulation_step += 1
+                    # elif counter == constants.AMOUNT_PHASES:
+                    #     # running = False
                     simulation_step += 1
                     if simulation_step == constants.NUMBER_SIMULATION_STEPS:
                         simulate = False
                         running = False
 
-                self.limit_bodies_velocity(test_ball_body, dt)
+                # self.limit_bodies_velocity(test_ball_body, dt)
+                self.limit_bodies_velocity(dt)
             else:
                 self.stop_moving()
 
@@ -116,8 +135,8 @@ class Simulator:
         pygame.display.flip()  # All done, lets flip the display
         pygame.display.set_caption(f"fps: {clock.get_fps()}")
 
-    def limit_bodies_velocity(self, test_ball_body, dt):
-        LegMethodsHelper.limit_velocity(test_ball_body, self.space.gravity, dt)
+    def limit_bodies_velocity(self, dt):
+        # LegMethodsHelper.limit_velocity(test_ball_body, self.space.gravity, dt)
         LegMethodsHelper.limit_velocity(self.model_entity.right_leg.bodies, self.space.gravity, dt)
         LegMethodsHelper.limit_velocity(self.model_entity.left_leg.bodies, self.space.gravity, dt)
 
